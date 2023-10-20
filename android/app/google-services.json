@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "502543521894",
+    "project_id": "flutter-memoplanner",
+    "storage_bucket": "flutter-memoplanner.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:502543521894:android:33acb73d366ffb1844f5a7",
+        "android_client_info": {
+          "package_name": "vn.io.memo.planner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDulTuOV1GhlXW195yzdr2l_EeKV-H9Mis"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
