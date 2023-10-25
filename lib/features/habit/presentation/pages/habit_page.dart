@@ -1,0 +1,66 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../domain/entities/habit_entity.dart';
+import '../bloc/bloc/habit_bloc.dart';
+
+class HabitPage extends StatelessWidget {
+  HabitPage({super.key});
+
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('Habit Page'),
+          Form(
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Habit Title',
+                    hintText: 'What is your habit?',
+                  ),
+                ),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    hintText: 'Describe your habit',
+                  ),
+                ),
+
+                // button to add habit to HabitBloc
+                ElevatedButton(
+                  onPressed: () {
+                    BlocProvider.of<HabitBloc>(context).add(
+                      HabitAddEvent(
+                        habit: HabitEntity(
+                          hid: null,
+                          summary: _titleController.text,
+                          description: _descriptionController.text,
+                          start: DateTime.now(),
+                          end: DateTime.now(),
+                          created: DateTime.now(),
+                          updated: DateTime.now(),
+                          creator: null,
+                          completions: const [],
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Add Habit'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

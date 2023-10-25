@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:memo_planner/features/habit/presentation/pages/habit_page.dart';
 
+import '../../features/authentication/data/models/user_model.dart';
 import '../../features/authentication/presentation/bloc/bloc/authentication_bloc.dart';
 import '../../features/authentication/presentation/pages/user_page.dart';
 
@@ -30,39 +33,7 @@ class AppRouters {
             routes: <RouteBase>[
               GoRoute(
                 path: '/home',
-                builder: (context, state) => Scaffold(
-                  body: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                            onPressed: () {
-                              final result =
-                                  context.read<AuthenticationBloc>().state;
-                              debugPrint(
-                                  '===================> state.user: ${result.user}');
-                              debugPrint(
-                                  '===================> state.status: ${result.status}');
-                              debugPrint(
-                                  '===================> state.message: ${result.message}');
-                              debugPrint(
-                                  '===================> state.runtimeType: ${result.runtimeType}');
-                              // notify to user using scaffold snackbar
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'User: ${result.user?.email ?? 'null'}',
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const Text('Test AuthenticationBloc')),
-                        const Text('Home'),
-                      ],
-                    ),
-                  ),
-                ),
+                builder: (context, state) => HabitPage(),
               )
             ],
           ),

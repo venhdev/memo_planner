@@ -1,12 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import '../../../data/models/user_model.dart';
+import '../../../domain/entities/user_entity.dart';
+
 import '../../../domain/usecase/sign_in_with_email_and_password.dart';
 import '../../../domain/usecase/sign_out.dart';
-
-import '../../../../../core/usecase/usecase.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';
@@ -34,14 +34,14 @@ class AuthenticationBloc
     Emitter<AuthenticationState> emit,
   ) async {
     try {
-      final userCredential = await _signInWithEmailAndPasswordUC(
+      final userEntityEither = await _signInWithEmailAndPasswordUC(
           SignInParams(email: event.email, password: event.password));
 
-      userCredential.fold(
+      userEntityEither.fold(
         (failure) =>
             emit(AuthenticationState.unauthenticated(message: failure.message)),
-        (userCredential) =>
-            emit(AuthenticationState.authenticated(userCredential.user!)),
+        (userEntity) =>
+            emit(AuthenticationState.authenticated(userEntity)),
       );
     } on FirebaseAuthException catch (e) {
       emit(AuthenticationState.unauthenticated(message: e.message.toString()));
@@ -54,10 +54,11 @@ class AuthenticationBloc
     AuthenticationStartedEvent event,
     Emitter<AuthenticationState> emit,
   ) async {
+
     final user = _firebaseAuth.currentUser;
-    debugPrint('===================> AuthenticationBloc: $user');
+
     if (user != null) {
-      emit(AuthenticationState.authenticated(user));
+      emit(AuthenticationState.authenticated(UserModel.fromUser(user)));
     } else {
       emit(const AuthenticationState.unauthenticated());
     }
@@ -68,14 +69,14 @@ class AuthenticationBloc
     Emitter<AuthenticationState> emit,
   ) async {
     try {
-      await _signOutUC(NoParams());
+      await _signOutUC();
       emit(const AuthenticationState.unauthenticated());
     } catch (e) {
       emit(const AuthenticationState.unauthenticated());
     }
   }
 
-  void _onAuthenticationStatusChanged (
+  void _onAuthenticationStatusChanged(
     AuthenticationStatusChangedEvent event,
     Emitter<AuthenticationState> emit,
   ) async {

@@ -1,6 +1,13 @@
 part of 'routes.dart';
 
-final providers = [EmailAuthProvider()];
+final signInProviders = [EmailAuthProvider()];
+
+/// Authentication routes
+/// /authentication
+/// /authentication/sign-in
+/// /authentication/sign-in/forgot-password
+/// /authentication/profile
+/// /authentication/sign-out
 
 final GoRoute authenticationRoute = GoRoute(
     path: '/authentication',
@@ -8,12 +15,13 @@ final GoRoute authenticationRoute = GoRoute(
       return const UserPage();
     },
     routes: [
-      // /sign-in
+      // sign-in
       GoRoute(
           path: 'sign-in',
           builder: (context, state) {
             return SignInScreen(
-              providers: providers,
+              showAuthActionSwitch: true,
+              providers: signInProviders,
               actions: [
                 // to get current user email and pass to the forgot password screen
                 ForgotPasswordAction((context, email) {
@@ -36,6 +44,23 @@ final GoRoute authenticationRoute = GoRoute(
                   }
                   if (state is UserCreated) {
                     user.updateDisplayName(user.email!.split('@')[0]);
+                    // add to 'users' collection of fireStorage a user that match user uid for the first time
+                    try {
+                      final userDocumentReference = FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.email);
+
+                      userDocumentReference.get().then((value) => {
+                            !value.exists ? userDocumentReference.set({}) : null
+                          });
+                    } catch (e) {
+                      // show to user
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(e.toString()),
+                        ),
+                      );
+                    }
                   }
                   if (!user.emailVerified) {
                     user.sendEmailVerification();
@@ -47,7 +72,7 @@ final GoRoute authenticationRoute = GoRoute(
                   BlocProvider.of<AuthenticationBloc>(context)
                       .add(AuthenticationStatusChangedEvent(
                     status: AuthenticationStatus.authenticated,
-                    user: user,
+                    user: UserModel.fromUser(user),
                   ));
                   context.go('/authentication');
                 })
@@ -55,6 +80,7 @@ final GoRoute authenticationRoute = GoRoute(
             );
           },
           routes: [
+            // /authentication/sign-in/forgot-password
             GoRoute(
                 path: 'forgot-password',
                 builder: (context, state) {
@@ -64,6 +90,7 @@ final GoRoute authenticationRoute = GoRoute(
           ]),
       // profile
       GoRoute(
+        // /authentication/profile
         path: 'profile',
         builder: (context, state) {
           return ProfileScreen(

@@ -1,19 +1,19 @@
 import 'package:equatable/equatable.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
+import '../entities/user_entity.dart';
 import '../../../../core/usecase/usecase.dart';
-import '../../../../core/utils/typedef.dart';
+import '../../../../core/constants/typedef.dart';
 import '../repository/authentication_repository.dart';
 
 @singleton
 class SignInWithEmailAndPasswordUC
-    implements BaseUseCase<UserCredential, SignInParams> {
+    implements UseCaseWithParams<UserEntity, SignInParams> {
   final AuthenticationRepository authenticationRepository;
 
   SignInWithEmailAndPasswordUC(this.authenticationRepository);
 
   @override
-  ResultFuture<UserCredential> call(SignInParams params) async {
+  ResultFuture<UserEntity> call(SignInParams params) async {
     return await authenticationRepository.signedInWithEmailAndPassword(
       params.email,
       params.password,

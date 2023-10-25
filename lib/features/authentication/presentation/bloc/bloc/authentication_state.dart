@@ -4,8 +4,12 @@ enum AuthenticationStatus { unknown, authenticated, unauthenticated }
 
 class AuthenticationState extends Equatable {
   final AuthenticationStatus status;
-  final User? user;
+  final UserEntity? user; // this is the user credential from firebase
   final String? message;
+
+  // get status
+  AuthenticationStatus get getStatus => status;
+
 
   const AuthenticationState._({
     this.status = AuthenticationStatus.unknown,
@@ -15,7 +19,7 @@ class AuthenticationState extends Equatable {
 
   const AuthenticationState.unknown() : this._();
 
-  const AuthenticationState.authenticated(User user)
+  const AuthenticationState.authenticated(UserEntity user)
       : this._(
           status: AuthenticationStatus.authenticated,
           user: user,

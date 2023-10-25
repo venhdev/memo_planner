@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import '../entities/user_entity.dart';
 
-import '../../../../core/utils/typedef.dart';
+import '../../../../core/constants/typedef.dart';
 
 abstract class AuthenticationRepository {
   // Future<void> logInWithCredentials(String email, String password);
@@ -8,10 +8,12 @@ abstract class AuthenticationRepository {
   // Future<void> logOut();
   // Future<bool> isSignedIn();
   // Future<String> getUser();
-  ResultFuture<UserCredential> signedInWithEmailAndPassword(
+  ResultFuture<UserEntity> signedInWithEmailAndPassword(
     String email,
     String password,
   );
 
   ResultVoid signOut();
+
+  Future<UserEntity?> getCurrentUser();
 }

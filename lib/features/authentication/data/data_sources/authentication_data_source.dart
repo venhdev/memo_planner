@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
 
-abstract class FireBaseAuthenticationService {
+abstract class AuthenticationDataSource {
   /// Tries to sign in a user with the given [email] and [password]
   /// and returns a [UserCredential] if successful.
   ///
@@ -13,14 +13,17 @@ abstract class FireBaseAuthenticationService {
 
   /// Signs out the current user.
   Future<void> signOut();
+
+  /// Returns the current user.
+  User? get currentUser;
 }
 
-@Singleton(as: FireBaseAuthenticationService)
-class FireBaseAuthenticationServiceImpl
-    implements FireBaseAuthenticationService {
+@Singleton(as: AuthenticationDataSource)
+class AuthenticationDataSourceImpl
+    implements AuthenticationDataSource {
   final FirebaseAuth _firebaseAuth;
 
-  FireBaseAuthenticationServiceImpl(this._firebaseAuth);
+  AuthenticationDataSourceImpl(this._firebaseAuth);
 
   @override
   Future<UserCredential> signedInWithEmailAndPassword(
@@ -60,4 +63,7 @@ class FireBaseAuthenticationServiceImpl
       );
     }
   }
+  
+  @override
+  User? get currentUser => _firebaseAuth.currentUser;
 }

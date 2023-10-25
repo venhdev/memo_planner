@@ -20,9 +20,12 @@ class AuthScreens extends StatelessWidget {
           padding: const EdgeInsets.only(left: 24, bottom: 8),
           child: StyledButton(
               onPressed: () {
-                !loggedIn
+                  !loggedIn
                     ? context.go('/authentication/sign-in')
                     : context.read<AuthenticationBloc>().add(SignOutEvent());
+                // try {
+                // } on FirebaseAuthException catch (e) {
+                // }
               },
               child: !loggedIn ? const Text('Login') : const Text('Logout')),
         ),

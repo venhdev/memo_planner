@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart'; // new
-import 'package:memo_planner/features/authentication/presentation/bloc/bloc/authentication_bloc.dart';
 import 'package:provider/provider.dart'; // new
 
+import '../bloc/bloc/authentication_bloc.dart';
 import '../widgets/widgets.dart';
 
 class UserPage extends StatelessWidget {

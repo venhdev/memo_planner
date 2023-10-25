@@ -1,20 +1,23 @@
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/utils/typedef.dart';
-
+import '../../../../core/error/failures.dart';
+import '../../../../core/constants/typedef.dart';
+import '../../domain/entities/user_entity.dart';
 import '../../domain/repository/authentication_repository.dart';
-import '../data_sources/firebase_authentication_service.dart';
+import '../data_sources/authentication_data_source.dart';
+import '../models/user_model.dart';
 
 @Singleton(as: AuthenticationRepository)
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
-  final FireBaseAuthenticationService _fireBaseAuthenticationService;
+  final AuthenticationDataSource _fireBaseAuthenticationService;
 
   AuthenticationRepositoryImpl(this._fireBaseAuthenticationService);
 
   @override
-  ResultFuture<UserCredential> signedInWithEmailAndPassword(
+  ResultFuture<UserEntity> signedInWithEmailAndPassword(
     String email,
     String password,
   ) async {
@@ -24,12 +27,9 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         email,
         password,
       );
-      return Right(result);
+      return Right(UserModel.fromUser(result.user!).toEntity());
     } on FirebaseAuthException catch (e) {
-      throw FirebaseAuthException(
-        code: e.code,
-        message: e.message!,
-      );
+      return Left(ServerFailure(code: e.code, message: e.message!));
     }
   }
 
@@ -39,10 +39,23 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       await _fireBaseAuthenticationService.signOut();
       return const Right(null);
     } on FirebaseAuthException catch (e) {
-      throw FirebaseAuthException(
-        code: e.code,
-        message: e.message!,
-      );
+      return Left(ServerFailure(message: e.message!));
+    }
+  }
+
+  @override
+  Future<UserEntity?> getCurrentUser() async {
+    try {
+      final result = _fireBaseAuthenticationService.currentUser;
+
+      if (result != null) {
+        return UserModel.fromUser(result).toEntity();
+      } else {
+        return null;
+      }
+    } on FirebaseAuthException catch (e) {
+      debugPrint('AuthenticationRepositoryImpl: getCurrentUser: ${e.message}');
+      return null;
     }
   }
 }
