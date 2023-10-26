@@ -60,6 +60,16 @@ class UserModel extends UserEntity {
     );
   }
 
+  factory UserModel.fromDocument(Map<String, dynamic> data) {
+    return UserModel(
+      uid: data['uid'],
+      displayName: data['displayName'],
+      email: data['email'],
+      photoURL: data['photoURL'],
+      phoneNumber: data['phoneNumber'],
+    );
+  }
+
   Map<String, dynamic> toDocument() {
     return {
       'uid': uid,

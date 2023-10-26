@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:memo_planner/core/utils/convertors.dart';
 import 'package:memo_planner/features/authentication/data/models/user_model.dart';
 
 import '../../../authentication/domain/entities/user_entity.dart';
@@ -58,15 +60,15 @@ class HabitModel extends HabitEntity {
       hid: data['hid'],
       summary: data['summary'],
       description: data['description'],
-      start: data['start'],
-      end: data['end'],
-      created: data['created'],
-      updated: data['updated'],
-      creator: data['creator'],
+      start: convertTimestampToDateTime(data['start'] as Timestamp),
+      end: convertTimestampToDateTime(data['end'] as Timestamp),
+      created: convertTimestampToDateTime(data['created'] as Timestamp),
+      updated: convertTimestampToDateTime(data['updated'] as Timestamp),
+      creator: UserModel.fromDocument(data['creator']).toEntity(),
       completions: (data['completions']).map<HabitCompletion>((completion) {
         return HabitCompletion(
           hid: completion['hid'],
-          completedAt: completion['completedAt'],
+          completedAt: convertTimestampToDateTime(data['completedAt'] as Timestamp),
         );
       }).toList(),
     );
@@ -99,6 +101,21 @@ class HabitModel extends HabitEntity {
       updated: entity.updated,
       creator: entity.creator,
       completions: entity.completions,
+    );
+  }
+
+  // to Entity
+  HabitEntity toEntity() {
+    return HabitEntity(
+      hid: hid,
+      summary: summary,
+      description: description,
+      start: start,
+      end: end,
+      created: created,
+      updated: updated,
+      creator: creator,
+      completions: completions,
     );
   }
 

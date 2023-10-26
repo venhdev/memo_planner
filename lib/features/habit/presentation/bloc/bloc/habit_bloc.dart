@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:memo_planner/features/authentication/domain/usecase/get_current_user.dart';
 
-import '../../../data/models/habit_model.dart';
 import '../../../domain/entities/habit_entity.dart';
 import '../../../domain/usecase/add_habit.dart';
 import '../../../domain/usecase/delete_habit.dart';

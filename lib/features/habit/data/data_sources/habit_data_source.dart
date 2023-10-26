@@ -24,33 +24,26 @@ class HabitDataSourceImpl extends HabitDataSource {
   @override
   Future<void> addHabit(HabitEntity habit) async {
     try {
-      debugPrint('1\n');
+      // get the collection reference
       final habitCollectionRef = _firestore
-          .collection(pathUsers)
+          .collection(pathToUsers)
           .doc(habit.creator!.email)
-          .collection(pathHabits);
-      debugPrint('2\n');
-      // final hid = habitCollectionRef.doc().id;
-      // debugPrint('2.1\n');
-      // habit.hid = hid;
-      debugPrint('3\n');
+          .collection(pathToHabits);
+      // create a new document with a unique id
+      final hid = habitCollectionRef.doc().id;
+      habit = habit.copyWith(hid: hid);
+      // convert to the type that firestore accepts
       final habitDocument = (HabitModel.fromEntity(habit)).toDocument();
-      debugPrint('4\n');
-      // debugPrint(
-      //     'HabitDataSourceImpl:addHabit:habitModel type: ${habitModel.runtimeType}');
-      // debugPrint('HabitDataSourceImpl:addHabit:habitModel: $habitModel');
-      debugPrint('HabitDataSourceImpl:addHabit:habitDocument: $habitDocument');
-      debugPrint('5\n');
-      await habitCollectionRef.add(habitDocument);
-      debugPrint('6\n');
-
+      // add to hid document
+      await habitCollectionRef.doc(hid).set(habitDocument);
     } on FirebaseException catch (e) {
       debugPrint(
           'HabitDataSourceImpl:addHabit:FirebaseException --type of e: ${e.runtimeType}');
       debugPrint(e.toString());
       throw ServerException(code: e.code, message: e.toString());
     } catch (e) {
-      debugPrint('HabitDataSourceImpl:addHabit --type of e: ${e.runtimeType}');
+      debugPrint(
+          'HabitDataSourceImpl:addHabit:Exception --type of e: ${e.runtimeType}');
       debugPrint(e.toString());
       throw ServerException(message: e.toString());
     }
@@ -60,9 +53,9 @@ class HabitDataSourceImpl extends HabitDataSource {
   Future<void> deleteHabit(HabitEntity habit) async {
     try {
       final habitCollectionRef = _firestore
-          .collection(pathUsers)
+          .collection(pathToUsers)
           .doc(habit.creator!.email)
-          .collection(pathHabits);
+          .collection(pathToHabits);
 
       await habitCollectionRef.doc(habit.hid).delete();
     } on FirebaseException catch (e) {
@@ -82,9 +75,9 @@ class HabitDataSourceImpl extends HabitDataSource {
   Future<void> updateHabit(HabitEntity habit) async {
     try {
       final habitCollectionRef = _firestore
-          .collection(pathUsers)
+          .collection(pathToUsers)
           .doc(habit.creator!.email)
-          .collection(pathHabits);
+          .collection(pathToHabits);
 
       final habitModel = HabitModel.fromEntity(habit);
 

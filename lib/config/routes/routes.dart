@@ -33,7 +33,7 @@ class AppRouters {
             routes: <RouteBase>[
               GoRoute(
                 path: '/home',
-                builder: (context, state) => HabitPage(),
+                builder: (context, state) => const HabitPage(),
               )
             ],
           ),
