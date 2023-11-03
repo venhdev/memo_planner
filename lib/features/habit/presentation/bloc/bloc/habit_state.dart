@@ -12,18 +12,16 @@ final class HabitInitial extends HabitState {}
 final class HabitLoading extends HabitState {}
 
 final class HabitSuccess extends HabitState {
+  const HabitSuccess({this.message = 'HabitSuccess'});
   final String message;
 
-  const HabitSuccess({this.message = 'HabitSuccess'});
-  
   @override
   List<Object> get props => [message];
 }
 
 final class HabitError extends HabitState {
-  final String message;
-
   const HabitError({required this.message});
+  final String message;
 
   @override
   List<Object> get props => [message];

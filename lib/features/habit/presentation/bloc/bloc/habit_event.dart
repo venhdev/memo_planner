@@ -10,27 +10,27 @@ sealed class HabitEvent extends Equatable {
 final class HabitStartedEvent extends HabitEvent {}
 
 final class HabitAddEvent extends HabitEvent {
+  const HabitAddEvent({required this.habit});
   final HabitEntity habit;
 
-  const HabitAddEvent({required this.habit});
 
   @override
   List<Object> get props => [habit];
 }
 
 final class HabitUpdateEvent extends HabitEvent {
+  const HabitUpdateEvent({required this.habit});
   final HabitEntity habit;
 
-  const HabitUpdateEvent({required this.habit});
 
   @override
   List<Object> get props => [habit];
 }
 
 final class HabitDeleteEvent extends HabitEvent {
+  const HabitDeleteEvent({required this.habit});
   final HabitEntity habit;
 
-  const HabitDeleteEvent({required this.habit});
 
   @override
   List<Object> get props => [habit];

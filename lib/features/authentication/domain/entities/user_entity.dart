@@ -1,12 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class UserEntity extends Equatable {
-  final String? uid;
-  final String? displayName;
-  final String? email;
-  final String? photoURL;
-  final String? phoneNumber;
-
   const UserEntity({
     required this.uid,
     this.displayName,
@@ -24,6 +18,11 @@ class UserEntity extends Equatable {
       photoURL: '',
     );
   }
+  final String? uid;
+  final String? displayName;
+  final String? email;
+  final String? photoURL;
+  final String? phoneNumber;
 
   @override
   String toString() {

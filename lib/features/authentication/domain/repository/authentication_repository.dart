@@ -1,6 +1,5 @@
-import '../entities/user_entity.dart';
-
 import '../../../../core/constants/typedef.dart';
+import '../entities/user_entity.dart';
 
 abstract class AuthenticationRepository {
   // Future<void> logInWithCredentials(String email, String password);
@@ -8,12 +7,14 @@ abstract class AuthenticationRepository {
   // Future<void> logOut();
   // Future<bool> isSignedIn();
   // Future<String> getUser();
-  ResultFuture<UserEntity> signedInWithEmailAndPassword(
+  ResultEither<UserEntity> signedInWithEmailAndPassword(
     String email,
     String password,
   );
 
+  ResultEither<UserEntity> signInWithGoogle();
+
   ResultVoid signOut();
 
-  Future<UserEntity?> getCurrentUser();
+  UserEntity? getCurrentUser();
 }

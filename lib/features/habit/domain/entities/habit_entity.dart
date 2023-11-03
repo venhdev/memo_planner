@@ -1,8 +1,19 @@
 import 'package:equatable/equatable.dart';
-import 'package:memo_planner/features/authentication/domain/entities/user_entity.dart';
+import '../../../authentication/domain/entities/user_entity.dart';
 
 // The entity design to sync with Google Calendar
 class HabitEntity extends Equatable {
+  const HabitEntity({
+    required this.hid,
+    required this.summary,
+    required this.description,
+    required this.start,
+    required this.end,
+    required this.created,
+    required this.updated,
+    required this.creator,
+    required this.completions,
+  });
   final String? hid;
   final String? summary; // the title
   final String? description;
@@ -16,18 +27,6 @@ class HabitEntity extends Equatable {
   final UserEntity? creator; //The creator of the event. Read-only.
 
   final List<HabitCompletion>? completions;
-
-  const HabitEntity({
-    required this.hid,
-    required this.summary,
-    required this.description,
-    required this.start,
-    required this.end,
-    required this.created,
-    required this.updated,
-    required this.creator,
-    required this.completions,
-  });
   // copyWith
   HabitEntity copyWith({
     String? hid,
@@ -53,7 +52,6 @@ class HabitEntity extends Equatable {
     );
   }
 
-
   @override
   List<Object?> get props => [
         hid,
@@ -69,13 +67,12 @@ class HabitEntity extends Equatable {
 }
 
 class HabitCompletion {
-  final String hid;
-  final DateTime completedAt;
-
   HabitCompletion({
     required this.hid,
     required this.completedAt,
   });
+  final String hid;
+  final DateTime completedAt;
 }
 
 // https://developers.google.com/calendar/api/v3/reference/events#resource

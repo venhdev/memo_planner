@@ -15,6 +15,8 @@ class ScaffoldWithNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: _buildAppBar(context),
+      drawer: const AppNavigationDrawer(),
       body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(
         // Here, the items of BottomNavigationBar are hard coded. In a real
@@ -28,6 +30,20 @@ class ScaffoldWithNavBar extends StatelessWidget {
         currentIndex: navigationShell.currentIndex,
         onTap: (int index) => _onTap(context, index),
       ),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      leading: Builder(builder: (context) {
+        return IconButton(
+          icon: const Icon(Icons.menu),
+          // openDrawer
+          onPressed: () {
+            Scaffold.of(context).openDrawer();
+          },
+        );
+      }),
     );
   }
 
@@ -47,5 +63,3 @@ class ScaffoldWithNavBar extends StatelessWidget {
     );
   }
 }
-
-

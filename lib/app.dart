@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:memo_planner/features/habit/presentation/bloc/bloc/habit_bloc.dart';
 import 'package:provider/provider.dart';
 
+import 'config/dependency_injection.dart';
 import 'config/routes/routes.dart';
-import 'core/utils/di.dart';
 import 'features/authentication/presentation/bloc/bloc/authentication_bloc.dart';
+import 'features/habit/presentation/bloc/bloc/habit_bloc.dart';
 
 class App extends StatelessWidget {
   const App({super.key});

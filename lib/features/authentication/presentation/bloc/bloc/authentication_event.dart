@@ -10,13 +10,12 @@ sealed class AuthenticationEvent extends Equatable {
 class AuthenticationStartedEvent extends AuthenticationEvent {}
 
 class AuthenticationStatusChangedEvent extends AuthenticationEvent {
-  final AuthenticationStatus status;
-  final UserEntity? user;
-
   const AuthenticationStatusChangedEvent({
     required this.status,
     required this.user,
   });
+  final AuthenticationStatus status;
+  final UserEntity? user;
 
   @override
   List<Object> get props => [
@@ -26,16 +25,22 @@ class AuthenticationStatusChangedEvent extends AuthenticationEvent {
 }
 
 class SignInWithEmailAndPasswordEvent extends AuthenticationEvent {
+  const SignInWithEmailAndPasswordEvent({
+    required this.email,
+    required this.password,
+  });
   final String email;
   final String password;
 
-  const SignInWithEmailAndPasswordEvent(
-    this.email,
-    this.password,
-  );
-
   @override
   List<Object> get props => [email, password];
+}
+
+class SignInWithGoogleEvent extends AuthenticationEvent {
+  const SignInWithGoogleEvent();
+
+  @override
+  List<Object> get props => [];
 }
 
 class SignOutEvent extends AuthenticationEvent {

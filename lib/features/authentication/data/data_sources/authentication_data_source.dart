@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class AuthenticationDataSource {
@@ -11,6 +12,8 @@ abstract class AuthenticationDataSource {
     String password,
   );
 
+  Future<UserCredential> signInWithGoogle();
+
   /// Signs out the current user.
   Future<void> signOut();
 
@@ -19,11 +22,11 @@ abstract class AuthenticationDataSource {
 }
 
 @Singleton(as: AuthenticationDataSource)
-class AuthenticationDataSourceImpl
-    implements AuthenticationDataSource {
-  final FirebaseAuth _firebaseAuth;
+class AuthenticationDataSourceImpl implements AuthenticationDataSource {
+  AuthenticationDataSourceImpl(this._firebaseAuth, this._googleSignIn);
 
-  AuthenticationDataSourceImpl(this._firebaseAuth);
+  final FirebaseAuth _firebaseAuth;
+  final GoogleSignIn _googleSignIn;
 
   @override
   Future<UserCredential> signedInWithEmailAndPassword(
@@ -63,7 +66,26 @@ class AuthenticationDataSourceImpl
       );
     }
   }
-  
+
   @override
   User? get currentUser => _firebaseAuth.currentUser;
+
+  @override
+  Future<UserCredential> signInWithGoogle() async {
+    // Trigger the authentication flow
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    // Once signed in, return the UserCredential
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
 }

@@ -7,12 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:502543521894:android:33acb73d366ffb1844f5a7",
+        "mobilesdk_app_id": "1:502543521894:android:c6df7e07aab6f60444f5a7",
         "android_client_info": {
           "package_name": "vn.io.memo.planner"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "502543521894-ngkisaavknp2urb66c7vo4e8nkldsluj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDulTuOV1GhlXW195yzdr2l_EeKV-H9Mis"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "502543521894-ngkisaavknp2urb66c7vo4e8nkldsluj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "502543521894-jrhjv3o37nlefjf3nt6tg3lp5okqr31e.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "vn.io.memo.planner"
+              }
+            }
+          ]
         }
       }
     }

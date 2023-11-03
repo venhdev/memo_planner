@@ -18,15 +18,15 @@ class UserModel extends UserEntity {
           phoneNumber: phoneNumber,
         );
 
-  UserEntity toEntity() {
-    return UserEntity(
-      uid: uid,
-      displayName: displayName,
-      email: email,
-      photoURL: photoURL,
-      phoneNumber: phoneNumber,
-    );
-  }
+  // UserEntity toEntity() {
+  //   return UserEntity(
+  //     uid: uid,
+  //     displayName: displayName,
+  //     email: email,
+  //     photoURL: photoURL,
+  //     phoneNumber: phoneNumber,
+  //   );
+  // }
 
   factory UserModel.fromEntity(UserEntity user) {
     return UserModel(
@@ -72,11 +72,11 @@ class UserModel extends UserEntity {
 
   Map<String, dynamic> toDocument() {
     return {
-      'uid': uid,
-      'displayName': displayName,
-      'email': email,
-      'photoURL': photoURL,
-      'phoneNumber': phoneNumber,
+      if (uid!= null) 'uid': uid,
+      if (displayName!= null) 'displayName': displayName,
+      if (email!= null) 'email': email,
+      if (photoURL!= null) 'photoURL': photoURL,
+      if (phoneNumber!= null) 'phoneNumber': phoneNumber,
     };
   }
 }

@@ -1,19 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/constants/typedef.dart';
-import 'package:memo_planner/core/error/failures.dart';
-import 'package:memo_planner/features/authentication/domain/entities/user_entity.dart';
-import 'package:memo_planner/features/habit/data/data_sources/habit_data_source.dart';
-import 'package:memo_planner/features/habit/domain/entities/habit_entity.dart';
+import '../../../../core/constants/typedef.dart';
+import '../../../../core/error/failures.dart';
+import '../../../authentication/domain/entities/user_entity.dart';
+import '../data_sources/habit_data_source.dart';
+import '../../domain/entities/habit_entity.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../domain/repository/habit_repository.dart';
 
 @Singleton(as: HabitRepository)
 class HabitRepositoryImpl implements HabitRepository {
-  final HabitDataSource _habitDataSource;
-
   const HabitRepositoryImpl(this._habitDataSource);
+  final HabitDataSource _habitDataSource;
 
   @override
   ResultVoid addHabit(HabitEntity habit) async {
@@ -46,12 +46,14 @@ class HabitRepositoryImpl implements HabitRepository {
   }
 
   @override
-  ResultFuture<Stream<List<HabitEntity>>> getHabits(UserEntity creator) async {
+  Stream<QuerySnapshot> getHabitStream(UserEntity user) {
     try {
-      final habits = await _habitDataSource.getHabits(creator);
-      return Right(habits);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(code: e.code, message: e.message));
+      final habits = _habitDataSource.getHabitStream(user);
+      return habits;
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      return const Stream.empty();
     }
   }
 }

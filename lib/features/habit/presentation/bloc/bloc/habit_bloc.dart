@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/features/authentication/domain/usecase/get_current_user.dart';
+import '../../../../authentication/domain/usecase/get_current_user.dart';
 
 import '../../../domain/entities/habit_entity.dart';
 import '../../../domain/usecase/add_habit.dart';
@@ -13,10 +13,7 @@ part 'habit_state.dart';
 
 @injectable
 class HabitBloc extends Bloc<HabitEvent, HabitState> {
-  final AddHabitUC _addHabitUC;
-  final UpdateHabitUC _updateHabitUC;
-  final DeleteHabitUC _deleteHabitUC;
-  final GetCurrentUserUC _getCurrentUserUC;
+  
 
   HabitBloc(
     this._addHabitUC,
@@ -29,11 +26,16 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
     on<HabitDeleteEvent>(_onDeleteHabitEvent);
   }
 
+  final AddHabitUC _addHabitUC;
+  final UpdateHabitUC _updateHabitUC;
+  final DeleteHabitUC _deleteHabitUC;
+  final GetCurrentUserUC _getCurrentUserUC;
+
   void _onAddHabitEvent(HabitAddEvent event, Emitter<HabitState> emit) async {
     emit(HabitLoading());
     try {
       final HabitEntity habit = event.habit.copyWith(
-        creator: await _getCurrentUserUC(),
+        creator: _getCurrentUserUC(),
       );
       final result = await _addHabitUC(habit);
 

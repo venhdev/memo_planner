@@ -1,16 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/habit/presentation/pages/habit_page.dart';
 
-import '../../features/authentication/data/models/user_model.dart';
-import '../../features/authentication/presentation/bloc/bloc/authentication_bloc.dart';
-import '../../features/authentication/presentation/pages/user_page.dart';
+import '../../features/authentication/presentation/screens/authentication_view.dart';
+import '../../features/authentication/presentation/screens/sign_in_screen.dart';
+import '../../features/habit/presentation/screens/habit_page.dart';
+import 'app_navigation_drawer.dart';
 
-part 'app_routes.dart';
-part 'authentication_routes.dart';
+part 'app_navigation_bar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -21,7 +17,7 @@ class AppRouters {
   static final GoRouter router = GoRouter(
     debugLogDiagnostics: true, // NOTE only set to true if you need to debug
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
+    initialLocation: '/',
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -32,14 +28,32 @@ class AppRouters {
             navigatorKey: _shellNavigatorKey,
             routes: <RouteBase>[
               GoRoute(
-                path: '/home',
-                builder: (context, state) => const HabitPage(),
+                path: '/',
+                builder: (context, state) => HabitPage(),
               )
             ],
           ),
+          // StatefulShellBranch(
+          //   routes: [
+          //     authenticationRoute2,
+          //   ],
+          // ),
           StatefulShellBranch(
             routes: [
-              authenticationRoute,
+              GoRoute(
+                path: '/authentication',
+                builder: (context, state) => const AuthenticationView(),
+                routes: [
+                  GoRoute(
+                    path: 'sign-in',
+                    builder: (context, state) => const SignInScreen(),
+                  ),
+                  // GoRoute(
+                  //   path: 'sign-up',
+                  //   builder: (context, state) => const SignUpScreen(),
+                  // ),
+                ],
+              ),
             ],
           ),
         ],

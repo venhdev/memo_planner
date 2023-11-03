@@ -5,10 +5,9 @@ import '../../../../core/constants/typedef.dart';
 import '../repository/authentication_repository.dart';
 
 @singleton
-class SignOutUC implements UseCaseNoParams<void> {
-  final AuthenticationRepository authenticationRepository;
-
+class SignOutUC extends UseCaseNoParam<void> {
   SignOutUC(this.authenticationRepository);
+  final AuthenticationRepository authenticationRepository;
 
   @override
   ResultVoid call() async {

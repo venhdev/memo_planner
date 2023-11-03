@@ -26,10 +26,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -54,9 +51,18 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDulTuOV1GhlXW195yzdr2l_EeKV-H9Mis',
-    appId: '1:502543521894:android:33acb73d366ffb1844f5a7',
+    appId: '1:502543521894:android:c6df7e07aab6f60444f5a7',
     messagingSenderId: '502543521894',
     projectId: 'flutter-memoplanner',
     storageBucket: 'flutter-memoplanner.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDMXBdXOAbUf-e3exS1cfi9ADCSORen-x8',
+    appId: '1:502543521894:ios:a6162b5fd51e8cbb44f5a7',
+    messagingSenderId: '502543521894',
+    projectId: 'flutter-memoplanner',
+    storageBucket: 'flutter-memoplanner.appspot.com',
+    iosBundleId: 'vn.io.memo.planner',
   );
 }

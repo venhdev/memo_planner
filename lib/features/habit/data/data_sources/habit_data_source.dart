@@ -1,15 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/constants/constants.dart';
-import 'package:memo_planner/core/error/exceptions.dart';
+import '../../../../core/constants/constants.dart';
+import '../../../../core/error/exceptions.dart';
 
 import '../../../authentication/domain/entities/user_entity.dart';
 import '../../domain/entities/habit_entity.dart';
 import '../models/habit_model.dart';
 
 abstract class HabitDataSource {
-  Future<Stream<List<HabitEntity>>> getHabits(UserEntity creator);
+  Stream<QuerySnapshot> getHabitStream(UserEntity user);
   Future<void> addHabit(HabitEntity habit);
   Future<void> updateHabit(HabitEntity habit);
   Future<void> deleteHabit(HabitEntity habit);
@@ -96,21 +96,11 @@ class HabitDataSourceImpl extends HabitDataSource {
   }
 
   @override
-  Future<Stream<List<HabitEntity>>> getHabits(UserEntity creator) async {
-    try {
-      final habitCollectionRef = _firestore
-          .collection('users')
-          .doc(creator.email)
-          .collection('habits');
-
-      final habits = habitCollectionRef.snapshots().map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return HabitModel.fromDocument(doc.data());
-        }).toList();
-      });
-      return habits;
-    } on FirebaseException catch (e) {
-      throw ServerException(code: e.code, message: e.message!);
-    }
+  Stream<QuerySnapshot> getHabitStream(UserEntity user) {
+    final habitCollectionRef = _firestore
+        .collection(pathToUsers)
+        .doc(user.email)
+        .collection(pathToHabits);
+    return habitCollectionRef.snapshots();
   }
 }

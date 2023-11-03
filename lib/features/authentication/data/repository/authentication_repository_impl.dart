@@ -12,12 +12,23 @@ import '../models/user_model.dart';
 
 @Singleton(as: AuthenticationRepository)
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
+  AuthenticationRepositoryImpl(this._fireBaseAuthenticationService);
   final AuthenticationDataSource _fireBaseAuthenticationService;
 
-  AuthenticationRepositoryImpl(this._fireBaseAuthenticationService);
+  @override
+  ResultEither<UserEntity> signInWithGoogle() async {
+    try {
+      final result = await _fireBaseAuthenticationService.signInWithGoogle();
+      return Right(UserModel.fromUser(result.user!));
+    } on FirebaseAuthException catch (e) {
+      return Left(ServerFailure(code: e.code, message: e.message!));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 
   @override
-  ResultFuture<UserEntity> signedInWithEmailAndPassword(
+  ResultEither<UserEntity> signedInWithEmailAndPassword(
     String email,
     String password,
   ) async {
@@ -27,9 +38,11 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         email,
         password,
       );
-      return Right(UserModel.fromUser(result.user!).toEntity());
+      return Right(UserModel.fromUser(result.user!));
     } on FirebaseAuthException catch (e) {
       return Left(ServerFailure(code: e.code, message: e.message!));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 
@@ -44,12 +57,12 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   }
 
   @override
-  Future<UserEntity?> getCurrentUser() async {
+  UserEntity? getCurrentUser() {
     try {
       final result = _fireBaseAuthenticationService.currentUser;
 
       if (result != null) {
-        return UserModel.fromUser(result).toEntity();
+        return UserModel.fromUser(result);
       } else {
         return null;
       }

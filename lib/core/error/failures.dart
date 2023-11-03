@@ -7,10 +7,13 @@ const String cacheCacheFailureMessage = 'Cache Failure';
 const String networkFailureMessage = 'Network Failure';
 
 class Failure extends Equatable {
+  const Failure({
+    this.code = '1000',
+    this.message = failureMessage,
+  });
+  
   final String code;
   final String message;
-
-  const Failure({this.code = '1000', this.message = failureMessage});
 
   @override
   List<Object> get props => [code, message];
@@ -18,7 +21,6 @@ class Failure extends Equatable {
 
 // General failure message
 class ServerFailure extends Failure {
-
   const ServerFailure({code = '2000', message = serverFailureFailureMessage})
       : super(code: code, message: message);
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart'; // new
 import 'package:provider/provider.dart'; // new
 
 import '../bloc/bloc/authentication_bloc.dart';
-import '../widgets/widgets.dart';
+import '../components/widgets.dart';
 
 class UserPage extends StatelessWidget {
   const UserPage({super.key});
@@ -15,11 +15,12 @@ class UserPage extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
-          Image.asset('assets/codelab.png'),
+          Image.asset('assets/images/codelab.png'),
           const SizedBox(height: 8),
           const IconAndDetail(Icons.calendar_today, 'October 30'),
           const IconAndDetail(Icons.location_city, 'San Francisco'),
           // Add from here
+          
           Consumer<AuthenticationBloc>(
             builder: (context, bloc, _) {
               if (bloc.state.status == AuthenticationStatus.authenticated) {

@@ -30,7 +30,10 @@ migrate_working_dir/
 .packages
 .pub-cache/
 .pub/
+.lib/config/firebase_options.dart
+.lib/config/credentials.dart
 /build/
+/bin/
 
 # Symbolication related
 app.*.symbols

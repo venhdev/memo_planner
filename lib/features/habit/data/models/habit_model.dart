@@ -1,94 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:memo_planner/core/utils/convertors.dart';
-import 'package:memo_planner/features/authentication/data/models/user_model.dart';
 
-import '../../../authentication/domain/entities/user_entity.dart';
+import '../../../../core/utils/convertors.dart';
+import '../../../authentication/data/models/user_model.dart';
 import '../../domain/entities/habit_entity.dart';
 
 class HabitModel extends HabitEntity {
   const HabitModel({
-    String? hid,
-    String? summary,
-    String? description,
-    DateTime? start,
-    DateTime? end,
-    DateTime? created,
-    DateTime? updated,
-    UserEntity? creator,
-    List<HabitCompletion>? completions,
-  }) : super(
-          hid: hid,
-          summary: summary,
-          description: description,
-          start: start,
-          end: end,
-          created: created,
-          updated: updated,
-          creator: creator,
-          completions: completions,
-        );
-
-  // copyWith
-  @override
-  HabitModel copyWith({
-    String? hid,
-    String? summary,
-    String? description,
-    DateTime? start,
-    DateTime? end,
-    DateTime? created,
-    DateTime? updated,
-    UserEntity? creator,
-    List<HabitCompletion>? completions,
-  }) {
-    return HabitModel(
-      hid: hid ?? this.hid,
-      summary: summary ?? this.summary,
-      description: description ?? this.description,
-      start: start ?? this.start,
-      end: end ?? this.end,
-      created: created ?? this.created,
-      updated: updated ?? this.updated,
-      creator: creator ?? this.creator,
-      completions: completions ?? this.completions,
-    );
-  }
-
-  // from DocumentSnapshot
-  factory HabitModel.fromDocument(Map<String, dynamic> data) {
-    return HabitModel(
-      hid: data['hid'],
-      summary: data['summary'],
-      description: data['description'],
-      start: convertTimestampToDateTime(data['start'] as Timestamp),
-      end: convertTimestampToDateTime(data['end'] as Timestamp),
-      created: convertTimestampToDateTime(data['created'] as Timestamp),
-      updated: convertTimestampToDateTime(data['updated'] as Timestamp),
-      creator: UserModel.fromDocument(data['creator']).toEntity(),
-      completions: (data['completions']).map<HabitCompletion>((completion) {
-        return HabitCompletion(
-          hid: completion['hid'],
-          completedAt: convertTimestampToDateTime(data['completedAt'] as Timestamp),
-        );
-      }).toList(),
-    );
-  }
-
-  // to DocumentSnapshot
-  Map<String, dynamic> toDocument() {
-    return {
-      'hid': hid,
-      'summary': summary,
-      'description': description,
-      'start': start,
-      'end': end,
-      'created': created,
-      'updated': updated,
-      'creator': UserModel.fromEntity(creator!).toDocument(),
-      'completions': completions,
-    };
-  }
-
+    super.hid,
+    super.summary,
+    super.description,
+    super.start,
+    super.end,
+    super.created,
+    super.updated,
+    super.creator,
+    super.completions,
+  });
   // from Entity
   factory HabitModel.fromEntity(HabitEntity entity) {
     return HabitModel(
@@ -102,6 +29,43 @@ class HabitModel extends HabitEntity {
       creator: entity.creator,
       completions: entity.completions,
     );
+  }
+
+  // from DocumentSnapshot
+  factory HabitModel.fromDocument(Map<String, dynamic> data) {
+    return HabitModel(
+      hid: data['hid'],
+      summary: data['summary'],
+      description: data['description'],
+      start: convertTimestampToDateTime(data['start'] as Timestamp),
+      end: convertTimestampToDateTime(data['end'] as Timestamp),
+      created: convertTimestampToDateTime(data['created'] as Timestamp),
+      updated: convertTimestampToDateTime(data['updated'] as Timestamp),
+      creator: UserModel.fromDocument(data['creator']),
+      completions: (data['completions']).map<HabitCompletion>((completion) {
+        return HabitCompletion(
+          hid: completion['hid'],
+          completedAt:
+              convertTimestampToDateTime(data['completedAt'] as Timestamp),
+        );
+      }).toList(),
+    );
+  }
+
+  // to DocumentSnapshot to be saved to Firestore
+  Map<String, dynamic> toDocument() {
+    return {
+      if (hid != null) 'hid': hid,
+      if (summary != null) 'summary': summary,
+      if (description != null) 'description': description,
+      if (start != null) 'start': start,
+      if (end != null) 'end': end,
+      if (created != null) 'created': created,
+      if (updated != null) 'updated': updated,
+      if (creator != null)
+        'creator': UserModel.fromEntity(creator!).toDocument(),
+      if (completions != null) 'completions': completions,
+    };
   }
 
   // to Entity

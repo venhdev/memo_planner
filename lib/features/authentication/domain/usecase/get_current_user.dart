@@ -1,17 +1,16 @@
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/usecase/usecase.dart';
+import '../../../../core/usecase/usecase.dart';
 
 import '../entities/user_entity.dart';
 import '../repository/authentication_repository.dart';
 
 @singleton
-class GetCurrentUserUC extends UseCaseNoParamNull<UserEntity> {
+class GetCurrentUserUC extends UseCaseNoParam<UserEntity?> {
+  GetCurrentUserUC(this._authenticationRepository);
   final AuthenticationRepository _authenticationRepository;
 
-  GetCurrentUserUC(this._authenticationRepository);
-
   @override
-  Future<UserEntity?> call() async {
-    return await _authenticationRepository.getCurrentUser();
+  UserEntity? call() {
+    return _authenticationRepository.getCurrentUser();
   }
 }
