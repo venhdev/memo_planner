@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -37,15 +39,32 @@ class AppNavigationDrawer extends StatelessWidget {
             return Column(
               children: [
                 const SizedBox(height: 24.0),
-                CircleAvatar(
-                  radius: 52,
-                  backgroundImage: NetworkImage(
-                    state.user!.photoURL!,
-                  )
-                ),
+                Builder(builder: (context) {
+                  if (state.user!.photoURL != null) {
+                    return CircleAvatar(
+                      radius: 52.0,
+                      backgroundColor: Colors.green.shade100,
+                      backgroundImage: NetworkImage(state.user!.photoURL!),
+                    );
+                  } else {
+                    // random image <assets/images/avatars> in case of no image
+                    return CircleAvatar(
+                      radius: 52.0,
+                      backgroundColor: Colors.green.shade100,
+                      child: Text(
+                        state.user!.email!.substring(0, 1),
+                        style: const TextStyle(
+                          fontSize: 52.0,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                    // return getRandomAvatar();
+                  }
+                }),
                 const SizedBox(height: 12.0),
                 Text(
-                  state.user!.displayName!,
+                  state.user!.displayName ?? state.user!.email!.split('@')[0],
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 28.0,
@@ -71,7 +90,7 @@ class AppNavigationDrawer extends StatelessWidget {
                       SignOutEvent(),
                     );
                   },
-                  child: const Text('Sign Out'),
+                  child: const Text('Logout'),
                 ),
               ],
             );
@@ -115,6 +134,16 @@ class AppNavigationDrawer extends StatelessWidget {
             onTap: () {},
           ),
         ],
+      ),
+    );
+  }
+
+  Widget getRandomAvatar() {
+    final randomImage = Random().nextInt(3) + 1;
+    return CircleAvatar(
+      radius: 52.0,
+      backgroundImage: AssetImage(
+        'assets/images/avatars/avatar-$randomImage.png',
       ),
     );
   }

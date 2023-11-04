@@ -1,57 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memo_planner/features/authentication/domain/entities/user_entity.dart';
 
+import '../bloc/bloc/authentication_bloc.dart';
 import '../components/profile_menu.dart';
-
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
     super.key,
-    // required this.userEntity,
+    required this.user,
   });
+
+  final UserEntity user;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late UserEntity tUser;
-
-  @override
-  void initState() {
-    super.initState();
-    tUser = const UserEntity(
-        uid: '81726387123',
-        email: 'venh.ha@gmail.com',
-        displayName: 'Venh Ha',
-        photoURL: 'photoURL',
-        phoneNumber: 'phoneNumber');
-  }
-
   @override
   Widget build(BuildContext context) {
     // var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        centerTitle: true,
-      ),
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(12),
           child: Column(
             children: [
-              Image.network('https://picsum.photos/250?image=9'),
               /// -- IMAGE
               Stack(
                 children: [
-                  
                   SizedBox(
                       width: 120,
                       height: 120,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(100),
-                        child: Image.network('https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png'),
+                        child: Image.network(
+                          widget.user.photoURL!,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.error),
+                          fit: BoxFit.cover,
+                        ),
                       )),
                   // Positioned(
                   //   bottom: 0,
@@ -72,23 +61,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              Text(tUser.displayName ?? tUser.email ?? '',
-                  style: Theme.of(context).textTheme.headlineMedium),
+              Text(widget.user.displayName ?? widget.user.email!.split('@')[0],
+                  style: const TextStyle(fontSize: 32, color: Colors.black)),
               const SizedBox(height: 20),
 
-              /// -- BUTTON
-              SizedBox(
-                width: 200,
-                child: ElevatedButton(
-                  onPressed: () => {},
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.primaries[0],
-                      side: BorderSide.none,
-                      shape: const StadiumBorder()),
-                  child: const Text('Edit',
-                      style: TextStyle(color: Colors.black)),
-                ),
-              ),
+              /// -- BUTTON EDIT
+              // SizedBox(
+              //   width: 200,
+              //   child: ElevatedButton(
+              //     onPressed: () => {},
+              //     style: ElevatedButton.styleFrom(
+              //         backgroundColor: Colors.primaries[0],
+              //         side: BorderSide.none,
+              //         shape: const StadiumBorder()),
+              //     child:
+              //         const Text('Edit', style: TextStyle(color: Colors.black)),
+              //   ),
+              // ),
               const SizedBox(height: 30),
               const Divider(),
               const SizedBox(height: 10),
@@ -111,7 +100,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: Icons.logout,
                   textColor: Colors.red,
                   endIcon: false,
-                  onPress: () {}),
+                  onPress: () {
+                    BlocProvider.of<AuthenticationBloc>(context).add(
+                      SignOutEvent(),
+                    );
+                  }),
             ],
           ),
         ),

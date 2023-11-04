@@ -1,6 +1,11 @@
 part of 'authentication_bloc.dart';
 
-enum AuthenticationStatus { unknown, authenticated, unauthenticated }
+enum AuthenticationStatus {
+  unknown,
+  authenticating,
+  authenticated,
+  unauthenticated,
+}
 
 class AuthenticationState extends Equatable {
   const AuthenticationState._({
@@ -10,6 +15,7 @@ class AuthenticationState extends Equatable {
   });
 
   const AuthenticationState.unknown() : this._();
+  const AuthenticationState.authenticating() : this._();
 
   const AuthenticationState.authenticated(UserEntity user)
       : this._(
@@ -22,7 +28,7 @@ class AuthenticationState extends Equatable {
           status: AuthenticationStatus.unauthenticated,
           message: message,
         );
-        
+
   final AuthenticationStatus status;
   final UserEntity? user; // this is the user credential from firebase
   final String? message;

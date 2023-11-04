@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/authentication/presentation/screens/authentication_view.dart';
 import '../../features/authentication/presentation/screens/sign_in_screen.dart';
+import '../../features/authentication/presentation/screens/sign_up_screen.dart';
 import '../../features/habit/presentation/screens/habit_page.dart';
 import 'app_navigation_drawer.dart';
 
@@ -48,10 +49,10 @@ class AppRouters {
                     path: 'sign-in',
                     builder: (context, state) => const SignInScreen(),
                   ),
-                  // GoRoute(
-                  //   path: 'sign-up',
-                  //   builder: (context, state) => const SignUpScreen(),
-                  // ),
+                  GoRoute(
+                    path: 'sign-up',
+                    builder: (context, state) => const SignUpScreen(),
+                  ),
                 ],
               ),
             ],

@@ -38,12 +38,12 @@ class ScaffoldWithNavBar extends StatelessWidget {
       leading: Builder(builder: (context) {
         return IconButton(
           icon: const Icon(Icons.menu),
-          // openDrawer
           onPressed: () {
             Scaffold.of(context).openDrawer();
           },
         );
       }),
+      title: const Text('Memo Planner'),
     );
   }
 

@@ -13,7 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart' as _i3;
 import 'package:get_it/get_it.dart' as _i1;
 import 'package:google_sign_in/google_sign_in.dart' as _i5;
 import 'package:injectable/injectable.dart' as _i2;
-import 'package:memo_planner/config/dependency_injection.dart' as _i22;
+import 'package:memo_planner/config/dependency_injection.dart' as _i24;
 import 'package:memo_planner/features/authentication/data/data_sources/authentication_data_source.dart'
     as _i11;
 import 'package:memo_planner/features/authentication/data/repository/authentication_repository_impl.dart'
@@ -28,8 +28,12 @@ import 'package:memo_planner/features/authentication/domain/usecase/sign_in_with
     as _i19;
 import 'package:memo_planner/features/authentication/domain/usecase/sign_out.dart'
     as _i20;
-import 'package:memo_planner/features/authentication/presentation/bloc/bloc/authentication_bloc.dart'
+import 'package:memo_planner/features/authentication/domain/usecase/sign_up_with_email.dart'
     as _i21;
+import 'package:memo_planner/features/authentication/domain/usecase/usecases.dart'
+    as _i23;
+import 'package:memo_planner/features/authentication/presentation/bloc/bloc/authentication_bloc.dart'
+    as _i22;
 import 'package:memo_planner/features/habit/data/data_sources/habit_data_source.dart'
     as _i6;
 import 'package:memo_planner/features/habit/data/repository/habit_repository_impl.dart'
@@ -94,14 +98,17 @@ extension GetItInjectableX on _i1.GetIt {
         _i19.SignInWithGoogleUC(gh<_i12.AuthenticationRepository>()));
     gh.singleton<_i20.SignOutUC>(
         _i20.SignOutUC(gh<_i12.AuthenticationRepository>()));
-    gh.factory<_i21.AuthenticationBloc>(() => _i21.AuthenticationBloc(
-          gh<_i18.SignInWithEmailAndPasswordUC>(),
-          gh<_i20.SignOutUC>(),
-          gh<_i3.FirebaseAuth>(),
-          gh<_i19.SignInWithGoogleUC>(),
+    gh.singleton<_i21.SignUpWithEmailUC>(
+        _i21.SignUpWithEmailUC(gh<_i12.AuthenticationRepository>()));
+    gh.factory<_i22.AuthenticationBloc>(() => _i22.AuthenticationBloc(
+          gh<_i23.SignInWithEmailAndPasswordUC>(),
+          gh<_i23.SignOutUC>(),
+          gh<_i23.SignInWithGoogleUC>(),
+          gh<_i23.GetCurrentUserUC>(),
+          gh<_i23.SignUpWithEmailUC>(),
         ));
     return this;
   }
 }
 
-class _$RegisterModule extends _i22.RegisterModule {}
+class _$RegisterModule extends _i24.RegisterModule {}

@@ -19,7 +19,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   ResultEither<UserEntity> signInWithGoogle() async {
     try {
       final result = await _fireBaseAuthenticationService.signInWithGoogle();
-      return Right(UserModel.fromUser(result.user!));
+      return Right(UserModel.fromUserCredential(result.user!));
     } on FirebaseAuthException catch (e) {
       return Left(ServerFailure(code: e.code, message: e.message!));
     } catch (e) {
@@ -38,7 +38,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         email,
         password,
       );
-      return Right(UserModel.fromUser(result.user!));
+      return Right(UserModel.fromUserCredential(result.user!));
     } on FirebaseAuthException catch (e) {
       return Left(ServerFailure(code: e.code, message: e.message!));
     } catch (e) {
@@ -62,13 +62,29 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       final result = _fireBaseAuthenticationService.currentUser;
 
       if (result != null) {
-        return UserModel.fromUser(result);
+        return UserModel.fromUserCredential(result);
       } else {
         return null;
       }
     } on FirebaseAuthException catch (e) {
       debugPrint('AuthenticationRepositoryImpl: getCurrentUser: ${e.message}');
       return null;
+    }
+  }
+
+  @override
+  ResultEither<UserEntity> signUpWithEmail(
+      String email, String password) async {
+    try {
+      final result = await _fireBaseAuthenticationService.signUpWithEmail(
+        email,
+        password,
+      );
+      return Right(UserModel.fromUserCredential(result.user!));
+    } on FirebaseAuthException catch (e) {
+      return Left(ServerFailure(code: e.code, message: e.message!));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 }

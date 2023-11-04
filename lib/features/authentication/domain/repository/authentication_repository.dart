@@ -11,10 +11,11 @@ abstract class AuthenticationRepository {
     String email,
     String password,
   );
-
   ResultEither<UserEntity> signInWithGoogle();
-
+  ResultEither<UserEntity> signUpWithEmail(
+    String email,
+    String password,
+  );
   ResultVoid signOut();
-
   UserEntity? getCurrentUser();
 }

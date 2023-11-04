@@ -38,7 +38,7 @@ class UserModel extends UserEntity {
     );
   }
 
-  factory UserModel.fromUser(User user) {
+  factory UserModel.fromUserCredential(User user) {
     return UserModel(
       uid: user.uid,
       displayName: user.displayName,

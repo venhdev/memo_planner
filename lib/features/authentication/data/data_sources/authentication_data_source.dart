@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 
@@ -8,6 +9,11 @@ abstract class AuthenticationDataSource {
   ///
   /// Throws a [FirebaseAuthException] if the sign in fails.
   Future<UserCredential> signedInWithEmailAndPassword(
+    String email,
+    String password,
+  );
+
+  Future<UserCredential> signUpWithEmail(
     String email,
     String password,
   );
@@ -56,9 +62,13 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
   }
 
   @override
-  Future<void> signOut() {
+  Future<void> signOut() async {
     try {
-      return _firebaseAuth.signOut();
+      await _firebaseAuth.signOut();
+      if (_googleSignIn.currentUser != null) {
+        debugPrint('Signing out from Google');
+        await _googleSignIn.signOut();
+      }
     } on FirebaseException catch (e) {
       throw FirebaseAuthException(
         code: e.code,
@@ -87,5 +97,13 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
 
     // Once signed in, return the UserCredential
     return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  @override
+  Future<UserCredential> signUpWithEmail(String email, String password) {
+    return _firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 }

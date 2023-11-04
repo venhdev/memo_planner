@@ -23,10 +23,7 @@ class SignInWithEmailAndPasswordUC
 
 /// [SignInParams] hold 2 parameters: String[email] and String[password].
 class SignInParams extends Equatable {
-  const SignInParams({
-    required this.email,
-    required this.password,
-  });
+  const SignInParams({required this.email, required this.password});
   final String email;
   final String password;
 
