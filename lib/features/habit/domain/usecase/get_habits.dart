@@ -6,8 +6,8 @@ import '../../../authentication/domain/entities/user_entity.dart';
 import '../repository/habit_repository.dart';
 
 @singleton
-class GetHabitStreamUC extends UseCaseWithParams<Stream<QuerySnapshot>, UserEntity> {
-  GetHabitStreamUC(this._habitRepository);
+class GetHabitUC extends UseCaseWithParams<Stream<QuerySnapshot>, UserEntity> {
+  GetHabitUC(this._habitRepository);
   final HabitRepository _habitRepository;
 
 

@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
+
 import '../../../authentication/domain/entities/user_entity.dart';
+import 'habit_instance_entity.dart';
 
 // The entity design to sync with Google Calendar
 class HabitEntity extends Equatable {
@@ -9,24 +11,29 @@ class HabitEntity extends Equatable {
     required this.description,
     required this.start,
     required this.end,
+    required this.recurrence,
     required this.created,
     required this.updated,
     required this.creator,
-    required this.completions,
+    required this.instances,
   });
+
   final String? hid;
   final String? summary; // the title
   final String? description;
 
   final DateTime? start; // start time
   final DateTime? end; // end time
+  final String? recurrence; // recurrence rule
 
-  final DateTime? created; //Creation time of the event
-  final DateTime? updated; //Last modification time of the event
+  final DateTime? created; //Creation time of the habit
+  final DateTime? updated; //Last modification time of the habit
 
-  final UserEntity? creator; //The creator of the event. Read-only.
+  final UserEntity? creator; //The creator of the habit. Read-only.
 
-  final List<HabitCompletion>? completions;
+  final List<HabitInstanceEntity>? instances;
+
+  final String kind = 'habit#summary';
   // copyWith
   HabitEntity copyWith({
     String? hid,
@@ -34,10 +41,11 @@ class HabitEntity extends Equatable {
     String? description,
     DateTime? start,
     DateTime? end,
+    String? recurrence,
     DateTime? created,
     DateTime? updated,
     UserEntity? creator,
-    List<HabitCompletion>? completions,
+    List<HabitInstanceEntity>? instances,
   }) {
     return HabitEntity(
       hid: hid ?? this.hid,
@@ -45,10 +53,11 @@ class HabitEntity extends Equatable {
       description: description ?? this.description,
       start: start ?? this.start,
       end: end ?? this.end,
+      recurrence: recurrence ?? this.recurrence,
       created: created ?? this.created,
       updated: updated ?? this.updated,
       creator: creator ?? this.creator,
-      completions: completions ?? this.completions,
+      instances: instances ?? instances,
     );
   }
 
@@ -59,20 +68,12 @@ class HabitEntity extends Equatable {
         description,
         start,
         end,
+        recurrence,
         created,
         updated,
         creator,
-        completions,
+        instances,
       ];
-}
-
-class HabitCompletion {
-  HabitCompletion({
-    required this.hid,
-    required this.completedAt,
-  });
-  final String hid;
-  final DateTime completedAt;
 }
 
 // https://developers.google.com/calendar/api/v3/reference/events#resource

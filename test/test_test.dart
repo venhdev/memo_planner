@@ -1,5 +1,58 @@
 // // import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:memo_planner/core/utils/convertors.dart';
+import 'package:memo_planner/features/habit/data/models/habit_model.dart';
+import 'package:memo_planner/features/habit/domain/entities/habit_entity.dart';
+import 'package:memo_planner/features/habit/domain/entities/habit_instance_entity.dart';
 
+void main() {
+
+  test('2', () {
+    DateTime date = DateTime.now();
+    debugPrint(date.toIso8601String().substring(0, 10).replaceAll('-', ''));
+    debugPrint(convertDateTimeToyyyyMMdd(date));
+  });
+
+  test('description', () {
+    final HabitEntity entity = HabitEntity(
+      hid: 'hid',
+      summary: 'summary',
+      description: 'description',
+      start: DateTime.now(),
+      end: DateTime.now(),
+      recurrence: 'recurrence',
+      created: DateTime.now(),
+      updated: DateTime.now(),
+      creator: null,
+      instances: const [],
+    );
+    final HabitModel model = HabitModel(
+      hid: 'hid',
+      summary: 'summary',
+      description: 'description',
+      start: DateTime.now(),
+      end: DateTime.now(),
+      recurrence: 'recurrence',
+      created: DateTime.now(),
+      updated: DateTime.now(),
+      creator: null,
+      instances: const [],
+    );
+
+    final HabitInstanceEntity instance = HabitInstanceEntity(
+      hid: 'hid',
+      iid: 'iid',
+      created: DateTime.now(),
+      updated: DateTime.now(),
+      creator: null,
+    );
+
+    debugPrint(entity.kind);
+    debugPrint(model.kind);
+    debugPrint(instance.kind);
+  });
+}
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:dartz/dartz.dart';
 // import 'package:flutter_test/flutter_test.dart';

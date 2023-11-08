@@ -15,7 +15,6 @@ class ScaffoldWithNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(context),
       drawer: const AppNavigationDrawer(),
       body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(
@@ -25,25 +24,12 @@ class ScaffoldWithNavBar extends StatelessWidget {
         // `navigationShell.route.branches`.
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.note_add), label: 'Habit'),
+          BottomNavigationBarItem(icon: Icon(Icons.today), label: 'Goal'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'User'),
         ],
         currentIndex: navigationShell.currentIndex,
         onTap: (int index) => _onTap(context, index),
       ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      leading: Builder(builder: (context) {
-        return IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
-        );
-      }),
-      title: const Text('Memo Planner'),
     );
   }
 

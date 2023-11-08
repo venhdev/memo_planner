@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/authentication/presentation/screens/authentication_view.dart';
-import '../../features/authentication/presentation/screens/sign_in_screen.dart';
-import '../../features/authentication/presentation/screens/sign_up_screen.dart';
-import '../../features/habit/presentation/screens/habit_page.dart';
-import 'app_navigation_drawer.dart';
+import '../../core/widgets/widgets.dart';
+import '../../features/authentication/presentation/screens/screens.dart';
+import '../../features/goal/presentation/screens/goal_page.dart';
+import '../../features/habit/presentation/screens/screens.dart';
 
 part 'app_navigation_bar.dart';
 
@@ -18,7 +17,7 @@ class AppRouters {
   static final GoRouter router = GoRouter(
     debugLogDiagnostics: true, // NOTE only set to true if you need to debug
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/',
+    initialLocation: '/habit',
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -28,37 +27,58 @@ class AppRouters {
           StatefulShellBranch(
             navigatorKey: _shellNavigatorKey,
             routes: <RouteBase>[
-              GoRoute(
-                path: '/',
-                builder: (context, state) => HabitPage(),
-              )
+              habitRoutes(),
             ],
           ),
-          // StatefulShellBranch(
-          //   routes: [
-          //     authenticationRoute2,
-          //   ],
-          // ),
           StatefulShellBranch(
             routes: [
-              GoRoute(
-                path: '/authentication',
-                builder: (context, state) => const AuthenticationView(),
-                routes: [
-                  GoRoute(
-                    path: 'sign-in',
-                    builder: (context, state) => const SignInScreen(),
-                  ),
-                  GoRoute(
-                    path: 'sign-up',
-                    builder: (context, state) => const SignUpScreen(),
-                  ),
-                ],
-              ),
+              goalRoutes(),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              authenticationRoutes(),
             ],
           ),
         ],
       )
+    ],
+  );
+}
+
+GoRoute habitRoutes() {
+  return GoRoute(
+    path: '/habit',
+    builder: (context, state) => const HabitPage(),
+    routes: [
+      GoRoute(
+        path: 'add',
+        builder: (context, state) => const AddHabitScreen(),
+      ),
+    ],
+  );
+}
+
+GoRoute goalRoutes() {
+  return GoRoute(
+    path: '/goal',
+    builder: (context, state) => const GoalPage(),
+  );
+}
+
+GoRoute authenticationRoutes() {
+  return GoRoute(
+    path: '/authentication',
+    builder: (context, state) => const AuthenticationPage(),
+    routes: [
+      GoRoute(
+        path: 'sign-in',
+        builder: (context, state) => const SignInScreen(),
+      ),
+      GoRoute(
+        path: 'sign-up',
+        builder: (context, state) => const SignUpScreen(),
+      ),
     ],
   );
 }

@@ -100,7 +100,7 @@ class AppNavigationDrawer extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    context.go('/authentication/sign-in');
+                    context.go('/authentication');
                   },
                   child: const Text('Sign In'),
                 )

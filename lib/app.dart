@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:memo_planner/config/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 import 'config/dependency_injection.dart';
 import 'config/routes/routes.dart';
 import 'features/authentication/presentation/bloc/bloc/authentication_bloc.dart';
-import 'features/habit/presentation/bloc/bloc/habit_bloc.dart';
+import 'features/habit/presentation/bloc/habit/habit_bloc.dart';
+import 'features/habit/presentation/bloc/instance/instance_bloc.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -23,23 +24,16 @@ class App extends StatelessWidget {
               di<AuthenticationBloc>()..add(AuthenticationStartedEvent()),
         ),
         BlocProvider(
-          create: (_) => di<HabitBloc>(),
+          create: (_) => di<HabitBloc>()..add(HabitStartedEvent()),
+        ),
+        BlocProvider(
+          create: (_) => di<HabitInstanceBloc>(),
         ),
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'Memo Planner',
-        theme: ThemeData(
-          buttonTheme: Theme.of(context).buttonTheme.copyWith(
-                highlightColor: Colors.deepPurple,
-              ),
-          primarySwatch: Colors.deepPurple,
-          textTheme: GoogleFonts.robotoTextTheme(
-            Theme.of(context).textTheme,
-          ),
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          useMaterial3: true,
-        ),
+        theme: AppTheme.defaultTheme,
         routerConfig: AppRouters.router,
       ),
     );

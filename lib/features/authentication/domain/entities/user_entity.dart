@@ -9,25 +9,11 @@ class UserEntity extends Equatable {
     this.photoURL,
   });
 
-  factory UserEntity.empty() {
-    return const UserEntity(
-      uid: '',
-      displayName: '',
-      email: '',
-      phoneNumber: '',
-      photoURL: '',
-    );
-  }
   final String? uid;
   final String? displayName;
   final String? email;
   final String? photoURL;
   final String? phoneNumber;
-
-  @override
-  String toString() {
-    return 'UserEntity(uid: $uid, displayName: $displayName, email: $email, photoURL: $photoURL, phoneNumber: $phoneNumber)';
-  }
 
   @override
   List<Object?> get props => [
