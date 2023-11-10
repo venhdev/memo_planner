@@ -4,16 +4,16 @@ import 'package:memo_planner/core/usecase/usecase.dart';
 import 'package:memo_planner/features/habit/domain/entities/habit_entity.dart';
 
 import '../../../../core/constants/typedef.dart';
-import '../repository/habit_repository.dart';
+import '../repository/habit_instance_repository.dart';
 
 @singleton
 class AddHabitInstanceUC
     extends UseCaseWithParams<ResultVoid, AddHabitInstanceParams> {
-  AddHabitInstanceUC(this._habitRepository);
-  final HabitRepository _habitRepository;
+  AddHabitInstanceUC(this._habitInstanceRepository);
+  final HabitInstanceRepository _habitInstanceRepository;
   @override
   ResultVoid call(AddHabitInstanceParams params) async {
-    return await _habitRepository.addHabitInstance(params.habit, params.date);
+    return await _habitInstanceRepository.addHabitInstance(params.habit, params.date);
   }
 }
 

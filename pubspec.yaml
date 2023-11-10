@@ -34,10 +34,13 @@ dependencies:
 
   # ui
   # firebase_ui_auth: ^1.9.1
-  easy_date_timeline: ^1.0.2
   flutter_svg: ^2.0.9
   google_fonts: ^6.1.0
   cupertino_icons: ^1.0.2 # Use with the CupertinoIcons class for iOS style icons.
+  flutter_native_splash: ^2.3.5 # cmd:dart run flutter_native_splash:create
+  flutter_launcher_icons: ^0.13.1 # cmd:flutter pub run flutter_launcher_icons
+  easy_date_timeline: ^1.0.2
+  clean_calendar: ^1.1.0
 
   # state management + navigation
   provider: ^6.0.5
@@ -98,8 +101,9 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
-    - assets/images/avatars/
-    - assets/icons/
+    - assets/images/avatar/
+    - assets/images/logo/
+    - assets/images/icon/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

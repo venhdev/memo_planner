@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/features/habit/domain/entities/habit_instance_entity.dart';
 
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/error/exceptions.dart';
@@ -14,7 +13,9 @@ import '../data_sources/habit_data_source.dart';
 
 @Singleton(as: HabitRepository)
 class HabitRepositoryImpl implements HabitRepository {
-  const HabitRepositoryImpl(this._habitDataSource);
+  const HabitRepositoryImpl(
+    this._habitDataSource,
+  );
   final HabitDataSource _habitDataSource;
 
   @override
@@ -61,36 +62,14 @@ class HabitRepositoryImpl implements HabitRepository {
   }
 
   @override
-  ResultVoid addHabitInstance(HabitEntity habit, DateTime date) async {
+  ResultEither<HabitEntity> getHabitByHid(String hid) async {
     try {
-      _habitDataSource.addHabitInstance(habit, date);
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(code: e.code, message: e.message));
-    }
-  }
-
-  @override
-  Stream<QuerySnapshot<Map<String, dynamic>>> getHabitInstanceStream(
-      HabitEntity habit, DateTime focusDate) {
-    try {
-      final habitInstances =
-          _habitDataSource.getHabitInstanceStream(habit, focusDate);
-      return habitInstances;
-    } catch (e) {
-      debugPrint(
-          'HabitRepositoryImpl:getHabitInstanceStream:Exception --type of e: ${e.runtimeType}');
-      debugPrint(e.toString());
-      return const Stream.empty();
-    }
-  }
-
-  @override
-  ResultVoid changeHabitInstanceStatus(
-      HabitInstanceEntity instance, bool status) async {
-    try {
-      await _habitDataSource.changeHabitInstanceStatus(instance, status);
-      return const Right(null);
+      final habit = await _habitDataSource.getHabitByHid(hid);
+      if (habit != null) {
+        return Right(habit);
+      } else {
+        return const Left(ServerFailure(message: 'Habit not found'));
+      }
     } on ServerException catch (e) {
       return Left(ServerFailure(code: e.code, message: e.message));
     }

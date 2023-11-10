@@ -4,18 +4,18 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../entities/habit_instance_entity.dart';
-import '../repository/habit_repository.dart';
+import '../repository/habit_instance_repository.dart';
 
 @singleton
 class ChangeHabitInstanceStatusUC
     extends UseCaseWithParams<ResultVoid, ChangeHabitInstanceStatusParams> {
-  ChangeHabitInstanceStatusUC(this._habitRepository);
-  final HabitRepository _habitRepository;
+  ChangeHabitInstanceStatusUC(this._habitInstanceRepository);
+  final HabitInstanceRepository _habitInstanceRepository;
   @override
   ResultVoid call(ChangeHabitInstanceStatusParams params) async {
-    return await _habitRepository.changeHabitInstanceStatus(
+    return await _habitInstanceRepository.changeHabitInstanceStatus(
       params.instance,
-      params.status,
+      params.completed,
     );
   }
 }
@@ -23,12 +23,12 @@ class ChangeHabitInstanceStatusUC
 class ChangeHabitInstanceStatusParams extends Equatable {
   const ChangeHabitInstanceStatusParams({
     required this.instance,
-    required this.status,
+    required this.completed,
   });
 
   final HabitInstanceEntity instance;
-  final bool status;
+  final bool completed;
 
   @override
-  List<Object> get props => [instance, status];
+  List<Object> get props => [instance, completed];
 }

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/features/habit/data/models/habit_instance_model.dart';
+import 'package:memo_planner/features/habit/domain/entities/habit_instance_entity.dart';
 import 'package:memo_planner/features/habit/domain/usecase/usecases.dart';
 
 import '../../../domain/entities/habit_entity.dart';
@@ -34,7 +34,7 @@ class HabitInstanceBloc extends Bloc<InstanceEvent, InstanceState> {
     );
     resultEither.fold(
       (l) => emit(InstanceActionFail(message: l.message)),
-      (r) => emit(const InstanceActionSuccess(message: 'Congrats!')),
+      (r) => emit(const InstanceActionSuccess(message: 'Congratulation!')),
     );
   }
 
@@ -45,7 +45,7 @@ class HabitInstanceBloc extends Bloc<InstanceEvent, InstanceState> {
     final resultEither = await _changeHabitInstanceStatusUC(
       ChangeHabitInstanceStatusParams(
         instance: event.instance,
-        status: event.status,
+        completed: event.completed,
       ),
     );
     resultEither.fold(

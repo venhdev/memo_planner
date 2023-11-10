@@ -43,7 +43,6 @@ void main() {
     final HabitInstanceEntity instance = HabitInstanceEntity(
       hid: 'hid',
       iid: 'iid',
-      created: DateTime.now(),
       updated: DateTime.now(),
       creator: null,
     );

@@ -4,17 +4,17 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../entities/habit_entity.dart';
-import '../repository/habit_repository.dart';
+import '../repository/habit_instance_repository.dart';
 
 @singleton
 class GetHabitInstanceStreamUC
     extends UseCaseWithParams<SQuerySnapshot, GetHabitInstanceParams> {
-  GetHabitInstanceStreamUC(this._habitRepository);
+  GetHabitInstanceStreamUC(this._habitInstanceRepository);
 
-  final HabitRepository _habitRepository;
+  final HabitInstanceRepository _habitInstanceRepository;
   @override
   SQuerySnapshot call(GetHabitInstanceParams params) {
-    return _habitRepository.getHabitInstanceStream(
+    return _habitInstanceRepository.getHabitInstanceStream(
       params.habit,
       params.focusDate,
     );

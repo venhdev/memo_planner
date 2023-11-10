@@ -55,6 +55,12 @@ GoRoute habitRoutes() {
         path: 'add',
         builder: (context, state) => const AddHabitScreen(),
       ),
+      GoRoute(
+          path: 'detail/:hid',
+          builder: (context, state) {
+            final hid = state.pathParameters['hid']!;
+            return HabitDetailScreen(hid: hid);
+          }),
     ],
   );
 }

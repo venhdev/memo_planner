@@ -16,7 +16,7 @@ class HabitPage extends StatefulWidget {
 }
 
 class _HabitPageState extends State<HabitPage> {
-  DateTime? _focusDate = DateTime.now();
+  DateTime? _now = DateTime.now();
   final EasyInfiniteDateTimelineController _controller =
       EasyInfiniteDateTimelineController();
 
@@ -58,11 +58,11 @@ class _HabitPageState extends State<HabitPage> {
                         EasyInfiniteDateTimeLine(
                           controller: _controller,
                           firstDate: DateTime(2023),
-                          focusDate: _focusDate,
+                          focusDate: _now,
                           lastDate: DateTime(2023, 12, 31),
                           onDateChange: (selectedDate) {
                             setState(() {
-                              _focusDate = selectedDate;
+                              _now = selectedDate;
                             });
                           },
                         ),
@@ -72,7 +72,7 @@ class _HabitPageState extends State<HabitPage> {
                           style: TextStyle(fontSize: 20),
                         ),
                         HabitList(
-                          focusDate: _focusDate,
+                          focusDate: _now!,
                           habitStream: state.habitStream,
                         ),
                       ],

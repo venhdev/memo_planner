@@ -15,6 +15,13 @@ class RRULE {
   final int? interval;
   final FREQ freq;
 
+  static List<String> get list => <String>[
+        FREQ.DAILY.name,
+        FREQ.WEEKLY.name,
+        FREQ.MONTHLY.name,
+        FREQ.YEARLY.name,
+      ];
+
   @override
   String toString() {
     return 'RRULE:FREQ=${freq.name};INTERVAL=$interval';

@@ -96,7 +96,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ),
                     child: SvgPicture.asset(
-                      'assets/icons/google.svg',
+                      'assets/images/icon/google.svg',
                       height: 32.0,
                       width: 32.0,
                     ),

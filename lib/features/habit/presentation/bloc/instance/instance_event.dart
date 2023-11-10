@@ -11,15 +11,15 @@ sealed class InstanceEvent extends Equatable {
 //   const InstanceStatusChangeEvent({
 //     required this.focusDate,
 //     required this.habit,
-//     required this.status,
+//     required this.completed,
 //   });
 
 //   final DateTime focusDate;
 //   final HabitEntity habit;
-//   final bool status;
+//   final bool completed;
 
 //   @override
-//   List<Object> get props => [focusDate, habit, status];
+//   List<Object> get props => [focusDate, habit, completed];
 // }
 
 // This event used for the instance not created yet
@@ -35,8 +35,8 @@ class InstanceInitialEvent extends InstanceEvent {
 class InstanceStatusChangeEvent extends InstanceEvent {
   const InstanceStatusChangeEvent({
     required this.instance,
-    required this.status,
+    required this.completed,
   });
-  final HabitInstanceModel instance;
-  final bool status;
+  final HabitInstanceEntity instance;
+  final bool completed;
 }

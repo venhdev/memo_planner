@@ -7,23 +7,23 @@ class HabitInstanceEntity extends Equatable {
     this.iid,
     this.hid,
     this.summary,
-    this.created,
+    this.date,
     this.updated,
-    required this.creator,
-    this.status,
+    this.creator,
+    this.completed,
   });
 
   final String? hid; // Recurring Habit ID
-  final String? iid; // Habit Instance ID = hid + date (yyyyMMdd)
+  final String? iid; // Habit Instance ID = hid_date (yyyyMMdd)
 
   final String? summary;
 
-  final DateTime? created; // Date of creation
+  final DateTime? date; // Date of this habit instance (= iid)
   final DateTime? updated; // Date of last update
 
   final UserEntity? creator; // User who created this habit instance
 
-  final bool? status; // Whether the habit is completed or not
+  final bool? completed; // Whether the habit is completed or not
 
   final String kind = 'habit#instance';
 
@@ -31,8 +31,11 @@ class HabitInstanceEntity extends Equatable {
   List<Object?> get props => [
         hid,
         iid,
-        created,
+        summary,
+        date,
         updated,
+        creator,
+        completed,
         kind,
       ];
 }

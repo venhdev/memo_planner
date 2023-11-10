@@ -10,18 +10,18 @@ class HabitInstanceModel extends HabitInstanceEntity {
     String? iid,
     String? hid,
     String? summary,
-    DateTime? created,
+    DateTime? date,
     DateTime? updated,
     UserEntity? creator,
-    bool? status,
+    bool? completed,
   }) : super(
           iid: iid,
           hid: hid,
           summary: summary,
-          created: created,
+          date: date,
           updated: updated,
           creator: creator,
-          status: status,
+          completed: completed,
         );
 
   //fromEntity
@@ -29,10 +29,11 @@ class HabitInstanceModel extends HabitInstanceEntity {
     return HabitInstanceModel(
       iid: entity.iid,
       hid: entity.hid,
-      created: entity.created,
+      summary: entity.summary,
+      date: entity.date,
       updated: entity.updated,
       creator: entity.creator,
-      status: entity.status,
+      completed: entity.completed,
     );
   }
 
@@ -47,13 +48,13 @@ class HabitInstanceModel extends HabitInstanceEntity {
       iid: data['iid'],
       hid: data['hid'],
       summary: data['summary'],
-      created: convertTimestampToDateTime(data['created'] as Timestamp),
+      date: convertTimestampToDateTime(data['date'] as Timestamp),
       updated: convertTimestampToDateTime(data['updated'] as Timestamp),
       creator: UserModel.fromMap(data['creator']),
-      status: data['status'],
+      completed: data['completed'],
     );
   }
-  
+
   // to Document
   Map<String, dynamic> toDocument() {
     return toMap();
@@ -65,10 +66,10 @@ class HabitInstanceModel extends HabitInstanceEntity {
       if (iid != null) 'iid': iid,
       if (hid != null) 'hid': hid,
       if (summary != null) 'summary': summary,
-      if (created != null) 'created': created,
+      if (date != null) 'date': date,
       if (updated != null) 'updated': updated,
       if (creator != null) 'creator': UserModel.fromEntity(creator!).toMap(),
-      if (status != null) 'status': status,
+      if (completed != null) 'completed': completed,
     };
   }
 }
