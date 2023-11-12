@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-void showDialogErrorMessage({
+void showAlertDialogMessage({
   required BuildContext context,
   required String message,
   required Icon icon,

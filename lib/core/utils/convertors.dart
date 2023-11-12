@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 // use to Convert Timestamp From FireStore to DateTime
 DateTime convertTimestampToDateTime(Timestamp timestamp) {
@@ -17,4 +18,16 @@ String convertDateTimeToyyyyMMdd(DateTime dateTime) {
 // } //bad performance
 String getIid(String hid, DateTime date) {
   return '${hid}_${convertDateTimeToyyyyMMdd(date)}';
+}
+
+DateTime yyyyMMddDateTime (String date) {
+  return DateFormat('yyyyMMdd').parse(date);
+}
+
+String ddMMString (DateTime date) {
+  return DateFormat('dd/MM').format(date);
+}
+
+DateFormat getDateFormat (String format) {
+  return DateFormat(format);
 }

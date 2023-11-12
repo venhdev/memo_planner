@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/widgets/widgets.dart';
 import '../../../habit/presentation/bloc/habit/habit_bloc.dart';
@@ -19,17 +20,17 @@ class AuthenticationPage extends StatelessWidget {
           //     context: context,
           //     message: state.message!,
           //     icon: const Icon(Icons.error));
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Logout success'),
-            showCloseIcon: true,
-          ));
+          // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          //   content: Text('Logout success'),
+          //   showCloseIcon: true,
+          // ));
         }
         if (state.status == AuthenticationStatus.authenticated) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Login with ${state.user!.email}'),
-            showCloseIcon: true,
-          ));
-
+          showAlertDialogMessage(
+              context: context,
+              message: 'Login Success!',
+              icon: const Icon(Icons.check));
+          context.go('/habit');
           BlocProvider.of<HabitBloc>(context).add(HabitStartedEvent());
         }
       },

@@ -1,18 +1,19 @@
 import 'package:injectable/injectable.dart';
+import 'package:memo_planner/core/constants/typedef.dart';
+import 'package:memo_planner/features/habit/domain/entities/streak_entity.dart';
 
 import '../../../../core/usecase/usecase.dart';
-import '../entities/streak_entity.dart';
-import '../repository/habit_instance_repository.dart';
+import '../repository/habit_repository.dart';
 
 @singleton
 class GetTopStreakUC
-    extends UseCaseWithParams<Future<List<StreakEntity>>, String> {
-  GetTopStreakUC(this._repository);
+    extends UseCaseWithParams<ResultEither<StreakEntity>, String> {
+  GetTopStreakUC(this._habitRepository);
 
-  final HabitInstanceRepository _repository;
+  final HabitRepository _habitRepository;
 
   @override
-  Future<List<StreakEntity>> call(String params) async {
-    return await _repository.getTopStreaks(params);
+  ResultEither<StreakEntity> call(String params) async {
+    return await _habitRepository.getTopStreaks(params);
   }
 }

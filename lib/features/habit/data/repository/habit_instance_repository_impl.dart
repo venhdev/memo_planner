@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/features/habit/data/data_sources/habit_data_source.dart';
-import 'package:memo_planner/features/habit/domain/entities/streak_entity.dart';
 
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/error/exceptions.dart';
@@ -15,9 +13,8 @@ import '../data_sources/habit_instance_data_source.dart';
 
 @Singleton(as: HabitInstanceRepository)
 class HabitInstanceRepositoryImpl implements HabitInstanceRepository {
-  const HabitInstanceRepositoryImpl(this._habitInstanceDataSource, this._dataSource,);
+  const HabitInstanceRepositoryImpl(this._habitInstanceDataSource);
   final HabitInstanceDataSource _habitInstanceDataSource;
-  final HabitDataSource _dataSource;
 
   @override
   ResultVoid addHabitInstance(HabitEntity habit, DateTime date) async {
@@ -53,16 +50,28 @@ class HabitInstanceRepositoryImpl implements HabitInstanceRepository {
       return Left(ServerFailure(code: e.code, message: e.message));
     }
   }
-
+  
   @override
-  Future<List<StreakEntity>> getTopStreaks(String hid) async {
+  ResultEither<HabitInstanceEntity> getHabitInstanceByIid(String iid) async {
     try {
-      final habit = await _dataSource.getHabitByHid(hid);
-      final streaks = await _habitInstanceDataSource.getTopStreakOfHabit(habit!);
-      return streaks;
-    } catch (e) {
-      debugPrint(e.toString());
-      return const [];
+      final instance = await _habitInstanceDataSource.findHabitInstanceById(iid);
+      if (instance != null) {
+        return Right(instance);
+      } else {
+        return const Left(ServerFailure(message: 'Habit instance not found'));
+      }
+    } on ServerException catch (e) {
+      return Left(ServerFailure(code: e.code, message: e.message));
+    }
+  }
+  
+  @override
+  ResultVoid updateHabitInstance(HabitInstanceEntity instance) async {
+    try {
+      _habitInstanceDataSource.updateHabitInstance(instance);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(code: e.code, message: e.message));
     }
   }
 }

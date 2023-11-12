@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:memo_planner/features/habit/presentation/screens/edit_habit_instance_screen.dart';
+import 'package:memo_planner/features/habit/presentation/screens/edit_habit_screen.dart';
 
 import '../../core/widgets/widgets.dart';
 import '../../features/authentication/presentation/screens/screens.dart';
@@ -27,6 +29,10 @@ class AppRouters {
           StatefulShellBranch(
             navigatorKey: _shellNavigatorKey,
             routes: <RouteBase>[
+              GoRoute(
+                path: '/',
+                redirect: (context, state) => '/habit',
+              ),
               habitRoutes(),
             ],
           ),
@@ -60,6 +66,18 @@ GoRoute habitRoutes() {
           builder: (context, state) {
             final hid = state.pathParameters['hid']!;
             return HabitDetailScreen(hid: hid);
+          }),
+      GoRoute(
+          path: 'edit-habit/:id', // this id may be hid or iid
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return EditHabitScreen(hid: id);
+          }),
+      GoRoute(
+          path: 'edit-instance/:id', // this id may be hid or iid
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return EditHabitInstanceScreen(iid: id);
           }),
     ],
   );

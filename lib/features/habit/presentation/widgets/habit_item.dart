@@ -1,15 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/habit/domain/entities/habit_instance_entity.dart';
-import 'package:memo_planner/features/habit/domain/usecase/usecases.dart';
-import 'package:memo_planner/features/habit/presentation/bloc/instance/instance_bloc.dart';
+import 'package:memo_planner/core/utils/convertors.dart';
 
 import '../../../../config/dependency_injection.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../data/models/habit_instance_model.dart';
 import '../../domain/entities/habit_entity.dart';
+import '../../domain/entities/habit_instance_entity.dart';
+import '../../domain/usecase/get_habit_instances.dart';
 import '../bloc/habit/habit_bloc.dart';
+import '../bloc/instance/instance_bloc.dart';
 
 class HabitItem extends StatelessWidget {
   const HabitItem({super.key, required this.habit, required this.focusDate});
@@ -23,6 +26,7 @@ class HabitItem extends StatelessWidget {
     debugPrint('HabitItem:build ${habit.created}');
     // add event to bloc when focus date change
     return Container(
+      margin: const EdgeInsets.symmetric(vertical: 5.0),
       decoration: BoxDecoration(
         border: Border.all(
           color: Colors.grey,
@@ -50,34 +54,30 @@ class HabitItem extends StatelessWidget {
     return StreamBuilder(
       stream: stream,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Something went wrong! [e01]');
-        } else if (snapshot.hasData) {
+        if (snapshot.hasData) {
           if (snapshot.data!.docs.isEmpty) {
-            debugPrint('buildStreamInstance:onLongPress ${habit.created}');
-            // instance is not created so use the default habit
+            // instance is not created so use the habit info to display
             return HabitItemBody(
               isICreated: false,
               focusDate: focusDate,
               habit: habit,
               instance: null,
             );
-            // return buildNotCreateInstance(habit, context);
           } else {
             // instance is created
-            final instance = HabitInstanceModel.fromDocument(
-              snapshot.data!.docs.first.data(),
-            );
             return HabitItemBody(
               isICreated: true,
               focusDate: focusDate,
               habit: habit,
-              instance: instance,
+              instance: HabitInstanceModel.fromDocument(
+                snapshot.data!.docs.first.data(),
+              ),
             );
-            // return buildCreatedInstance(instance, context);
           }
+        } else if (snapshot.hasError) {
+          return MessageScreen(message: snapshot.error.toString());
         } else {
-          return const Text('Some thing went wrong [e02]');
+          return const LoadingScreen();
         }
       },
     );
@@ -93,10 +93,10 @@ class HabitItemBody extends StatelessWidget {
     required this.focusDate,
   });
 
-  final HabitInstanceEntity? instance;
   final HabitEntity habit;
-  final bool isICreated;
   final DateTime focusDate;
+  final bool isICreated; // is Instance created
+  final HabitInstanceEntity? instance;
 
   @override
   Widget build(BuildContext context) {
@@ -104,26 +104,45 @@ class HabitItemBody extends StatelessWidget {
       onLongPress: () {
         debugPrint('HabitItemBody:build:onLongPress ${habit.created}');
       },
-      onTap: () async {
+      onTap: () {
         context.go('/habit/detail/${habit.hid}');
-        // final result = await di<HabitInstanceRepository>().getTopStreaks(habit.hid!);
-        // debugPrint('getTopStreaks: $result');
-        // onInstanceTap(context, !(isICreated ? instance!.completed! : false));
       },
-      child: ListTile(
-        title: Text(isICreated ? instance!.summary! : habit.summary!),
-        leading: Checkbox(
-          value: isICreated ? instance!.completed! : false,
-          onChanged: (bool? value) {
-            onInstanceTap(context, value);
-          },
+      child: Slidable(
+        endActionPane: ActionPane(
+          motion: const DrawerMotion(),
+          children: [
+            // A SlidableAction can have an icon and/or a label.
+            SlidableAction(
+              onPressed: (context) {
+                showConfirmDeleteDialog(context: context);
+              },
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              icon: Icons.delete,
+              label: 'Delete',
+            ),
+            SlidableAction(
+              onPressed: (context) {
+                showEditTypeDialog(context: context);
+                // isICreated
+                //     ? context.go('/habit/edit-instance/${instance!.iid}')
+                //     : context.go('/habit/edit-habit/${habit.hid}');
+              },
+              backgroundColor: Colors.cyan,
+              foregroundColor: Colors.white,
+              icon: Icons.edit,
+              label: 'Edit',
+            ),
+          ],
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () {
-            BlocProvider.of<HabitBloc>(context)
-                .add(HabitDeleteEvent(habit: habit));
-          },
+        child: ListTile(
+          title: Text(isICreated ? instance!.summary! : habit.summary!),
+          leading: Checkbox(
+            value: isICreated ? instance!.completed! : false,
+            onChanged: (bool? value) {
+              onInstanceTap(context, value);
+            },
+          ),
         ),
       ),
     );
@@ -144,5 +163,89 @@ class HabitItemBody extends StatelessWidget {
         InstanceInitialEvent(habit: habit, date: focusDate),
       );
     }
+  }
+
+  void showConfirmDeleteDialog({
+    required BuildContext context,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Habit'),
+          content: Text(
+            'Are you sure to permanently delete ${habit.summary} habit?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                BlocProvider.of<HabitBloc>(context)
+                    .add(HabitDeleteEvent(habit: habit));
+                Navigator.pop(context);
+              },
+              child: const Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('No'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showEditTypeDialog({
+    required BuildContext context,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Type'),
+          content: const Text(
+            'You want to edit to all habit or just this one?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.go('/habit/edit-habit/${habit.hid}');
+                Navigator.pop(context);
+                // isICreated
+                //     ? context.go('/habit/edit-instance/${instance!.iid}')
+                //     : context.go('/habit/edit-habit/${habit.hid}');
+              },
+              child: const Text('All'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (isICreated) {
+                  context.go('/habit/edit-instance/${instance!.iid}');
+                } else {
+                  // the instance is not created yet
+                  // create new instance with completed = false
+                  BlocProvider.of<HabitInstanceBloc>(context).add(
+                    InstanceInitialEvent(
+                      habit: habit,
+                      date: focusDate,
+                      completed: false,
+                    ),
+                  );
+
+                  // and then go to edit instance screen
+                  final iid = getIid(habit.hid!, focusDate);
+                  context.go('/habit/edit-instance/$iid');
+                }
+
+                Navigator.pop(context);
+              },
+              child: const Text('Just this one'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

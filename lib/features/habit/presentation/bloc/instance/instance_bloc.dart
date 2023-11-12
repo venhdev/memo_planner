@@ -14,13 +14,16 @@ class HabitInstanceBloc extends Bloc<InstanceEvent, InstanceState> {
   HabitInstanceBloc(
     this._addHabitInstanceUC,
     this._changeHabitInstanceStatusUC,
+    this._updateHabitInstanceUC,
   ) : super(InstanceInitial()) {
     on<InstanceInitialEvent>(_onInitialEvent);
     on<InstanceStatusChangeEvent>(_onChangeStatusEvent);
+    on<InstanceUpdateEvent>(_onUpdateEvent);
   }
 
   final AddHabitInstanceUC _addHabitInstanceUC;
   final ChangeHabitInstanceStatusUC _changeHabitInstanceStatusUC;
+  final UpdateHabitInstanceUC _updateHabitInstanceUC;
 
   void _onInitialEvent(
     InstanceInitialEvent event,
@@ -35,6 +38,17 @@ class HabitInstanceBloc extends Bloc<InstanceEvent, InstanceState> {
     resultEither.fold(
       (l) => emit(InstanceActionFail(message: l.message)),
       (r) => emit(const InstanceActionSuccess(message: 'Congratulation!')),
+    );
+  }
+
+  void _onUpdateEvent(
+    InstanceUpdateEvent event,
+    Emitter<InstanceState> emit,
+  ) async {
+    final resultEither = await _updateHabitInstanceUC(event.instance);
+    resultEither.fold(
+      (l) => emit(InstanceActionFail(message: l.message)),
+      (r) => emit(const InstanceActionSuccess(message: 'Updated This Habit!')),
     );
   }
 

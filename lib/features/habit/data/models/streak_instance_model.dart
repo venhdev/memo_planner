@@ -1,18 +1,13 @@
-import 'package:equatable/equatable.dart';
-import 'package:memo_planner/features/habit/domain/entities/habit_entity.dart';
+import '../../domain/entities/streak_instance_entity.dart';
 
-import 'streak_instance_entity.dart';
-
-class StreakEntity extends Equatable {
-  const StreakEntity({
-    required this.habit,
-    required this.streaks,
+class StreakModel extends StreakInstanceEntity {
+  const StreakModel({
+    required super.start,
+    required super.end,
+    required super.length,
   });
 
-  final HabitEntity habit;
-  final List<StreakInstanceEntity> streaks;
-
-  List<DateTime> get getDateRange {
+  List<DateTime> getDateRange(List<StreakInstanceEntity> streaks) {
     final List<DateTime> dateRange = [];
     for (var streak in streaks) {
       dateRange.add(streak.start);
@@ -25,7 +20,4 @@ class StreakEntity extends Equatable {
     }
     return dateRange;
   }
-
-  @override
-  List<Object?> get props => [habit, streaks];
 }

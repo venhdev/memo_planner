@@ -21,7 +21,7 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
     this._updateHabitUC,
     this._deleteHabitUC,
     this._getCurrentUserUC,
-    this._getHabitsUC,
+    this._getHabitStreamUC,
     this._addHabitInstanceUC,
   ) : super(HabitInitial()) {
     on<HabitStartedEvent>(_onStarted);
@@ -36,15 +36,16 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
   final UpdateHabitUC _updateHabitUC;
   final DeleteHabitUC _deleteHabitUC;
   final GetCurrentUserUC _getCurrentUserUC;
-  final GetHabitUC _getHabitsUC;
+  final GetHabitStreamUC _getHabitStreamUC;
 
   Stream<QuerySnapshot>? currentSteam;
 
   void _onStarted(HabitStartedEvent event, Emitter<HabitState> emit) {
+    emit(HabitLoading());
     try {
       var user = _getCurrentUserUC();
       if (user != null) {
-        final habitStream = _getHabitsUC(user);
+        final habitStream = _getHabitStreamUC(user);
         currentSteam = habitStream;
         emit(HabitLoaded(habitStream: habitStream));
       }
@@ -86,7 +87,9 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
   }
 
   void _onUpdateHabitEvent(
-      HabitUpdateEvent event, Emitter<HabitState> emit) async {
+    HabitUpdateEvent event,
+    Emitter<HabitState> emit,
+  ) async {
     try {
       await _updateHabitUC(event.habit);
       emit(HabitLoaded(

@@ -2,10 +2,10 @@ import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/habit/presentation/bloc/habit/habit_bloc.dart';
 
 import '../../../../core/widgets/widgets.dart';
 import '../../../authentication/presentation/bloc/bloc/authentication_bloc.dart';
+import '../bloc/habit/habit_bloc.dart';
 import '../widgets/widgets.dart';
 
 class HabitPage extends StatefulWidget {
@@ -77,8 +77,12 @@ class _HabitPageState extends State<HabitPage> {
                         ),
                       ],
                     );
+                  } else if (state is HabitLoading) {
+                    return const LoadingScreen();
                   } else {
-                    return const Text('Something went wrong');
+                    return const MessageScreen(
+                      message: 'Some thing went wrong [e04]',
+                    );
                   }
                 },
               );

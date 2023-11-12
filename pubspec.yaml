@@ -29,7 +29,6 @@ dependencies:
   dartz: ^0.10.1 # functional programming
   get_it: ^7.6.4 # dependency injection
   injectable: ^2.3.2 # code generator for get_it
-  rxdart: ^0.27.7
   intl: ^0.18.1
 
   # ui
@@ -39,6 +38,7 @@ dependencies:
   cupertino_icons: ^1.0.2 # Use with the CupertinoIcons class for iOS style icons.
   flutter_native_splash: ^2.3.5 # cmd:dart run flutter_native_splash:create
   flutter_launcher_icons: ^0.13.1 # cmd:flutter pub run flutter_launcher_icons
+  flutter_slidable: ^3.0.1
   easy_date_timeline: ^1.0.2
   clean_calendar: ^1.1.0
 
@@ -57,9 +57,9 @@ dependencies:
   cloud_firestore: ^4.9.3
 
   # storage
-  shared_preferences: ^2.2.2
-  drift: ^2.13.0
-  sqlite3_flutter_libs: ^0.5.0
+  # shared_preferences: ^2.2.2
+  # drift: ^2.13.0
+  # sqlite3_flutter_libs: ^0.5.0
 
   # network
   http: ^1.1.0 # http client

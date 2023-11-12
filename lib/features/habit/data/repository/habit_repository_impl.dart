@@ -8,6 +8,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 import '../../domain/entities/habit_entity.dart';
+import '../../domain/entities/streak_entity.dart';
 import '../../domain/repository/habit_repository.dart';
 import '../data_sources/habit_data_source.dart';
 
@@ -72,6 +73,19 @@ class HabitRepositoryImpl implements HabitRepository {
       }
     } on ServerException catch (e) {
       return Left(ServerFailure(code: e.code, message: e.message));
+    }
+  }
+
+  @override
+  ResultEither<StreakEntity> getTopStreaks(String hid) async {
+    try {
+      final habit = await _habitDataSource.getHabitByHid(hid);
+      final streaks = await _habitDataSource.getTopStreakOfHabit(habit!);
+      final result = StreakEntity(habit: habit, streaks: streaks);
+      return Right(result);
+    } catch (e) {
+      debugPrint(e.toString());
+      return const Left(ServerFailure(code: '404', message: 'Habit not found'));
     }
   }
 }

@@ -1,5 +1,9 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
     "java.configuration.updateBuildConfiguration": "automatic",
+    "cSpell.words": [
+        "datepicker",
+        "syncfusion"
+    ],
     // "dart.flutterHotReloadOnSave": "all"
 }

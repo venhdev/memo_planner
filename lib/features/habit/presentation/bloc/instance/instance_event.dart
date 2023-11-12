@@ -24,9 +24,14 @@ sealed class InstanceEvent extends Equatable {
 
 // This event used for the instance not created yet
 class InstanceInitialEvent extends InstanceEvent {
-  const InstanceInitialEvent({required this.habit, required this.date});
+  const InstanceInitialEvent({
+    required this.habit,
+    required this.date,
+    this.completed = true,
+  });
   final HabitEntity habit;
   final DateTime date;
+  final bool? completed;
 
   @override
   List<Object> get props => [habit, date];
@@ -39,4 +44,17 @@ class InstanceStatusChangeEvent extends InstanceEvent {
   });
   final HabitInstanceEntity instance;
   final bool completed;
+
+  @override
+  List<Object> get props => [instance, completed];
+}
+
+class InstanceUpdateEvent extends InstanceEvent {
+  const InstanceUpdateEvent({
+    required this.instance,
+  });
+  final HabitInstanceEntity instance;
+
+  @override
+  List<Object> get props => [instance];
 }
