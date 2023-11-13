@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -19,7 +18,7 @@ class HabitInstanceRepositoryImpl implements HabitInstanceRepository {
   @override
   ResultVoid addHabitInstance(HabitEntity habit, DateTime date) async {
     try {
-      _habitInstanceDataSource.addHabitInstance(habit, date);
+      _habitInstanceDataSource.addHabitInitInstance(habit, date);
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(code: e.code, message: e.message));
@@ -27,7 +26,7 @@ class HabitInstanceRepositoryImpl implements HabitInstanceRepository {
   }
 
   @override
-  Stream<QuerySnapshot<Map<String, dynamic>>> getHabitInstanceStream(
+  SQuerySnapshot getHabitInstanceStream(
       HabitEntity habit, DateTime focusDate) {
     try {
       final habitInstances =

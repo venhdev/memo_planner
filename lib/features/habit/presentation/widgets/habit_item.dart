@@ -1,16 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/core/utils/convertors.dart';
 
 import '../../../../config/dependency_injection.dart';
+import '../../../../core/constants/typedef.dart';
+import '../../../../core/utils/convertors.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../data/models/habit_instance_model.dart';
 import '../../domain/entities/habit_entity.dart';
 import '../../domain/entities/habit_instance_entity.dart';
-import '../../domain/usecase/get_habit_instances.dart';
+import '../../domain/usecase/get_habit_instance_stream.dart';
 import '../bloc/habit/habit_bloc.dart';
 import '../bloc/instance/instance_bloc.dart';
 
@@ -23,31 +23,31 @@ class HabitItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('HabitItem:build ${habit.created}');
-    // add event to bloc when focus date change
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 5.0),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.grey,
-        ),
-        borderRadius: BorderRadius.circular(5.0),
-      ),
-      child: buildStreamInstance(
-        stream: di<GetHabitInstanceStreamUC>()(
-          GetHabitInstanceParams(
-            habit: habit,
-            focusDate: focusDate,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey,
           ),
+          borderRadius: BorderRadius.circular(8.0),
         ),
-        habit: habit,
-        context: context,
+        child: buildStreamInstance(
+          stream: di<GetHabitInstanceStreamUC>()(
+            GetHabitInstanceParams(
+              habit: habit,
+              focusDate: focusDate,
+            ),
+          ),
+          habit: habit,
+          context: context,
+        ),
       ),
     );
   }
 
   Widget buildStreamInstance({
-    required Stream<QuerySnapshot<Map<String, dynamic>>> stream,
+    required SQuerySnapshot stream,
     required HabitEntity habit,
     required BuildContext context,
   }) {
@@ -101,9 +101,6 @@ class HabitItemBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: () {
-        debugPrint('HabitItemBody:build:onLongPress ${habit.created}');
-      },
       onTap: () {
         context.go('/habit/detail/${habit.hid}');
       },
@@ -123,10 +120,7 @@ class HabitItemBody extends StatelessWidget {
             ),
             SlidableAction(
               onPressed: (context) {
-                showEditTypeDialog(context: context);
-                // isICreated
-                //     ? context.go('/habit/edit-instance/${instance!.iid}')
-                //     : context.go('/habit/edit-habit/${habit.hid}');
+                showChooseEditTypeDialog(context: context);
               },
               backgroundColor: Colors.cyan,
               foregroundColor: Colors.white,
@@ -135,15 +129,35 @@ class HabitItemBody extends StatelessWidget {
             ),
           ],
         ),
-        child: ListTile(
-          title: Text(isICreated ? instance!.summary! : habit.summary!),
-          leading: Checkbox(
-            value: isICreated ? instance!.completed! : false,
-            onChanged: (bool? value) {
-              onInstanceTap(context, value);
-            },
-          ),
-        ),
+        child: Builder(builder: (context) {
+          final String summary;
+          final String description;
+          if (isICreated) {
+            if (instance!.edited!) {
+              summary = instance!.summary!;
+              description = instance!.description!;
+            } else {
+              summary = habit.summary!;
+              description = habit.description!;
+            }
+          } else {
+            summary = habit.summary!;
+            description = habit.description!;
+          }
+          return ListTile(
+            title: Text(
+              summary,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(description),
+            leading: Checkbox(
+              value: isICreated ? instance!.completed! : false,
+              onChanged: (bool? value) {
+                onInstanceTap(context, value);
+              },
+            ),
+          );
+        }),
       ),
     );
   }
@@ -197,7 +211,7 @@ class HabitItemBody extends StatelessWidget {
     );
   }
 
-  void showEditTypeDialog({
+  void showChooseEditTypeDialog({
     required BuildContext context,
   }) {
     showDialog(
@@ -241,7 +255,7 @@ class HabitItemBody extends StatelessWidget {
 
                 Navigator.pop(context);
               },
-              child: const Text('Just this one'),
+              child: const Text('This one'),
             ),
           ],
         );

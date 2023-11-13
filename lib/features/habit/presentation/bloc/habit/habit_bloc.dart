@@ -3,7 +3,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:memo_planner/features/habit/domain/usecase/add_habit_instance.dart';
-import 'package:memo_planner/features/habit/domain/usecase/get_habits.dart';
+import 'package:memo_planner/features/habit/domain/usecase/get_habit_stream.dart';
+import '../../../../../core/constants/typedef.dart';
 import '../../../../authentication/domain/usecase/get_current_user.dart';
 
 import '../../../domain/entities/habit_entity.dart';
@@ -38,7 +39,7 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
   final GetCurrentUserUC _getCurrentUserUC;
   final GetHabitStreamUC _getHabitStreamUC;
 
-  Stream<QuerySnapshot>? currentSteam;
+  SQuerySnapshot? currentSteam;
 
   void _onStarted(HabitStartedEvent event, Emitter<HabitState> emit) {
     emit(HabitLoading());

@@ -33,22 +33,25 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: di<GetHabitByHidUC>()(widget.hid),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasData) {
-            return snapshot.data!.fold(
-              (failure) => MessageScreen(message: failure.message),
-              (habit) => buildEditHabitBody(context, habit),
-            );
+    return Scaffold(
+      appBar: AppBar(),
+      body: FutureBuilder(
+        future: di<GetHabitByHidUC>()(widget.hid),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasData) {
+              return snapshot.data!.fold(
+                (failure) => MessageScreen(message: failure.message),
+                (habit) => buildEditHabitBody(context, habit),
+              );
+            } else {
+              return MessageScreen(message: snapshot.error.toString());
+            }
           } else {
-            return MessageScreen(message: snapshot.error.toString());
+            return const LoadingScreen();
           }
-        } else {
-          return const LoadingScreen();
-        }
-      },
+        },
+      ),
     );
   }
 

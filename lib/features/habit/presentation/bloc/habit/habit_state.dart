@@ -17,7 +17,7 @@ final class HabitLoaded extends HabitState {
     required this.habitStream,
   });
 
-  final Stream<QuerySnapshot> habitStream;
+  final Stream<QuerySnapshot<Map<String,dynamic>>> habitStream;
   final String? message;
 
   @override

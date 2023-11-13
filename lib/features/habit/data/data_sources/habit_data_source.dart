@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/constants/typedef.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/utils/convertors.dart';
 import '../../../authentication/data/data_sources/authentication_data_source.dart';
@@ -13,7 +14,7 @@ import '../models/habit_instance_model.dart';
 import '../models/habit_model.dart';
 
 abstract class HabitDataSource {
-  Stream<QuerySnapshot> getHabitStream(UserEntity user);
+  SQuerySnapshot getHabitStream(UserEntity user);
   Future<void> addHabit(HabitEntity habit);
   Future<void> updateHabit(HabitEntity habit);
   Future<void> deleteHabit(HabitEntity habit);
@@ -105,11 +106,12 @@ class HabitDataSourceImpl extends HabitDataSource {
   }
 
   @override
-  Stream<QuerySnapshot> getHabitStream(UserEntity user) {
+  SQuerySnapshot getHabitStream(UserEntity user) {
     final habitCollRef = _firestore
         .collection(pathToUsers)
         .doc(user.email)
-        .collection(pathToHabits);
+        .collection(pathToHabits)
+        .orderBy('summary');
     return habitCollRef.snapshots();
   }
 

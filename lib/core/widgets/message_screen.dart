@@ -4,9 +4,11 @@ class MessageScreen extends StatelessWidget {
   const MessageScreen({
     super.key,
     required this.message,
+    this.enableBack = true
   });
 
   final String message;
+  final bool enableBack;
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +17,14 @@ class MessageScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(message),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Back'),
+          Visibility(
+            visible: enableBack,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Back'),
+            ),
           ),
         ],
       ),

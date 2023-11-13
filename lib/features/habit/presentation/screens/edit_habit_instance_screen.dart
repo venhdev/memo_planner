@@ -32,22 +32,25 @@ class _EditHabitInstanceScreenState extends State<EditHabitInstanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: di<GetCreateHabitInstanceByIid>()(widget.iid),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasData) {
-            return snapshot.data!.fold(
-              (failure) => MessageScreen(message: failure.message),
-              (instance) => buildEditHabitInstanceBody(context, instance),
-            );
+    return Scaffold(
+      appBar: AppBar(),
+      body: FutureBuilder(
+        future: di<GetCreateHabitInstanceByIid>()(widget.iid),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasData) {
+              return snapshot.data!.fold(
+                (failure) => MessageScreen(message: failure.message),
+                (instance) => buildEditHabitInstanceBody(context, instance),
+              );
+            } else {
+              return MessageScreen(message: snapshot.error.toString());
+            }
           } else {
-            return MessageScreen(message: snapshot.error.toString());
+            return const LoadingScreen();
           }
-        } else {
-          return const LoadingScreen();
-        }
-      },
+        },
+      ),
     );
   }
 

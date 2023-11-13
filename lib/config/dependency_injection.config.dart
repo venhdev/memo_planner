@@ -58,9 +58,9 @@ import 'package:memo_planner/features/habit/domain/usecase/get_create_habit_inst
     as _i28;
 import 'package:memo_planner/features/habit/domain/usecase/get_habit_by_hid.dart'
     as _i29;
-import 'package:memo_planner/features/habit/domain/usecase/get_habit_instances.dart'
+import 'package:memo_planner/features/habit/domain/usecase/get_habit_instance_stream.dart'
     as _i30;
-import 'package:memo_planner/features/habit/domain/usecase/get_habits.dart'
+import 'package:memo_planner/features/habit/domain/usecase/get_habit_stream.dart'
     as _i31;
 import 'package:memo_planner/features/habit/domain/usecase/get_top_streak.dart'
     as _i32;

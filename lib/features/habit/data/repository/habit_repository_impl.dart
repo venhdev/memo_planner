@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -50,7 +49,7 @@ class HabitRepositoryImpl implements HabitRepository {
   }
 
   @override
-  Stream<QuerySnapshot<Object?>> getHabitStream(UserEntity user) {
+  SQuerySnapshot getHabitStream(UserEntity user) {
     try {
       final habits = _habitDataSource.getHabitStream(user);
       return habits;

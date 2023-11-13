@@ -15,6 +15,7 @@ class HabitInstanceModel extends HabitInstanceEntity {
     DateTime? updated,
     UserEntity? creator,
     bool? completed,
+    bool? edited,
   }) : super(
           iid: iid,
           hid: hid,
@@ -24,6 +25,7 @@ class HabitInstanceModel extends HabitInstanceEntity {
           updated: updated,
           creator: creator,
           completed: completed,
+          edited: edited,
         );
 
   //fromEntity
@@ -37,6 +39,7 @@ class HabitInstanceModel extends HabitInstanceEntity {
       updated: entity.updated,
       creator: entity.creator,
       completed: entity.completed,
+      edited: entity.edited,
     );
   }
 
@@ -56,6 +59,7 @@ class HabitInstanceModel extends HabitInstanceEntity {
       updated: convertTimestampToDateTime(data['updated'] as Timestamp),
       creator: UserModel.fromMap(data['creator']),
       completed: data['completed'],
+      edited: data['edited'],
     );
   }
 
@@ -75,6 +79,7 @@ class HabitInstanceModel extends HabitInstanceEntity {
       if (updated != null) 'updated': updated,
       if (creator != null) 'creator': UserModel.fromEntity(creator!).toMap(),
       if (completed != null) 'completed': completed,
+      if (edited != null) 'edited': edited,
     };
   }
 }

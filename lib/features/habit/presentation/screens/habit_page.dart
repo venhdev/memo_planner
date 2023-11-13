@@ -16,9 +16,18 @@ class HabitPage extends StatefulWidget {
 }
 
 class _HabitPageState extends State<HabitPage> {
-  DateTime? _now = DateTime.now();
-  final EasyInfiniteDateTimelineController _controller =
-      EasyInfiniteDateTimelineController();
+  DateTime _now = DateTime.now();
+  late EasyInfiniteDateTimelineController _controller;
+  late TextEditingController _searchController;
+
+  String searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = EasyInfiniteDateTimelineController();
+    _searchController = TextEditingController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +43,9 @@ class _HabitPageState extends State<HabitPage> {
         },
         child: const Icon(Icons.add),
       ),
-      body: Center(
-        child: BlocConsumer<AuthenticationBloc, AuthenticationState>(
-          listener: (context, state) {},
+      body: Container(
+        padding: const EdgeInsets.all(8),
+        child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
           builder: (context, state) {
             if (state.status == AuthenticationStatus.authenticated) {
               return BlocBuilder<HabitBloc, HabitState>(
@@ -44,36 +53,75 @@ class _HabitPageState extends State<HabitPage> {
                   if (state is HabitLoaded) {
                     return Column(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                _controller.jumpToDate(DateTime.now());
-                              },
-                              child: const Text('Today'),
-                            ),
-                          ],
+                        habitSearchBar(
+                          context,
+                          controller: _searchController,
+                          onChange: () {
+                            setState(() {
+                              searchQuery = _searchController.text;
+                            });
+                          },
+                          onCancel: () {
+                            setState(() {
+                              _searchController.clear();
+                              searchQuery = '';
+                              FocusScope.of(context).unfocus();
+                            });
+                          },
                         ),
+                        const SizedBox(height: 20),
                         EasyInfiniteDateTimeLine(
                           controller: _controller,
+                          activeColor: Colors.green.shade300,
+                          dayProps: const EasyDayProps(
+                            activeDayStyle: DayStyle(
+                              borderRadius: 28,
+                            ),
+                            todayStyle: DayStyle(),
+                            borderColor: Colors.black12,
+                            todayHighlightColor: Colors.green,
+                          ),
                           firstDate: DateTime(2023),
+                          lastDate: DateTime(2026),
                           focusDate: _now,
-                          lastDate: DateTime(2023, 12, 31),
                           onDateChange: (selectedDate) {
                             setState(() {
                               _now = selectedDate;
                             });
                           },
                         ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          'Your Habits:',
-                          style: TextStyle(fontSize: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12.0),
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              child: const TextField(
+                                decoration: InputDecoration(
+                                  hintText: 'Search habit',
+                                ),
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                _now = DateTime.now();
+                                setState(() {
+                                  _controller.animateToDate(
+                                    _now,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.decelerate,
+                                  );
+                                });
+                              },
+                              child: const Icon(Icons.today),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 20),
                         HabitList(
-                          focusDate: _now!,
+                          focusDate: _now,
                           habitStream: state.habitStream,
+                          query: searchQuery,
                         ),
                       ],
                     );
@@ -100,4 +148,33 @@ class _HabitPageState extends State<HabitPage> {
       ),
     );
   }
+}
+
+Widget habitSearchBar(
+  BuildContext context, {
+  required TextEditingController controller,
+  required Function onChange,
+  required Function onCancel,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+    child: SearchBar(
+        controller: controller,
+        padding: const MaterialStatePropertyAll<EdgeInsets>(
+            EdgeInsets.symmetric(horizontal: 16.0)),
+        onTap: () {},
+        onChanged: (_) {
+          debugPrint('searching $_');
+          onChange();
+        },
+        leading: const Icon(Icons.search),
+        trailing: [
+          IconButton(
+            onPressed: () {
+              onCancel();
+            },
+            icon: const Icon(Icons.close),
+          ),
+        ]),
+  );
 }

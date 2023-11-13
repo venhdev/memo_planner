@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:memo_planner/features/authentication/data/data_sources/authentication_data_source.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/constants/typedef.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/utils/convertors.dart';
 import '../../domain/entities/habit_entity.dart';
@@ -11,11 +12,11 @@ import '../../domain/entities/habit_instance_entity.dart';
 import '../models/habit_instance_model.dart';
 
 abstract class HabitInstanceDataSource {
-  Stream<QuerySnapshot<Map<String, dynamic>>> getHabitInstanceStream(
+  SQuerySnapshot getHabitInstanceStream(
       HabitEntity habit, DateTime focusDate);
 
   Future<HabitInstanceEntity?> findHabitInstanceById(String iid);
-  Future<void> addHabitInstance(
+  Future<void> addHabitInitInstance(
     HabitEntity habit,
     DateTime date,
   );
@@ -35,7 +36,7 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
   final AuthenticationDataSource _authenticationDataSource;
 
   @override
-  Future<void> addHabitInstance(HabitEntity habit, DateTime date) async {
+  Future<void> addHabitInitInstance(HabitEntity habit, DateTime date) async {
     try {
       final habitICollRef = _firestore
           .collection(pathToUsers)
@@ -59,6 +60,7 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
         updated: DateTime.now(),
         creator: habit.creator,
         completed: true,
+        edited: false,
       );
 
       habitICollRef.doc(iid).set(habitInstanceModel.toDocument());
@@ -76,7 +78,7 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
   }
 
   @override
-  Stream<QuerySnapshot<Map<String, dynamic>>> getHabitInstanceStream(
+  SQuerySnapshot getHabitInstanceStream(
       HabitEntity habit, DateTime focusDate) {
     final habitICollRef = _firestore
         .collection(pathToUsers)
@@ -144,6 +146,7 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
     habitIDocRef.update({
       'summary': instance.summary,
       'description': instance.description,
+      'edited': true, // update the edited field
       'updated': DateTime.now(), // update the updated field
     });
   }

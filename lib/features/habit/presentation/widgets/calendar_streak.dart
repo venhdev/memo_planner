@@ -17,10 +17,12 @@ class _CalendarStreakState extends State<CalendarStreak> {
   @override
   Widget build(BuildContext context) {
     return CleanCalendar(
+      startWeekday: WeekDay.monday,
       datesForStreaks: widget.dateRange,
       // for (var streak in widget.streaks)
       //   for (int i = 0; i < streak.length; i++)
       //     streak.start.add(Duration(days: i)),
+      dateSelectionMode: DatePickerSelectionMode.disable,
       currentDateProperties: DatesProperties(
         datesDecoration: DatesDecoration(
           datesBorderRadius: 1000,

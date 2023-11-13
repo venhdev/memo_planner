@@ -7,11 +7,9 @@ export 'delete_habit.dart';
 
 export 'get_habit_by_hid.dart';
 export 'get_create_habit_instance_by_iid.dart';
-export 'get_habit_instances.dart';
-export 'get_habits.dart';
+export 'get_habit_instance_stream.dart';
+export 'get_habit_stream.dart';
 export 'get_top_streak.dart';
 
 export 'update_habit.dart';
 export 'update_habit_instance.dart';
-
-// 11 usecases

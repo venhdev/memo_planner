@@ -13,6 +13,7 @@ class HabitInstanceEntity extends Equatable {
     this.updated,
     this.creator,
     this.completed,
+    this.edited,
   });
 
   final String? hid; // Recurring Habit ID
@@ -28,7 +29,8 @@ class HabitInstanceEntity extends Equatable {
   final UserEntity? creator; // User who created this habit instance
 
   final bool? completed; // Whether the habit is completed or not
-
+  final bool? edited; // Default false, when user edit only the instance => true
+  
   final String kind = 'habit#instance';
 
   // copyWith
@@ -41,6 +43,7 @@ class HabitInstanceEntity extends Equatable {
     DateTime? updated,
     UserEntity? creator,
     bool? completed,
+    bool? edited, 
   }) {
     return HabitInstanceEntity(
       hid: hid ?? this.hid,
@@ -51,6 +54,7 @@ class HabitInstanceEntity extends Equatable {
       updated: updated ?? this.updated,
       creator: creator ?? this.creator,
       completed: completed ?? this.completed,
+      edited: edited ?? this.edited,
     );
   }
 
@@ -65,6 +69,7 @@ class HabitInstanceEntity extends Equatable {
         updated,
         creator,
         completed,
+        edited,
         kind,
       ];
 }

@@ -25,69 +25,72 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top,
-        left: 16,
-        right: 16,
-      ),
-      child: Form(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextFormField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Habit Title',
-                hintText: 'What is your habit?',
-              ),
-            ),
-            TextFormField(
-              controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                hintText: 'Describe your habit',
-              ),
-            ),
-            // dropdown to select recurrence
-            DropdownButtonFormField(
+    return Scaffold(
+      appBar: AppBar(),
+      body: Container(
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top,
+          left: 16,
+          right: 16,
+        ),
+        child: Form(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextFormField(
+                controller: titleController,
                 decoration: const InputDecoration(
-                  labelText: 'Recurrence',
-                  hintText: 'How often do you want to do this habit?',
+                  labelText: 'Habit Title',
+                  hintText: 'What is your habit?',
                 ),
-                value: list.first,
-                icon: const Icon(Icons.arrow_downward),
-                onChanged: (value) {},
-                items: list.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList()),
-            // button to add habit to HabitBloc
-            ElevatedButton(
-              onPressed: () {
-                BlocProvider.of<HabitBloc>(context).add(
-                  HabitAddEvent(
-                    habit: HabitEntity(
-                      hid: null,
-                      summary: titleController.text,
-                      description: descriptionController.text,
-                      start: DateTime.now(),
-                      end: DateTime.now(),
-                      recurrence: RRULE.daily().toString(),
-                      created: DateTime.now(),
-                      updated: DateTime.now(),
-                      creator: null,
-                      instances: const [],
-                    ),
+              ),
+              TextFormField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  hintText: 'Describe your habit',
+                ),
+              ),
+              // dropdown to select recurrence
+              DropdownButtonFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Recurrence',
+                    hintText: 'How often do you want to do this habit?',
                   ),
-                );
-                Navigator.pop(context);
-              },
-              child: const Text('Add Habit'),
-            ),
-          ],
+                  value: list.first,
+                  icon: const Icon(Icons.arrow_downward),
+                  onChanged: (value) {},
+                  items: list.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList()),
+              // button to add habit to HabitBloc
+              ElevatedButton(
+                onPressed: () {
+                  BlocProvider.of<HabitBloc>(context).add(
+                    HabitAddEvent(
+                      habit: HabitEntity(
+                        hid: null,
+                        summary: titleController.text,
+                        description: descriptionController.text,
+                        start: DateTime.now(),
+                        end: DateTime.now(),
+                        recurrence: RRULE.daily().toString(),
+                        created: DateTime.now(),
+                        updated: DateTime.now(),
+                        creator: null,
+                        instances: const [],
+                      ),
+                    ),
+                  );
+                  Navigator.pop(context);
+                },
+                child: const Text('Add Habit'),
+              ),
+            ],
+          ),
         ),
       ),
     );
