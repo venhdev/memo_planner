@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../authentication/domain/entities/user_entity.dart';
-import 'habit_instance_entity.dart';
 
 // The entity design to sync with Google Calendar
 class HabitEntity extends Equatable {
@@ -15,7 +14,6 @@ class HabitEntity extends Equatable {
     required this.created,
     required this.updated,
     required this.creator,
-    required this.instances,
   });
 
   final String? hid;
@@ -31,7 +29,6 @@ class HabitEntity extends Equatable {
 
   final UserEntity? creator; //The creator of the habit. Read-only.
 
-  final List<HabitInstanceEntity>? instances;
 
   final String kind = 'habit#summary';
   // copyWith
@@ -45,7 +42,6 @@ class HabitEntity extends Equatable {
     DateTime? created,
     DateTime? updated,
     UserEntity? creator,
-    List<HabitInstanceEntity>? instances,
   }) {
     return HabitEntity(
       hid: hid ?? this.hid,
@@ -57,7 +53,6 @@ class HabitEntity extends Equatable {
       created: created ?? this.created,
       updated: updated ?? this.updated,
       creator: creator ?? this.creator,
-      instances: instances ?? instances,
     );
   }
 
@@ -72,7 +67,6 @@ class HabitEntity extends Equatable {
         created,
         updated,
         creator,
-        instances,
       ];
 }
 

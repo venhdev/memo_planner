@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:memo_planner/features/authentication/data/data_sources/authentication_data_source.dart';
 
@@ -12,13 +11,14 @@ import '../../domain/entities/habit_instance_entity.dart';
 import '../models/habit_instance_model.dart';
 
 abstract class HabitInstanceDataSource {
-  SQuerySnapshot getHabitInstanceStream(
-      HabitEntity habit, DateTime focusDate);
+  SQuerySnapshot getHabitInstanceStream(HabitEntity habit, DateTime focusDate);
 
   Future<HabitInstanceEntity?> findHabitInstanceById(String iid);
-  Future<void> addHabitInitInstance(
+
+  Future<HabitInstanceEntity> initHabitInstance(
     HabitEntity habit,
     DateTime date,
+    bool completed,
   );
 
   Future<void> updateHabitInstance(HabitInstanceEntity instance);
@@ -36,7 +36,8 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
   final AuthenticationDataSource _authenticationDataSource;
 
   @override
-  Future<void> addHabitInitInstance(HabitEntity habit, DateTime date) async {
+  Future<HabitInstanceEntity> initHabitInstance(
+      HabitEntity habit, DateTime date, bool completed) async {
     try {
       final habitICollRef = _firestore
           .collection(pathToUsers)
@@ -59,27 +60,22 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
         date: date,
         updated: DateTime.now(),
         creator: habit.creator,
-        completed: true,
+        completed: completed,
         edited: false,
       );
 
-      habitICollRef.doc(iid).set(habitInstanceModel.toDocument());
+      await habitICollRef.doc(iid).set(habitInstanceModel.toDocument());
+
+      return habitInstanceModel;
     } on FirebaseException catch (e) {
-      debugPrint(
-          'HabitDataSourceImpl:addHabitInstance --type of e: ${e.runtimeType}');
-      debugPrint(e.toString());
       throw ServerException(code: e.code, message: e.toString());
     } catch (e) {
-      debugPrint(
-          'HabitDataSourceImpl:addHabitInstance --type of e: ${e.runtimeType}');
-      debugPrint(e.toString());
       throw ServerException(message: e.toString());
     }
   }
 
   @override
-  SQuerySnapshot getHabitInstanceStream(
-      HabitEntity habit, DateTime focusDate) {
+  SQuerySnapshot getHabitInstanceStream(HabitEntity habit, DateTime focusDate) {
     final habitICollRef = _firestore
         .collection(pathToUsers)
         .doc(habit.creator!.email)
@@ -132,7 +128,7 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
       throw ServerException(message: 'User is not logged in');
     }
   }
-  
+
   @override
   Future<void> updateHabitInstance(HabitInstanceEntity instance) async {
     final habitIDocRef = _firestore
@@ -146,7 +142,7 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
     habitIDocRef.update({
       'summary': instance.summary,
       'description': instance.description,
-      'edited': true, // update the edited field
+      'edited': instance.edited, // update the edited field
       'updated': DateTime.now(), // update the updated field
     });
   }

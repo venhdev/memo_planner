@@ -16,17 +16,21 @@ class HabitPage extends StatefulWidget {
 }
 
 class _HabitPageState extends State<HabitPage> {
-  DateTime _now = DateTime.now();
-  late EasyInfiniteDateTimelineController _controller;
-  late TextEditingController _searchController;
+  DateTime _focus = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+  );
+  final EasyInfiniteDateTimelineController _controller =
+      EasyInfiniteDateTimelineController();
+  final TextEditingController _searchController = TextEditingController();
 
   String searchQuery = '';
 
   @override
-  void initState() {
-    super.initState();
-    _controller = EasyInfiniteDateTimelineController();
-    _searchController = TextEditingController();
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -77,37 +81,33 @@ class _HabitPageState extends State<HabitPage> {
                             activeDayStyle: DayStyle(
                               borderRadius: 28,
                             ),
-                            todayStyle: DayStyle(),
                             borderColor: Colors.black12,
                             todayHighlightColor: Colors.green,
                           ),
                           firstDate: DateTime(2023),
                           lastDate: DateTime(2026),
-                          focusDate: _now,
+                          focusDate: _focus,
                           onDateChange: (selectedDate) {
                             setState(() {
-                              _now = selectedDate;
+                              _focus = selectedDate;
                             });
                           },
                         ),
+                        const SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(12.0),
-                              width: MediaQuery.of(context).size.width * 0.5,
-                              child: const TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Search habit',
-                                ),
-                              ),
-                            ),
                             ElevatedButton(
                               onPressed: () {
-                                _now = DateTime.now();
+                                final current = DateTime.now();
+                                _focus = DateTime(
+                                  current.year,
+                                  current.month,
+                                  current.day,
+                                );
                                 setState(() {
                                   _controller.animateToDate(
-                                    _now,
+                                    _focus,
                                     duration: const Duration(milliseconds: 300),
                                     curve: Curves.decelerate,
                                   );
@@ -115,11 +115,16 @@ class _HabitPageState extends State<HabitPage> {
                               },
                               child: const Icon(Icons.today),
                             ),
+                            IconButton(
+                              onPressed: () {
+                              },
+                              icon: const Icon(Icons.filter_alt),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 20),
                         HabitList(
-                          focusDate: _now,
+                          focusDate: _focus,
                           habitStream: state.habitStream,
                           query: searchQuery,
                         ),
@@ -127,10 +132,13 @@ class _HabitPageState extends State<HabitPage> {
                     );
                   } else if (state is HabitLoading) {
                     return const LoadingScreen();
+                  } else if (state is HabitInitial) {
+                    return const LoadingScreen();
+                  } else if (state is HabitError) {
+                    return MessageScreen(message: state.message);
                   } else {
                     return const MessageScreen(
-                      message: 'Some thing went wrong [e04]',
-                    );
+                        message: 'Something went wrong [e04]');
                   }
                 },
               );

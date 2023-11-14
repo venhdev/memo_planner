@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:memo_planner/features/habit/data/models/habit_instance_model.dart';
 
 import '../../../../core/utils/convertors.dart';
 import '../../../authentication/data/models/user_model.dart';
@@ -16,7 +15,6 @@ class HabitModel extends HabitEntity {
     super.created,
     super.updated,
     super.creator,
-    super.instances,
   });
 
   // fromEntity
@@ -31,7 +29,6 @@ class HabitModel extends HabitEntity {
       created: entity.created,
       updated: entity.updated,
       creator: entity.creator,
-      instances: entity.instances,
     );
   }
 
@@ -52,10 +49,6 @@ class HabitModel extends HabitEntity {
       created: convertTimestampToDateTime(data['created'] as Timestamp),
       updated: convertTimestampToDateTime(data['updated'] as Timestamp),
       creator: UserModel.fromDocument(data['creator']),
-      instances: (data['instances'] as List<Map<String, dynamic>>?)
-          ?.map<HabitInstanceModel>((instance) {
-        return HabitInstanceModel.fromDocument(instance);
-      }).toList(),
     );
   }
   // to DocumentSnapshot to be saved to Firestore
@@ -76,11 +69,6 @@ class HabitModel extends HabitEntity {
       if (updated != null) 'updated': updated,
       if (creator != null)
         'creator': UserModel.fromEntity(creator!).toDocument(),
-      if (instances != null)
-        'instances': instances!
-            .map((instance) =>
-                HabitInstanceModel.fromEntity(instance).toDocument())
-            .toList()
     };
   }
 }

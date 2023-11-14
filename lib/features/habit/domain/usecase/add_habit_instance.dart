@@ -13,15 +13,21 @@ class AddHabitInstanceUC
   final HabitInstanceRepository _habitInstanceRepository;
   @override
   ResultVoid call(AddHabitInstanceParams params) async {
-    return await _habitInstanceRepository.addHabitInstance(params.habit, params.date);
+    return await _habitInstanceRepository.addHabitInstance(
+        params.habit, params.date, params.completed);
   }
 }
 
 class AddHabitInstanceParams extends Equatable {
-  const AddHabitInstanceParams({required this.habit, required this.date});
+  const AddHabitInstanceParams({
+    required this.habit,
+    required this.date,
+    this.completed = true,
+  });
   final HabitEntity habit;
   final DateTime date;
+  final bool completed;
 
   @override
-  List<Object?> get props => [habit, date];
+  List<Object?> get props => [habit, date, completed];
 }

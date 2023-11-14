@@ -9,9 +9,10 @@ abstract class HabitInstanceRepository {
   );
   ResultEither<HabitInstanceEntity> getHabitInstanceByIid(String iid);
 
-  ResultVoid addHabitInstance(
+  ResultEither<HabitInstanceEntity> addHabitInstance(
     HabitEntity habit,
     DateTime date,
+    bool completed
   );
   ResultVoid updateHabitInstance(HabitInstanceEntity instance);
   

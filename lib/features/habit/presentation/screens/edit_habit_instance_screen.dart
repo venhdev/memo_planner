@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:memo_planner/features/habit/domain/entities/habit_instance_entity.dart';
-import 'package:memo_planner/features/habit/domain/usecase/get_create_habit_instance_by_iid.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../domain/entities/habit_instance_entity.dart';
+import '../../domain/usecase/usecases.dart';
 import '../bloc/instance/instance_bloc.dart';
 
 class EditHabitInstanceScreen extends StatefulWidget {
@@ -55,7 +55,9 @@ class _EditHabitInstanceScreenState extends State<EditHabitInstanceScreen> {
   }
 
   Container buildEditHabitInstanceBody(
-      BuildContext context, HabitInstanceEntity instance) {
+    BuildContext context,
+    HabitInstanceEntity instance,
+  ) {
     titleController = TextEditingController(text: instance.summary);
     descriptionController = TextEditingController(text: instance.description);
 

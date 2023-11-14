@@ -9,6 +9,10 @@ DateTime convertTimestampToDateTime(Timestamp timestamp) {
 // use to Convert DateTime to format yyyyMMdd
 String convertDateTimeToyyyyMMdd(DateTime dateTime) {
   return dateTime.toIso8601String().substring(0, 10).replaceAll('-', '');
+} // use to Convert DateTime to format yyyyMMdd
+
+String convertDateTimeToddMMyyyy(DateTime dateTime) {
+  return dateTime.toIso8601String().substring(0, 10);
 }
 
 // String convertDateTimeToyyyyMMdd(DateTime dateTime) {
@@ -20,14 +24,22 @@ String getIid(String hid, DateTime date) {
   return '${hid}_${convertDateTimeToyyyyMMdd(date)}';
 }
 
-DateTime yyyyMMddDateTime (String date) {
-  return DateFormat('yyyyMMdd').parse(date);
-}
+// DateTime yyyyMMddDateTime (String date) {
+//   return DateTime.parse(date);
+// }
 
-String ddMMString (DateTime date) {
+String ddMMString(DateTime date) {
   return DateFormat('dd/MM').format(date);
 }
 
-DateFormat getDateFormat (String format) {
+String ddMMyyyyString(DateTime date) {
+  return DateFormat('dd-MM-yyyy hh:mm').format(date);
+}
+
+DateFormat getDateFormat(String format) {
   return DateFormat(format);
+}
+
+DateTime getDate(DateTime date) {
+  return DateTime(date.year, date.month, date.day);
 }

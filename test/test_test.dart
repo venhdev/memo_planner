@@ -25,7 +25,6 @@ void main() {
       created: DateTime.now(),
       updated: DateTime.now(),
       creator: null,
-      instances: const [],
     );
     final HabitModel model = HabitModel(
       hid: 'hid',
@@ -37,7 +36,6 @@ void main() {
       created: DateTime.now(),
       updated: DateTime.now(),
       creator: null,
-      instances: const [],
     );
 
     final HabitInstanceEntity instance = HabitInstanceEntity(

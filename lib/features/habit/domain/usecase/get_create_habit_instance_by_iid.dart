@@ -1,11 +1,10 @@
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/constants/typedef.dart';
-import 'package:memo_planner/core/usecase/usecase.dart';
-import 'package:memo_planner/features/habit/domain/entities/habit_instance_entity.dart';
-import 'package:memo_planner/features/habit/domain/repository/habit_instance_repository.dart';
-import 'package:memo_planner/features/habit/domain/repository/habit_repository.dart';
 
-import '../../../../core/utils/convertors.dart';
+import '../../../../core/constants/typedef.dart';
+import '../../../../core/usecase/usecase.dart';
+import '../entities/habit_instance_entity.dart';
+import '../repository/habit_instance_repository.dart';
+import '../repository/habit_repository.dart';
 
 @singleton
 class GetCreateHabitInstanceByIid
@@ -20,19 +19,22 @@ class GetCreateHabitInstanceByIid
 
   @override
   ResultEither<HabitInstanceEntity> call(String params) async {
-    final result = await _habitInstanceRepository.getHabitInstanceByIid(params);
+    var instanceEither =
+        await _habitInstanceRepository.getHabitInstanceByIid(params);
 
-    if (result.isLeft()) {
-      var splitIid = params.split('_');
+    // if this true it mean the instance is not created yet
+    if (instanceEither.isLeft()) {
+      var splitIid = params.split('_'); // hid_yyyyMMdd
       final habit = await _habitRepository.getHabitByHid(splitIid[0]).then(
             (value) => value.fold(
               (failure) => null,
               (habit) => habit,
             ),
           );
-      final date = yyyyMMddDateTime(splitIid[1]);
-      await _habitInstanceRepository.addHabitInstance(habit!, date);
+      final date = DateTime.parse(splitIid[1]);
+      instanceEither =
+          await _habitInstanceRepository.addHabitInstance(habit!, date, false);
     }
-    return result;
+    return instanceEither;
   }
 }

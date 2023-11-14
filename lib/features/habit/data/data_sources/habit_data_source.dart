@@ -62,12 +62,25 @@ class HabitDataSourceImpl extends HabitDataSource {
   @override
   Future<void> deleteHabit(HabitEntity habit) async {
     try {
-      final habitCollectionRef = _firestore
+      final habitCollRef = _firestore
           .collection(pathToUsers)
           .doc(habit.creator!.email)
           .collection(pathToHabits);
 
-      await habitCollectionRef.doc(habit.hid).delete();
+      await habitCollRef
+          .doc(habit.hid)
+          .collection(pathToHabitInstances)
+          .get()
+          .then((snapshot) {
+        for (var ds in snapshot.docs) {
+          ds.reference.delete();
+        }
+      });
+
+      await habitCollRef
+          .doc(habit.hid)
+          .delete()
+          .then((doc) => debugPrint('Habit ${habit.summary} deleted'));
     } on FirebaseException catch (e) {
       debugPrint(
           'HabitDataSourceImpl:deleteHabit --type of e: ${e.runtimeType}');
@@ -140,7 +153,8 @@ class HabitDataSourceImpl extends HabitDataSource {
   // 2. the middle day of the list is completed [...0,1,0...]
   // 3. the last day of the list is completed [...0,1]
   @override
-  Future<List<StreakInstanceEntity>> getTopStreakOfHabit(HabitEntity habit) async {
+  Future<List<StreakInstanceEntity>> getTopStreakOfHabit(
+      HabitEntity habit) async {
     final habitICollRef = _firestore
         .collection(pathToUsers)
         .doc(habit.creator!.email)

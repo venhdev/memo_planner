@@ -31,10 +31,10 @@ class InstanceInitialEvent extends InstanceEvent {
   });
   final HabitEntity habit;
   final DateTime date;
-  final bool? completed;
+  final bool completed;
 
   @override
-  List<Object> get props => [habit, date];
+  List<Object> get props => [habit, date, completed];
 }
 
 class InstanceStatusChangeEvent extends InstanceEvent {

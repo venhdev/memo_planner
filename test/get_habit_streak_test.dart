@@ -27,7 +27,6 @@ void main() {
       created: DateTime.now(),
       updated: DateTime.now(),
       end: DateTime.now(),
-      instances: const [],
       recurrence: 'daily',
       start: DateTime.now(),
     );

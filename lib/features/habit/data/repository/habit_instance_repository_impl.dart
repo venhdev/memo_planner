@@ -16,10 +16,10 @@ class HabitInstanceRepositoryImpl implements HabitInstanceRepository {
   final HabitInstanceDataSource _habitInstanceDataSource;
 
   @override
-  ResultVoid addHabitInstance(HabitEntity habit, DateTime date) async {
+  ResultEither<HabitInstanceEntity> addHabitInstance(HabitEntity habit, DateTime date, bool completed) async {
     try {
-      _habitInstanceDataSource.addHabitInitInstance(habit, date);
-      return const Right(null);
+      final instance = await _habitInstanceDataSource.initHabitInstance(habit, date, completed);
+      return Right(instance);
     } on ServerException catch (e) {
       return Left(ServerFailure(code: e.code, message: e.message));
     }

@@ -22,8 +22,6 @@ class HabitList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('HabitList: build query $query');
-    debugPrint('HabitList: build query.length ${query.length}');
     return StreamBuilder(
       stream: habitStream,
       builder: (context, snapshot) {
@@ -33,11 +31,12 @@ class HabitList extends StatelessWidget {
             if (habits.isEmpty) {
               return const EmptyHabit();
             }
-            final demo = habits.where((element) {
+            final filteredHabits = habits.where((element) {
               final habit = HabitModel.fromDocument(element.data());
               return habit.summary!.contains(query);
             }).toList();
-            return FilterHabitList(habits: demo, focusDate: focusDate);
+            return FilterHabitList(
+                habits: filteredHabits, focusDate: focusDate);
           } else if (snapshot.hasError) {
             return MessageScreen(message: snapshot.error.toString());
           } else {
@@ -61,7 +60,7 @@ class EmptyHabit extends StatelessWidget {
       child: Column(
         children: [
           SvgPicture.asset(
-            'assets/images/svg/no-data.svg',
+            'assets/images/no-data.svg',
             height: 250,
             fit: BoxFit.cover,
           ),
@@ -104,17 +103,36 @@ class FilterHabitList extends StatefulWidget {
 class _FilterHabitListState extends State<FilterHabitList> {
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: widget.habits.length,
-        itemBuilder: (context, index) {
-          final habit = widget.habits[index];
-          return HabitItem(
-            habit: HabitModel.fromDocument(habit.data()),
-            focusDate: widget.focusDate,
-          );
-        },
-      ),
-    );
+    return Builder(builder: (context) {
+      final progressingHabits = widget.habits.where((element) {
+        final habit = HabitModel.fromDocument(element.data());
+        return isInProgress(habit.start!, habit.end!, widget.focusDate);
+      }).toList();
+
+      return Expanded(
+        child: ListView.builder(
+          itemCount: progressingHabits.length,
+          itemBuilder: (context, index) {
+            final habitMap = progressingHabits[index].data();
+            var habit = HabitModel.fromDocument(habitMap);
+            if (!isInProgress(habit.start!, habit.end!, widget.focusDate)) {
+              return const Placeholder(
+                fallbackHeight: 100,
+              );
+            }
+            return HabitItem(
+              habit: habit,
+              focusDate: widget.focusDate,
+            );
+          },
+        ),
+      );
+    });
   }
+}
+
+bool isInProgress(DateTime start, DateTime end, DateTime focusDate) {
+  return (start.isBefore(focusDate) && end.isAfter(focusDate)) ||
+      (end.isAtSameMomentAs(focusDate)) ||
+      (start.isAtSameMomentAs(focusDate));
 }

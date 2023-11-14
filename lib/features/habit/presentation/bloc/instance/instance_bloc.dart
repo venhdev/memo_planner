@@ -33,11 +33,14 @@ class HabitInstanceBloc extends Bloc<InstanceEvent, InstanceState> {
       AddHabitInstanceParams(
         habit: event.habit,
         date: event.date,
+        completed: event.completed,
       ),
     );
     resultEither.fold(
       (l) => emit(InstanceActionFail(message: l.message)),
-      (r) => emit(const InstanceActionSuccess(message: 'Congratulation!')),
+      (r) => emit(InstanceActionSuccess(
+        message: event.completed ? 'Congratulation' : 'Habit status changed',
+      )),
     );
   }
 
@@ -48,7 +51,7 @@ class HabitInstanceBloc extends Bloc<InstanceEvent, InstanceState> {
     final resultEither = await _updateHabitInstanceUC(event.instance);
     resultEither.fold(
       (l) => emit(InstanceActionFail(message: l.message)),
-      (r) => emit(const InstanceActionSuccess(message: 'Updated This Habit!')),
+      (r) => emit(const InstanceActionSuccess(message: 'Habit Updated')),
     );
   }
 
@@ -64,7 +67,7 @@ class HabitInstanceBloc extends Bloc<InstanceEvent, InstanceState> {
     );
     resultEither.fold(
       (l) => emit(InstanceActionFail(message: l.message)),
-      (r) => emit(const InstanceActionSuccess(message: 'Congrats!')),
+      (r) => emit(const InstanceActionSuccess(message: 'Habit Status Changed')),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memo_planner/features/habit/domain/entities/rrule.dart';
 
+import '../../../../core/utils/convertors.dart';
 import '../../domain/entities/habit_entity.dart';
 import '../bloc/habit/habit_bloc.dart';
 
@@ -13,15 +14,13 @@ class AddHabitScreen extends StatefulWidget {
 }
 
 class _AddHabitScreenState extends State<AddHabitScreen> {
-  late TextEditingController titleController;
-  late TextEditingController descriptionController;
-  List<String> list = RRULE.list;
-  @override
-  void initState() {
-    super.initState();
-    titleController = TextEditingController();
-    descriptionController = TextEditingController();
-  }
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final List<String> recurrenceList = RRULE.list;
+
+  DateTime _start = DateTime.now();
+  DateTime _end = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -34,21 +33,28 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           right: 16,
         ),
         child: Form(
+          key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextFormField(
-                controller: titleController,
+                controller: _titleController,
                 decoration: const InputDecoration(
                   labelText: 'Habit Title',
                   hintText: 'What is your habit?',
                 ),
+                validator: (value) {
+                  if (value?.isEmpty ?? true) {
+                    return '*Please enter your habit name';
+                  }
+                  return null;
+                },
               ),
               TextFormField(
-                controller: descriptionController,
+                controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Description',
-                  hintText: 'Describe your habit',
+                  hintText: 'Describe your habit (optional)',
                 ),
               ),
               // dropdown to select recurrence
@@ -57,37 +63,120 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                     labelText: 'Recurrence',
                     hintText: 'How often do you want to do this habit?',
                   ),
-                  value: list.first,
+                  value: recurrenceList.first,
                   icon: const Icon(Icons.arrow_downward),
                   onChanged: (value) {},
-                  items: list.map<DropdownMenuItem<String>>((String value) {
+                  items: recurrenceList
+                      .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
                     );
                   }).toList()),
-              // button to add habit to HabitBloc
+
+              // DatePicker for start
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton.icon(
+                    onPressed: () async {
+                      final date = await pickDate(_start);
+                      date != null
+                          ? setState(
+                              () {
+                                _start = date;
+                              },
+                            )
+                          : null;
+                    },
+                    icon: const Icon(Icons.calendar_month),
+                    label: const Text('Start Date'),
+                  ),
+                  Text(ddMMyyyyString(_start)),
+                  TextButton.icon(
+                    onPressed: () async {
+                      final time =
+                          await pickTime(TimeOfDay.fromDateTime(_start));
+                      time != null
+                          ? setState(
+                              () {
+                                _start = _start.copyWith(
+                                  hour: time.hour,
+                                  minute: time.minute,
+                                );
+                              },
+                            )
+                          : null;
+                    },
+                    icon: const Icon(Icons.timer),
+                    label: const Text('Start Time'),
+                  ),
+                ],
+              ),
+
+              // DatePicker for end
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton.icon(
+                    onPressed: () async {
+                      final date = await pickDate(_end);
+                      date != null
+                          ? setState(
+                              () {
+                                _end = date;
+                              },
+                            )
+                          : null;
+                    },
+                    icon: const Icon(Icons.calendar_month),
+                    label: const Text('End Date'),
+                  ),
+                  Text(ddMMyyyyString(_end)),
+                  TextButton.icon(
+                    onPressed: () async {
+                      final time =
+                          await pickTime(TimeOfDay.fromDateTime(_end));
+                      time != null
+                          ? setState(
+                              () {
+                                _end = _end.copyWith(
+                                  hour: time.hour,
+                                  minute: time.minute,
+                                );
+                              },
+                            )
+                          : null;
+                    },
+                    icon: const Icon(Icons.timer),
+                    label: const Text('End Time'),
+                  ),
+                ],
+              ),
+
               ElevatedButton(
                 onPressed: () {
-                  BlocProvider.of<HabitBloc>(context).add(
-                    HabitAddEvent(
-                      habit: HabitEntity(
-                        hid: null,
-                        summary: titleController.text,
-                        description: descriptionController.text,
-                        start: DateTime.now(),
-                        end: DateTime.now(),
-                        recurrence: RRULE.daily().toString(),
-                        created: DateTime.now(),
-                        updated: DateTime.now(),
-                        creator: null,
-                        instances: const [],
+                  if (_formKey.currentState!.validate() &&
+                      _start.isBefore(_end)) {
+                    BlocProvider.of<HabitBloc>(context).add(
+                      HabitAddEvent(
+                        habit: HabitEntity(
+                          hid: null,
+                          summary: _titleController.text,
+                          description: _descriptionController.text,
+                          start: _start,
+                          end: _end,
+                          recurrence: RRULE.daily().toString(),
+                          created: DateTime.now(),
+                          updated: DateTime.now(),
+                          creator: null,
+                        ),
                       ),
-                    ),
-                  );
-                  Navigator.pop(context);
+                    );
+                    Navigator.pop(context);
+                  } else {}
                 },
-                child: const Text('Add Habit'),
+                child: const Text('Add New Habit'),
               ),
             ],
           ),
@@ -95,4 +184,13 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       ),
     );
   }
+
+  Future<DateTime?> pickDate(DateTime initDate) => showDatePicker(
+        context: context,
+        initialDate: initDate,
+        firstDate: DateTime(2020),
+        lastDate: DateTime(2030),
+      );
+  Future<TimeOfDay?> pickTime(TimeOfDay initTime) =>
+      showTimePicker(context: context, initialTime: initTime);
 }

@@ -95,29 +95,26 @@ class HabitItemBody extends StatelessWidget {
 
   final HabitEntity habit;
   final DateTime focusDate;
-  final bool isICreated; // is Instance created
+  final bool isICreated; // is Instance created or not
   final HabitInstanceEntity? instance;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        // context.go('/habit/detail/${habit.hid}');
+        var value = isICreated ? instance!.completed! : false;
+        handleStatusChanged(context, !value);
+      },
+      onLongPress: () {
         context.go('/habit/detail/${habit.hid}');
+        // showChooseEditTypeDialog(context: context);
       },
       child: Slidable(
-        endActionPane: ActionPane(
+        startActionPane: ActionPane(
           motion: const DrawerMotion(),
           children: [
-            // A SlidableAction can have an icon and/or a label.
-            SlidableAction(
-              onPressed: (context) {
-                showConfirmDeleteDialog(context: context);
-              },
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              icon: Icons.delete,
-              label: 'Delete',
-            ),
+            // Edit action
             SlidableAction(
               onPressed: (context) {
                 showChooseEditTypeDialog(context: context);
@@ -126,6 +123,21 @@ class HabitItemBody extends StatelessWidget {
               foregroundColor: Colors.white,
               icon: Icons.edit,
               label: 'Edit',
+            ),
+          ],
+        ),
+        endActionPane: ActionPane(
+          motion: const DrawerMotion(),
+          children: [
+            // Delete action
+            SlidableAction(
+              onPressed: (context) {
+                showConfirmDeleteDialog(context: context);
+              },
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              icon: Icons.delete,
+              label: 'Delete',
             ),
           ],
         ),
@@ -150,11 +162,27 @@ class HabitItemBody extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(description),
-            leading: Checkbox(
-              value: isICreated ? instance!.completed! : false,
-              onChanged: (bool? value) {
-                onInstanceTap(context, value);
+            leading: Builder(builder: (context) {
+              var canCheck = false;
+              if (habit.created!.isBefore(focusDate) &&
+                  habit.end!.isAfter(focusDate)) {
+                canCheck = true;
+              }
+              return IgnorePointer(
+                ignoring: canCheck,
+                child: Checkbox(
+                  value: isICreated ? instance!.completed! : false,
+                  onChanged: (bool? value) {
+                    handleStatusChanged(context, value);
+                  },
+                ),
+              );
+            }),
+            trailing: TouchableIcon(
+              onTap: () {
+                context.go('/habit/detail/${habit.hid}');
               },
+              color: Colors.green[100],
             ),
           );
         }),
@@ -162,7 +190,7 @@ class HabitItemBody extends StatelessWidget {
     );
   }
 
-  void onInstanceTap(BuildContext context, bool? value) {
+  void handleStatusChanged(BuildContext context, bool? value) {
     if (isICreated) {
       // Change the instance's status of completed
       BlocProvider.of<HabitInstanceBloc>(context).add(
@@ -174,7 +202,7 @@ class HabitItemBody extends StatelessWidget {
     } else {
       // This will be create new instance with completed = true
       BlocProvider.of<HabitInstanceBloc>(context).add(
-        InstanceInitialEvent(habit: habit, date: focusDate),
+        InstanceInitialEvent(habit: habit, date: focusDate, completed: true),
       );
     }
   }
@@ -220,16 +248,13 @@ class HabitItemBody extends StatelessWidget {
         return AlertDialog(
           title: const Text('Edit Type'),
           content: const Text(
-            'You want to edit to all habit or just this one?',
+            'You want to edit for all habit or just apply for this one?',
           ),
           actions: [
             TextButton(
               onPressed: () {
                 context.go('/habit/edit-habit/${habit.hid}');
                 Navigator.pop(context);
-                // isICreated
-                //     ? context.go('/habit/edit-instance/${instance!.iid}')
-                //     : context.go('/habit/edit-habit/${habit.hid}');
               },
               child: const Text('All'),
             ),
@@ -238,17 +263,6 @@ class HabitItemBody extends StatelessWidget {
                 if (isICreated) {
                   context.go('/habit/edit-instance/${instance!.iid}');
                 } else {
-                  // the instance is not created yet
-                  // create new instance with completed = false
-                  BlocProvider.of<HabitInstanceBloc>(context).add(
-                    InstanceInitialEvent(
-                      habit: habit,
-                      date: focusDate,
-                      completed: false,
-                    ),
-                  );
-
-                  // and then go to edit instance screen
                   final iid = getIid(habit.hid!, focusDate);
                   context.go('/habit/edit-instance/$iid');
                 }
@@ -260,6 +274,39 @@ class HabitItemBody extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class TouchableIcon extends StatelessWidget {
+  const TouchableIcon({
+    super.key,
+    this.onTap,
+    this.height = 48.0,
+    this.width = 48.0,
+    this.color = Colors.black12,
+  });
+
+  final Function? onTap;
+  final double? height;
+  final double? width;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (onTap != null) onTap!();
+      },
+      child: Container(
+        height: height,
+        width: width,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
+        ),
+        child: const Icon(Icons.bar_chart),
+      ),
     );
   }
 }
