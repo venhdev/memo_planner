@@ -57,6 +57,8 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
         hid: habit.hid,
         summary: habit.summary,
         description: habit.description,
+        start: habit.start,
+        end: habit.end,
         date: date,
         updated: DateTime.now(),
         creator: habit.creator,
@@ -142,6 +144,8 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
     habitIDocRef.update({
       'summary': instance.summary,
       'description': instance.description,
+      'start': instance.start,
+      'end': instance.end,
       'edited': instance.edited, // update the edited field
       'updated': DateTime.now(), // update the updated field
     });

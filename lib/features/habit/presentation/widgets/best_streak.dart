@@ -35,7 +35,9 @@ Widget buildTopStreakItem(StreakInstanceEntity streak, Color color) {
         flex: 1,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(ddMMString(streak.start), textAlign: TextAlign.center),
+          child: Text(
+              convertDateTimeToString(streak.start, formatPattern: 'dd/MM'),
+              textAlign: TextAlign.center),
         ),
       ),
       Expanded(
@@ -58,7 +60,10 @@ Widget buildTopStreakItem(StreakInstanceEntity streak, Color color) {
         flex: 1,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(ddMMString(streak.end), textAlign: TextAlign.center),
+          child: Text(
+            convertDateTimeToString(streak.end, formatPattern: 'dd/MM'),
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     ],

@@ -9,6 +9,8 @@ class HabitInstanceEntity extends Equatable {
     this.hid,
     this.summary,
     this.description,
+    this.start,
+    this.end,
     this.date,
     this.updated,
     this.creator,
@@ -22,6 +24,8 @@ class HabitInstanceEntity extends Equatable {
   final String? summary;
   final String? description;
 
+  final DateTime? start; // Start date of this habit instance = [date]
+  final DateTime? end; // End date of this habit instance = [date]
 
   final DateTime? date; // Date of this habit instance (= iid)
   final DateTime? updated; // Date of last update
@@ -30,7 +34,7 @@ class HabitInstanceEntity extends Equatable {
 
   final bool? completed; // Whether the habit is completed or not
   final bool? edited; // Default false, when user edit only the instance => true
-  
+
   final String kind = 'habit#instance';
 
   // copyWith
@@ -39,17 +43,21 @@ class HabitInstanceEntity extends Equatable {
     String? iid,
     String? summary,
     String? description,
+    DateTime? start,
+    DateTime? end,
     DateTime? date,
     DateTime? updated,
     UserEntity? creator,
     bool? completed,
-    bool? edited, 
+    bool? edited,
   }) {
     return HabitInstanceEntity(
       hid: hid ?? this.hid,
       iid: iid ?? this.iid,
       summary: summary ?? this.summary,
       description: description ?? this.description,
+      start: start ?? this.start,
+      end: end ?? this.end,
       date: date ?? this.date,
       updated: updated ?? this.updated,
       creator: creator ?? this.creator,
@@ -58,13 +66,14 @@ class HabitInstanceEntity extends Equatable {
     );
   }
 
-
   @override
   List<Object?> get props => [
         hid,
         iid,
         summary,
         description,
+        start,
+        end,
         date,
         updated,
         creator,

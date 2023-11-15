@@ -21,7 +21,7 @@ class HabitEntity extends Equatable {
   final String? description;
 
   final DateTime? start; // start time
-  final DateTime? end; // end time
+  final DateTime? end; // end time end time of the event. For a recurring habit, this is the end time of the first instance.
   final String? recurrence; // recurrence rule
 
   final DateTime? created; //Creation time of the habit

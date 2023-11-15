@@ -23,25 +23,23 @@ class HabitItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.grey,
-          ),
-          borderRadius: BorderRadius.circular(8.0),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4.0),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.grey,
         ),
-        child: buildStreamInstance(
-          stream: di<GetHabitInstanceStreamUC>()(
-            GetHabitInstanceParams(
-              habit: habit,
-              focusDate: focusDate,
-            ),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: buildStreamInstance(
+        stream: di<GetHabitInstanceStreamUC>()(
+          GetHabitInstanceParams(
+            habit: habit,
+            focusDate: focusDate,
           ),
-          habit: habit,
-          context: context,
         ),
+        habit: habit,
+        context: context,
       ),
     );
   }
@@ -144,24 +142,43 @@ class HabitItemBody extends StatelessWidget {
         child: Builder(builder: (context) {
           final String summary;
           final String description;
+          final String startTime;
+          final String endTime;
           if (isICreated) {
             if (instance!.edited!) {
               summary = instance!.summary!;
               description = instance!.description!;
+              startTime = convertDateTimeToString(instance!.start!, formatPattern: 'hh:mm a');
+              endTime = convertDateTimeToString(instance!.end!, formatPattern: 'hh:mm a');
             } else {
               summary = habit.summary!;
               description = habit.description!;
+              startTime = convertDateTimeToString(habit.start!, formatPattern: 'hh:mm');
+              endTime = convertDateTimeToString(habit.end!, formatPattern: 'hh:mm');
             }
           } else {
             summary = habit.summary!;
             description = habit.description!;
+            startTime = convertDateTimeToString(habit.start!, formatPattern: 'hh:mm');
+            endTime = convertDateTimeToString(habit.end!, formatPattern: 'hh:mm');
           }
           return ListTile(
             title: Text(
               summary,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0
+              ),
+              textAlign: TextAlign.center,
             ),
-            subtitle: Text(description),
+            subtitle: Text(
+              '$startTime - $endTime',
+              style: const TextStyle(
+                fontSize: 12.0,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
+            ),
             leading: Builder(builder: (context) {
               var canCheck = false;
               if (habit.created!.isBefore(focusDate) &&

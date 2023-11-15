@@ -52,7 +52,19 @@ class _HabitPageState extends State<HabitPage> {
         child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
           builder: (context, state) {
             if (state.status == AuthenticationStatus.authenticated) {
-              return BlocBuilder<HabitBloc, HabitState>(
+              return BlocConsumer<HabitBloc, HabitState>(
+                listener: (context, state) {
+                  if (state is HabitLoaded) {
+                    if (state.message != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message!),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
                 builder: (context, state) {
                   if (state is HabitLoaded) {
                     return Column(
@@ -108,7 +120,8 @@ class _HabitPageState extends State<HabitPage> {
                                 setState(() {
                                   _controller.animateToDate(
                                     _focus,
-                                    duration: const Duration(milliseconds: 300),
+                                    duration:
+                                        const Duration(milliseconds: 300),
                                     curve: Curves.decelerate,
                                   );
                                 });
@@ -116,8 +129,7 @@ class _HabitPageState extends State<HabitPage> {
                               child: const Icon(Icons.today),
                             ),
                             IconButton(
-                              onPressed: () {
-                              },
+                              onPressed: () {},
                               icon: const Icon(Icons.filter_alt),
                             ),
                           ],
@@ -164,24 +176,28 @@ Widget habitSearchBar(
   required Function onChange,
   required Function onCancel,
 }) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 12.0),
     child: SearchBar(
+        elevation: MaterialStateProperty.all<double>(2.0),
         controller: controller,
         padding: const MaterialStatePropertyAll<EdgeInsets>(
             EdgeInsets.symmetric(horizontal: 16.0)),
-        onTap: () {},
+        onTap: () {
+        },
         onChanged: (_) {
-          debugPrint('searching $_');
           onChange();
         },
         leading: const Icon(Icons.search),
         trailing: [
-          IconButton(
-            onPressed: () {
-              onCancel();
-            },
-            icon: const Icon(Icons.close),
+          Visibility(
+            visible: controller.text.isNotEmpty,
+            child: IconButton(
+              onPressed: () {
+                onCancel();
+              },
+              icon: const Icon(Icons.close),
+            ),
           ),
         ]),
   );

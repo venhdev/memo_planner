@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:memo_planner/core/widgets/message_screen.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/widgets/loading_screen.dart';
@@ -50,42 +49,6 @@ class HabitList extends StatelessWidget {
   }
 }
 
-class EmptyHabit extends StatelessWidget {
-  const EmptyHabit({
-    super.key,
-  });
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          SvgPicture.asset(
-            'assets/images/no-data.svg',
-            height: 250,
-            fit: BoxFit.cover,
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'You have no habits',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Add your habits to make your life better',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class FilterHabitList extends StatefulWidget {
   const FilterHabitList({
     super.key,
@@ -103,31 +66,26 @@ class FilterHabitList extends StatefulWidget {
 class _FilterHabitListState extends State<FilterHabitList> {
   @override
   Widget build(BuildContext context) {
-    return Builder(builder: (context) {
-      final progressingHabits = widget.habits.where((element) {
-        final habit = HabitModel.fromDocument(element.data());
-        return isInProgress(habit.start!, habit.end!, widget.focusDate);
-      }).toList();
-
-      return Expanded(
-        child: ListView.builder(
-          itemCount: progressingHabits.length,
-          itemBuilder: (context, index) {
-            final habitMap = progressingHabits[index].data();
-            var habit = HabitModel.fromDocument(habitMap);
-            if (!isInProgress(habit.start!, habit.end!, widget.focusDate)) {
-              return const Placeholder(
-                fallbackHeight: 100,
-              );
-            }
-            return HabitItem(
-              habit: habit,
-              focusDate: widget.focusDate,
-            );
-          },
-        ),
-      );
-    });
+    final progressingHabits = widget.habits.where((element) {
+      final habit = HabitModel.fromDocument(element.data());
+      debugPrint(
+          'isInProgress: ${isInProgress(habit.start!, habit.end!, widget.focusDate)}');
+      return isInProgress(habit.start!, habit.end!, widget.focusDate);
+    }).toList();
+    return Expanded(
+      child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        itemCount: progressingHabits.length,
+        itemBuilder: (context, index) {
+          final habitMap = progressingHabits[index].data();
+          var habit = HabitModel.fromDocument(habitMap);
+          return HabitItem(
+            habit: habit,
+            focusDate: widget.focusDate,
+          );
+        },
+      ),
+    );
   }
 }
 

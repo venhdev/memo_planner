@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/widgets/widgets.dart';
 import '../../features/authentication/presentation/screens/screens.dart';
 import '../../features/goal/presentation/screens/goal_page.dart';
-import '../../features/habit/presentation/screens/edit_habit_screen_v2.dart';
 import '../../features/habit/presentation/screens/screens.dart';
+import '../../features/habit/presentation/widgets/habit_form.dart';
 
 part 'app_navigation_bar.dart';
 
@@ -59,7 +59,7 @@ GoRoute habitRoutes() {
       GoRoute(
         path: 'add',
         builder: (context, state) =>
-            const EditHabitScreenV2(type: EditType.addHabit),
+            const EditHabitScreen(type: EditType.addHabit),
         // builder: (context, state) => const AddHabitScreen(),
       ),
       GoRoute(
@@ -73,14 +73,14 @@ GoRoute habitRoutes() {
           builder: (context, state) {
             final id = state.pathParameters['id']!;
             // return EditHabitScreen(hid: id);
-            return EditHabitScreenV2(id: id, type: EditType.editHabit);
+            return EditHabitScreen(id: id, type: EditType.editHabit);
           }),
       GoRoute(
           path: 'edit-instance/:id',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
             // return EditHabitInstanceScreen(iid: id);
-            return EditHabitScreenV2(id: id, type: EditType.editInstance);
+            return EditHabitScreen(id: id, type: EditType.editInstance);
           }),
     ],
   );

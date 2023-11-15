@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../../../../core/constants/typedef.dart';
@@ -13,6 +14,7 @@ class UpdateHabitUC extends UseCaseWithParams<ResultEither, HabitEntity> {
 
   @override
   ResultEither<void> call(HabitEntity params) async {
+    debugPrint('UpdateHabitUC:call: HabitEntity params: $params');
     return await _habitRepository.updateHabit(params);
   }
 }

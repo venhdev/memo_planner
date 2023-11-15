@@ -106,14 +106,8 @@ class HabitDataSourceImpl extends HabitDataSource {
 
       await habitCollectionRef.doc(habit.hid).update(habitModel.toDocument());
     } on FirebaseException catch (e) {
-      debugPrint(
-          'HabitDataSourceImpl:updateHabit --type of e: ${e.runtimeType}');
-      debugPrint(e.toString());
       throw ServerException(code: e.code, message: e.toString());
     } catch (e) {
-      debugPrint(
-          'HabitDataSourceImpl:updateHabit --type of e: ${e.runtimeType}');
-      debugPrint(e.toString());
       throw ServerException(message: e.toString());
     }
   }

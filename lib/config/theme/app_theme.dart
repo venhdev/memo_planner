@@ -4,27 +4,27 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   static final ThemeData lightMode = ThemeData(
     buttonTheme: const ButtonThemeData(
-      highlightColor: Colors.deepPurple,
+      highlightColor: Colors.black,
     ),
-    primarySwatch: Colors.deepPurple,
+    primarySwatch: Colors.lightGreen,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     useMaterial3: true,
   );
 
   static final ThemeData darkMode = ThemeData(
     buttonTheme: const ButtonThemeData(
-      highlightColor: Colors.deepPurple,
+      highlightColor: Colors.lightGreen,
     ),
-    primarySwatch: Colors.deepPurple,
+    primarySwatch: Colors.lightGreen,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     useMaterial3: true,
   );
 
   static final ThemeData defaultTheme = ThemeData(
     buttonTheme: const ButtonThemeData(
-      highlightColor: Colors.deepPurple,
+      highlightColor: Colors.lightGreen,
     ),
-    primarySwatch: Colors.deepPurple,
+    primarySwatch: Colors.lightGreen,
     textTheme: GoogleFonts.robotoTextTheme(
       ThemeData.light().textTheme,
     ),

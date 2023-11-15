@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:memo_planner/features/authentication/data/models/user_model.dart';
 
 import '../../../../core/utils/convertors.dart';
+import '../../../authentication/data/models/user_model.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 import '../../domain/entities/habit_instance_entity.dart';
 
@@ -11,6 +11,8 @@ class HabitInstanceModel extends HabitInstanceEntity {
     String? hid,
     String? summary,
     String? description,
+    DateTime? start,
+    DateTime? end,
     DateTime? date,
     DateTime? updated,
     UserEntity? creator,
@@ -21,6 +23,8 @@ class HabitInstanceModel extends HabitInstanceEntity {
           hid: hid,
           summary: summary,
           description: description,
+          start: start,
+          end: end,
           date: date,
           updated: updated,
           creator: creator,
@@ -35,6 +39,8 @@ class HabitInstanceModel extends HabitInstanceEntity {
       hid: entity.hid,
       summary: entity.summary,
       description: entity.description,
+      start: entity.start,
+      end: entity.end,
       date: entity.date,
       updated: entity.updated,
       creator: entity.creator,
@@ -55,6 +61,8 @@ class HabitInstanceModel extends HabitInstanceEntity {
       hid: data['hid'],
       summary: data['summary'],
       description: data['description'],
+      start: convertTimestampToDateTime(data['start'] as Timestamp),
+      end: convertTimestampToDateTime(data['end'] as Timestamp),
       date: convertTimestampToDateTime(data['date'] as Timestamp),
       updated: convertTimestampToDateTime(data['updated'] as Timestamp),
       creator: UserModel.fromMap(data['creator']),
@@ -75,6 +83,8 @@ class HabitInstanceModel extends HabitInstanceEntity {
       if (hid != null) 'hid': hid,
       if (summary != null) 'summary': summary,
       if (description != null) 'description': description,
+      if (start != null) 'start': start,
+      if (end != null) 'end': end,
       if (date != null) 'date': date,
       if (updated != null) 'updated': updated,
       if (creator != null) 'creator': UserModel.fromEntity(creator!).toMap(),
