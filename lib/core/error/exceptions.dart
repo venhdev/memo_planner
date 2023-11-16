@@ -1,10 +1,11 @@
-const String serverExceptionErrorMessage = 'Server Exception';
-const String cacheExceptionErrorMessage = 'Cache Exception';
+const String serverExceptionMessage = 'Server Exception';
+const String cacheExceptionMessage = 'Cache Exception';
+const String formatExceptionMessage = 'Format Exception';
 
 class ServerException implements Exception {
   ServerException({
     this.code = 'e0',
-    this.message = serverExceptionErrorMessage,
+    this.message = serverExceptionMessage,
   });
 
   final String code;
@@ -13,7 +14,17 @@ class ServerException implements Exception {
 
 class CacheException implements Exception {
   CacheException({
-    this.message = cacheExceptionErrorMessage,
+    this.message = cacheExceptionMessage,
+  });
+
+  final String message;
+}
+
+
+// format exception
+class FormatException implements Exception {
+  FormatException({
+    this.message = formatExceptionMessage,
   });
 
   final String message;

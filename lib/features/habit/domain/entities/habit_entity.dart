@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/utils/helpers.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 
 // The entity design to sync with Google Calendar
@@ -31,6 +32,22 @@ class HabitEntity extends Equatable {
 
 
   final String kind = 'habit#summary';
+
+
+
+  // ie. recurrence: 'RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20231130'
+  DateTime? get until {
+    if (recurrence != null) {
+      final rrule = recurrence!.split(';');
+      final until = rrule.where((element) => element.contains('UNTIL='));
+      if (until.isNotEmpty) {
+        return convertStringToDateTime(until.first.split('=')[1]);
+      }
+    }
+    return null;
+  }
+
+  
   // copyWith
   HabitEntity copyWith({
     String? hid,

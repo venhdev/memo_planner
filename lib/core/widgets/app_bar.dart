@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class MyAppBar {
   static AppBar buildAppBar({
     required BuildContext context,
-    required String title,
+    String? title,
   }) {
     return AppBar(
       leading: Builder(builder: (context) {
@@ -15,7 +15,9 @@ class MyAppBar {
           },
         );
       }),
-      title: Text(title),
+      title: title != null ? Text(title) : null,
     );
   }
 }
+
+// add 'drawer: const AppNavigationDrawer(),' to Scaffold to open drawer on click

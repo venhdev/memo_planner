@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -8,7 +10,7 @@ abstract class AuthenticationDataSource {
   /// and returns a [UserCredential] if successful.
   ///
   /// Throws a [FirebaseAuthException] if the sign in fails.
-  Future<UserCredential> signedInWithEmailAndPassword(
+  Future<UserCredential> signInWithEmailAndPassword(
     String email,
     String password,
   );
@@ -35,7 +37,7 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
   final GoogleSignIn _googleSignIn;
 
   @override
-  Future<UserCredential> signedInWithEmailAndPassword(
+  Future<UserCredential> signInWithEmailAndPassword(
     String email,
     String password,
   ) async {
@@ -44,20 +46,10 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
         email: email,
         password: password,
       );
-
-      if (result.user == null) {
-        throw FirebaseAuthException(
-          code: 'ERROR_USER_NOT_FOUND',
-          message: 'No user found for that email.',
-        );
-      } else {
-        return result;
-      }
-    } on FirebaseException catch (e) {
-      throw FirebaseAuthException(
-        code: e.code,
-        message: e.message!,
-      );
+      return result;
+    } catch (e) {
+      log('rethrow --> Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      rethrow;
     }
   }
 
@@ -69,11 +61,10 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
         debugPrint('Signing out from Google');
         await _googleSignIn.signOut();
       }
-    } on FirebaseException catch (e) {
-      throw FirebaseAuthException(
-        code: e.code,
-        message: e.message!,
-      );
+    } catch (e) {
+      log(e.toString());
+      log('runtimeType: ${e.runtimeType.toString()}');
+      rethrow;
     }
   }
 
@@ -86,8 +77,7 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
     // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
+    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
@@ -101,9 +91,14 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
 
   @override
   Future<UserCredential> signUpWithEmail(String email, String password) {
-    return _firebaseAuth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      return _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      log('rethrow --> Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      rethrow;
+    }
   }
 }

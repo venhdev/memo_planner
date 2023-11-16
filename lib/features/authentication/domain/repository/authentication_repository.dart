@@ -7,7 +7,7 @@ abstract class AuthenticationRepository {
   // Future<void> logOut();
   // Future<bool> isSignedIn();
   // Future<String> getUser();
-  ResultEither<UserEntity> signedInWithEmailAndPassword(
+  ResultEither<UserEntity> signInWithEmailAndPassword(
     String email,
     String password,
   );

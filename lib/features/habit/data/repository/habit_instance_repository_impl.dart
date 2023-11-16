@@ -18,7 +18,7 @@ class HabitInstanceRepositoryImpl implements HabitInstanceRepository {
   @override
   ResultEither<HabitInstanceEntity> addHabitInstance(HabitEntity habit, DateTime date, bool completed) async {
     try {
-      final instance = await _habitInstanceDataSource.initHabitInstance(habit, date, completed);
+      final instance = await _habitInstanceDataSource.initNewHabitInstance(habit, date, completed);
       return Right(instance);
     } on ServerException catch (e) {
       return Left(ServerFailure(code: e.code, message: e.message));

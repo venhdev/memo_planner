@@ -5,7 +5,7 @@ import 'package:memo_planner/features/authentication/data/data_sources/authentic
 import '../../../../core/constants/constants.dart';
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/utils/convertors.dart';
+import '../../../../core/utils/helpers.dart';
 import '../../domain/entities/habit_entity.dart';
 import '../../domain/entities/habit_instance_entity.dart';
 import '../models/habit_instance_model.dart';
@@ -15,7 +15,7 @@ abstract class HabitInstanceDataSource {
 
   Future<HabitInstanceEntity?> findHabitInstanceById(String iid);
 
-  Future<HabitInstanceEntity> initHabitInstance(
+  Future<HabitInstanceEntity> initNewHabitInstance(
     HabitEntity habit,
     DateTime date,
     bool completed,
@@ -36,7 +36,7 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
   final AuthenticationDataSource _authenticationDataSource;
 
   @override
-  Future<HabitInstanceEntity> initHabitInstance(
+  Future<HabitInstanceEntity> initNewHabitInstance(
       HabitEntity habit, DateTime date, bool completed) async {
     try {
       final habitICollRef = _firestore
@@ -48,22 +48,28 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
 
       final iid = '${habit.hid}_${convertDateTimeToyyyyMMdd(date)}';
 
-      if (date.microsecond != 0) {
-        // remove the time part * because the first run app will have time part
-        date = DateTime(date.year, date.month, date.day);
-      }
+      // already handle in ui
+      //// remove the time part * because the first run app will have time part
+      // // if (date.microsecond != 0) {
+      // //   date = DateTime(date.year, date.month, date.day);
+      // // }
+
+      // the habit like parent of the habit instance
+      // habit.start/end : hold the start/end time (hour, minute) of the habit
+      // -> change the day, month, year of the habit.start/end to date (focusDate)
+
       HabitInstanceModel habitInstanceModel = HabitInstanceModel(
         iid: iid,
         hid: habit.hid,
         summary: habit.summary,
         description: habit.description,
-        start: habit.start,
-        end: habit.end,
+        start: habit.start!.copyWith(day: date.day, month: date.month, year: date.year),
+        end: habit.end!.copyWith(day: date.day, month: date.month, year: date.year),
         date: date,
         updated: DateTime.now(),
         creator: habit.creator,
         completed: completed,
-        edited: false,
+        edited: false, // because this is new habit instance -- not edited yet
       );
 
       await habitICollRef.doc(iid).set(habitInstanceModel.toDocument());

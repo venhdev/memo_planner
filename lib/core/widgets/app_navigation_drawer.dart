@@ -19,7 +19,7 @@ class AppNavigationDrawer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             _buildHeader(context),
-            _buildMenuItems(),
+            _buildMenuItems(context),
           ],
         ),
       ),
@@ -47,7 +47,8 @@ class AppNavigationDrawer extends StatelessWidget {
                       backgroundImage: NetworkImage(state.user!.photoURL!),
                     );
                   } else {
-                    // random image <assets/images/avatars> in case of no image
+                    // random image <assets/images/avatars> in case of no image --> no use for now
+                    // use the first letter of email instead
                     return CircleAvatar(
                       radius: 52.0,
                       backgroundColor: Colors.green.shade100,
@@ -112,26 +113,32 @@ class AppNavigationDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItems() {
+  Widget _buildMenuItems(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Wrap(
         runSpacing: 8.0,
         children: [
           ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
-            onTap: () {},
+            leading: const Icon(Icons.calendar_month),
+            title: const Text('Habit'),
+            onTap: () {
+              Navigator.pop(context);
+              context.go('/habit');
+            },
           ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {},
-          ),
+          // ListTile(
+          //   leading: const Icon(Icons.settings),
+          //   title: const Text('Settings'),
+          //   onTap: () {},
+          // ),
           ListTile(
             leading: const Icon(Icons.person),
             title: const Text('User'),
-            onTap: () {},
+            onTap: () {
+              Navigator.pop(context);
+              context.go('/authentication');
+            },
           ),
         ],
       ),

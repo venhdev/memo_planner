@@ -4,8 +4,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../config/dependency_injection.dart';
+import '../../../../core/constants/constants.dart';
 import '../../../../core/constants/typedef.dart';
-import '../../../../core/utils/convertors.dart';
+import '../../../../core/utils/helpers.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../data/models/habit_instance_model.dart';
 import '../../domain/entities/habit_entity.dart';
@@ -110,10 +111,12 @@ class HabitItemBody extends StatelessWidget {
       },
       child: Slidable(
         startActionPane: ActionPane(
+          dragDismissible: true,
           motion: const DrawerMotion(),
           children: [
             // Edit action
             SlidableAction(
+              borderRadius: BorderRadius.circular(12.0),
               onPressed: (context) {
                 showChooseEditTypeDialog(context: context);
               },
@@ -129,6 +132,7 @@ class HabitItemBody extends StatelessWidget {
           children: [
             // Delete action
             SlidableAction(
+              borderRadius: BorderRadius.circular(12.0),
               onPressed: (context) {
                 showConfirmDeleteDialog(context: context);
               },
@@ -141,34 +145,31 @@ class HabitItemBody extends StatelessWidget {
         ),
         child: Builder(builder: (context) {
           final String summary;
-          final String description;
           final String startTime;
           final String endTime;
           if (isICreated) {
             if (instance!.edited!) {
               summary = instance!.summary!;
-              description = instance!.description!;
-              startTime = convertDateTimeToString(instance!.start!, formatPattern: 'hh:mm a');
-              endTime = convertDateTimeToString(instance!.end!, formatPattern: 'hh:mm a');
+              startTime =
+                  convertDateTimeToString(instance!.start!, pattern: formatTimePattern);
+              endTime =
+                  convertDateTimeToString(instance!.end!, pattern: formatTimePattern);
             } else {
               summary = habit.summary!;
-              description = habit.description!;
-              startTime = convertDateTimeToString(habit.start!, formatPattern: 'hh:mm');
-              endTime = convertDateTimeToString(habit.end!, formatPattern: 'hh:mm');
+              startTime =
+                  convertDateTimeToString(habit.start!, pattern: formatTimePattern);
+              endTime = convertDateTimeToString(habit.end!, pattern: formatTimePattern);
             }
           } else {
             summary = habit.summary!;
-            description = habit.description!;
-            startTime = convertDateTimeToString(habit.start!, formatPattern: 'hh:mm');
-            endTime = convertDateTimeToString(habit.end!, formatPattern: 'hh:mm');
+            startTime = convertDateTimeToString(habit.start!, pattern: formatTimePattern);
+            endTime = convertDateTimeToString(habit.end!, pattern: formatTimePattern);
           }
           return ListTile(
             title: Text(
               summary,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18.0
-              ),
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
               textAlign: TextAlign.center,
             ),
             subtitle: Text(
@@ -219,7 +220,11 @@ class HabitItemBody extends StatelessWidget {
     } else {
       // This will be create new instance with completed = true
       BlocProvider.of<HabitInstanceBloc>(context).add(
-        InstanceInitialEvent(habit: habit, date: focusDate, completed: true),
+        InstanceInitialEvent(
+          habit: habit,
+          date: focusDate,
+          completed: value!,
+        ),
       );
     }
   }

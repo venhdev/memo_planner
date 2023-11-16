@@ -5,7 +5,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/utils/convertors.dart';
+import '../../../../core/utils/helpers.dart';
 import '../../../authentication/data/data_sources/authentication_data_source.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 import '../../domain/entities/habit_entity.dart';
@@ -47,14 +47,8 @@ class HabitDataSourceImpl extends HabitDataSource {
       final habitDocument = (HabitModel.fromEntity(habit)).toDocument();
       await habitCollectionRef.doc(hid).set(habitDocument);
     } on FirebaseException catch (e) {
-      debugPrint(
-          'HabitDataSourceImpl:addHabit:FirebaseException --type of e: ${e.runtimeType}');
-      debugPrint(e.toString());
       throw ServerException(code: e.code, message: e.toString());
     } catch (e) {
-      debugPrint(
-          'HabitDataSourceImpl:addHabit:Exception --type of e: ${e.runtimeType}');
-      debugPrint(e.toString());
       throw ServerException(message: e.toString());
     }
   }
@@ -82,14 +76,8 @@ class HabitDataSourceImpl extends HabitDataSource {
           .delete()
           .then((doc) => debugPrint('Habit ${habit.summary} deleted'));
     } on FirebaseException catch (e) {
-      debugPrint(
-          'HabitDataSourceImpl:deleteHabit --type of e: ${e.runtimeType}');
-      debugPrint(e.toString());
       throw ServerException(code: e.code, message: e.toString());
     } catch (e) {
-      debugPrint(
-          'HabitDataSourceImpl:deleteHabit --type of e: ${e.runtimeType}');
-      debugPrint(e.toString());
       throw ServerException(message: e.toString());
     }
   }

@@ -24,24 +24,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 24,
+              left: 24,
+              right: 24),
           child: Column(
             children: [
-              /// -- IMAGE
+              // IMAGE
+
               Stack(
                 children: [
                   SizedBox(
                       width: 120,
                       height: 120,
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: Image.network(
-                          widget.user.photoURL!,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.error),
-                          fit: BoxFit.cover,
-                        ),
-                      )),
+                          borderRadius: BorderRadius.circular(100),
+                          child: widget.user.photoURL != null
+                              ? Image.network(
+                                  widget.user.photoURL!,
+                                  fit: BoxFit.cover,
+                                )
+                              : CircleAvatar(
+                                  radius: 52.0,
+                                  backgroundColor: Colors.green.shade100,
+                                  child: Text(
+                                    widget.user.email!.substring(0, 1),
+                                    style: const TextStyle(
+                                      fontSize: 52.0,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ))),
                   // Positioned(
                   //   bottom: 0,
                   //   right: 0,
@@ -65,7 +78,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: const TextStyle(fontSize: 32, color: Colors.black)),
               const SizedBox(height: 20),
 
-              /// -- BUTTON EDIT
+              // Email
+              Text(
+                widget.user.email!,
+                style: const TextStyle(fontSize: 16, color: Colors.black),
+              ),
+
+              // -- BUTTON EDIT
               // SizedBox(
               //   width: 200,
               //   child: ElevatedButton(
@@ -83,18 +102,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 10),
 
               /// -- MENU
-              ProfileMenuWidget(
-                  title: 'Settings', icon: Icons.settings, onPress: () {}),
-              ProfileMenuWidget(
-                  title: 'Billing Details', icon: Icons.wallet, onPress: () {}),
-              ProfileMenuWidget(
-                  title: 'User Management',
-                  icon: Icons.person_pin,
-                  onPress: () {}),
-              const Divider(),
-              const SizedBox(height: 10),
-              ProfileMenuWidget(
-                  title: 'Information', icon: Icons.info, onPress: () {}),
+              // ProfileMenuWidget(
+              //     title: 'Settings', icon: Icons.settings, onPress: () {}),
+              // ProfileMenuWidget(
+              //     title: 'Billing Details', icon: Icons.wallet, onPress: () {}),
+              // ProfileMenuWidget(
+              //     title: 'User Management',
+              //     icon: Icons.person_pin,
+              //     onPress: () {}),
+              // const Divider(),
+              // const SizedBox(height: 10),
+              // ProfileMenuWidget(
+              //     title: 'Information', icon: Icons.info, onPress: () {}),
               ProfileMenuWidget(
                   title: 'Logout',
                   icon: Icons.logout,

@@ -21,7 +21,7 @@ class Failure extends Equatable {
 
 // General failure message
 class ServerFailure extends Failure {
-  const ServerFailure({code = '2000', message = serverFailureFailureMessage})
+  const ServerFailure({code = 'server-failure-code', message = serverFailureFailureMessage})
       : super(code: code, message: message);
 }
 

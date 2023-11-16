@@ -14,7 +14,7 @@ class SignInWithEmailAndPasswordUC
 
   @override
   ResultEither<UserEntity> call(SignInParams params) async {
-    return await _authRepo.signedInWithEmailAndPassword(
+    return await _authRepo.signInWithEmailAndPassword(
       params.email,
       params.password,
     );

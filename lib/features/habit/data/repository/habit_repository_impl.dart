@@ -21,8 +21,7 @@ class HabitRepositoryImpl implements HabitRepository {
   @override
   ResultVoid addHabit(HabitEntity habit) async {
     try {
-      await _habitDataSource.addHabit(habit);
-      return const Right(null);
+      return Right(await _habitDataSource.addHabit(habit));
     } on ServerException catch (e) {
       return Left(ServerFailure(code: e.code, message: e.message));
     }

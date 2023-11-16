@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/utils/helpers.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../authentication/presentation/bloc/bloc/authentication_bloc.dart';
 import '../bloc/habit/habit_bloc.dart';
 import '../widgets/widgets.dart';
+
+enum FilterOptions { name, time }
 
 class HabitPage extends StatefulWidget {
   const HabitPage({super.key});
@@ -16,16 +19,12 @@ class HabitPage extends StatefulWidget {
 }
 
 class _HabitPageState extends State<HabitPage> {
-  DateTime _focus = DateTime(
-    DateTime.now().year,
-    DateTime.now().month,
-    DateTime.now().day,
-  );
-  final EasyInfiniteDateTimelineController _controller =
-      EasyInfiniteDateTimelineController();
+  DateTime _focus = getDate(DateTime.now());
+  final EasyInfiniteDateTimelineController _controller = EasyInfiniteDateTimelineController();
   final TextEditingController _searchController = TextEditingController();
 
   String searchQuery = '';
+  FilterOptions currentFilter = FilterOptions.time;
 
   @override
   void dispose() {
@@ -38,7 +37,6 @@ class _HabitPageState extends State<HabitPage> {
     return Scaffold(
       appBar: MyAppBar.buildAppBar(
         context: context,
-        title: 'Habit',
       ),
       drawer: const AppNavigationDrawer(),
       floatingActionButton: FloatingActionButton(
@@ -120,8 +118,7 @@ class _HabitPageState extends State<HabitPage> {
                                 setState(() {
                                   _controller.animateToDate(
                                     _focus,
-                                    duration:
-                                        const Duration(milliseconds: 300),
+                                    duration: const Duration(milliseconds: 300),
                                     curve: Curves.decelerate,
                                   );
                                 });
@@ -129,7 +126,9 @@ class _HabitPageState extends State<HabitPage> {
                               child: const Icon(Icons.today),
                             ),
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                onTapFilter(context);
+                              },
                               icon: const Icon(Icons.filter_alt),
                             ),
                           ],
@@ -138,6 +137,7 @@ class _HabitPageState extends State<HabitPage> {
                         HabitList(
                           focusDate: _focus,
                           habitStream: state.habitStream,
+                          currentFilter: currentFilter,
                           query: searchQuery,
                         ),
                       ],
@@ -149,23 +149,66 @@ class _HabitPageState extends State<HabitPage> {
                   } else if (state is HabitError) {
                     return MessageScreen(message: state.message);
                   } else {
-                    return const MessageScreen(
-                        message: 'Something went wrong [e04]');
+                    return const MessageScreen(message: 'Something went wrong [e04]');
                   }
                 },
               );
             } else {
-              return Center(
-                child: ElevatedButton(
-                    onPressed: () {
-                      context.go('/authentication');
-                    },
-                    child: const Text('Login')),
+              return MessageScreenWithAction(
+                message: 'Please sign in to continue',
+                buttonText: 'Sign in',
+                onPressed: () {
+                  context.go('/authentication/sign-in');
+                },
               );
             }
           },
         ),
       ),
+    );
+  }
+
+  Future<dynamic> onTapFilter(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Sort by'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('Habit name'),
+                trailing: const Icon(Icons.note),
+                leading: Radio(
+                  value: FilterOptions.name,
+                  groupValue: currentFilter,
+                  onChanged: (value) {
+                    setState(() {
+                      currentFilter = value!;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              ListTile(
+                title: const Text('Start time'),
+                trailing: const Icon(Icons.schedule),
+                leading: Radio(
+                  value: FilterOptions.time,
+                  groupValue: currentFilter,
+                  onChanged: (value) {
+                    setState(() {
+                      currentFilter = value!;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -176,29 +219,24 @@ Widget habitSearchBar(
   required Function onChange,
   required Function onCancel,
 }) {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 12.0),
-    child: SearchBar(
-        elevation: MaterialStateProperty.all<double>(2.0),
-        controller: controller,
-        padding: const MaterialStatePropertyAll<EdgeInsets>(
-            EdgeInsets.symmetric(horizontal: 16.0)),
-        onTap: () {
-        },
-        onChanged: (_) {
-          onChange();
-        },
-        leading: const Icon(Icons.search),
-        trailing: [
-          Visibility(
-            visible: controller.text.isNotEmpty,
-            child: IconButton(
-              onPressed: () {
-                onCancel();
-              },
-              icon: const Icon(Icons.close),
-            ),
+  return SearchBar(
+      elevation: MaterialStateProperty.all<double>(2.0),
+      controller: controller,
+      padding: const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
+      onTap: () {},
+      onChanged: (_) {
+        onChange();
+      },
+      leading: const Icon(Icons.search),
+      trailing: [
+        Visibility(
+          visible: controller.text.isNotEmpty,
+          child: IconButton(
+            onPressed: () {
+              onCancel();
+            },
+            icon: const Icon(Icons.close),
           ),
-        ]),
-  );
+        ),
+      ]);
 }

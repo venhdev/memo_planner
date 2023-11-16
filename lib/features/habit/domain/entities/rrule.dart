@@ -2,11 +2,15 @@
 enum FREQ { DAILY, WEEKLY, MONTHLY, YEARLY }
 
 // Recurrence rule
-class RRULE {
-  factory RRULE.daily() {
-    return const RRULE(freq: FREQ.DAILY);
+class RRule {
+  factory RRule.daily() {
+    return const RRule(freq: FREQ.DAILY);
   }
-  const RRULE({
+  factory RRule.dailyUntil({String? until}) {
+    return RRule(freq: FREQ.DAILY, until: until);
+  }
+
+  const RRule({
     this.interval = 1,
     required this.freq,
     this.until,
@@ -27,6 +31,19 @@ class RRULE {
   String toString() {
     String until = this.until != null ? ';UNTIL=${this.until}' : '';
     return 'RRULE:FREQ=${freq.name};INTERVAL=$interval$until';
+  }
+
+  // copyWith
+  RRule copyWith({
+    FREQ? freq,
+    int? interval,
+    String? until,
+  }) {
+    return RRule(
+      freq: freq ?? this.freq,
+      interval: interval ?? this.interval,
+      until: until ?? this.until,
+    );
   }
 }
 

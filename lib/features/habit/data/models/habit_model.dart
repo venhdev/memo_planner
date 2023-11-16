@@ -1,22 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../../core/utils/convertors.dart';
+import '../../../../core/utils/helpers.dart';
 import '../../../authentication/data/models/user_model.dart';
 import '../../domain/entities/habit_entity.dart';
 
 class HabitModel extends HabitEntity {
-  const HabitModel({
-    super.hid,
-    super.summary,
-    super.description,
-    super.start,
-    super.end,
-    super.recurrence,
-    super.created,
-    super.updated,
-    super.creator,
-  });
-
   // fromEntity
   factory HabitModel.fromEntity(HabitEntity entity) {
     return HabitModel(
@@ -51,6 +39,18 @@ class HabitModel extends HabitEntity {
       creator: UserModel.fromDocument(data['creator']),
     );
   }
+  const HabitModel({
+    super.hid,
+    super.summary,
+    super.description,
+    super.start,
+    super.end,
+    super.recurrence,
+    super.created,
+    super.updated,
+    super.creator,
+  });
+
   // to DocumentSnapshot to be saved to Firestore
   Map<String, dynamic> toDocument() {
     return toMap();

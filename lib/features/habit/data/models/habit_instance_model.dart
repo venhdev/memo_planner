@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../../core/utils/convertors.dart';
+import '../../../../core/utils/helpers.dart';
 import '../../../authentication/data/models/user_model.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 import '../../domain/entities/habit_instance_entity.dart';

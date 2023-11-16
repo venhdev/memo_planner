@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/utils/convertors.dart';
+import '../../../../core/constants/constants.dart';
+import '../../../../core/utils/helpers.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../domain/entities/habit_entity.dart';
 import '../../domain/entities/habit_instance_entity.dart';
@@ -31,10 +32,15 @@ class _HabitFormState extends State<HabitForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  // the "FIRST DATE" that the habit take place, and hold the start time of day
   DateTime _start = getDate(DateTime.now());
+  // have the same day with _start, and hold the end time of day
   DateTime _end = getDate(DateTime.now());
+  // the "END DATE" of the habit (to set UNTIL in RRule)
+  DateTime? _endOfHabit;
+
   bool _hasEndDate = false;
-  final List<String> recurrenceList = RRULE.list;
+  final List<String> recurrenceList = RRule.list;
 
   @override
   void initState() {
@@ -44,11 +50,15 @@ class _HabitFormState extends State<HabitForm> {
       _descriptionController.text = widget.habit!.description!;
       _start = widget.habit!.start!;
       _end = widget.habit!.end!;
+      _endOfHabit = widget.habit!.until;
+      _hasEndDate = _endOfHabit != null;
     } else if (widget.type == EditType.editInstance) {
       _titleController.text = widget.instance!.summary!;
       _descriptionController.text = widget.instance!.description!;
-      _start = widget.instance!.date!;
-      _end = widget.instance!.date!;
+      _start = widget.instance!.start!;
+      _end = widget.instance!.end!;
+    } else if (widget.type == EditType.addHabit) {
+      _endOfHabit = _start.add(const Duration(days: 30));
     }
   }
 
@@ -124,25 +134,28 @@ class _HabitFormState extends State<HabitForm> {
                   }).toList()),
 
               const Divider(),
-              // DatePicker for start
               buildStartDatePicker(context),
-              const Divider(),
-              buildPickStartEndTime(context),
-              const Divider(),
 
+              const Divider(),
+              buildPickTime(context),
+
+              const Divider(),
               // Checkbox to select if there is end date
-              Row(
-                children: [
-                  Checkbox(
-                    value: _hasEndDate,
-                    onChanged: (value) {
-                      setState(() {
-                        _hasEndDate = value!;
-                      });
-                    },
-                  ),
-                  const Text('End Date'),
-                ],
+              Visibility(
+                visible: widget.type != EditType.editInstance,
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: _hasEndDate,
+                      onChanged: (value) {
+                        setState(() {
+                          _hasEndDate = value!;
+                        });
+                      },
+                    ),
+                    const Text('End Date'),
+                  ],
+                ),
               ),
 
               // DatePicker for end
@@ -155,24 +168,9 @@ class _HabitFormState extends State<HabitForm> {
                     if (widget.type == EditType.addHabit) {
                       onSubmitAddHabit(context);
                     } else if (widget.type == EditType.editHabit) {
-                      final updatedHabit = widget.habit!.copyWith(
-                        summary: _titleController.text,
-                        description: _descriptionController.text,
-                        start: _start,
-                        end: _end,
-                        updated: DateTime.now(),
-                      );
-                      onSubmitEditAllHabit(context, updatedHabit);
+                      onSubmitEditAllHabit(context);
                     } else if (widget.type == EditType.editInstance) {
-                      final updatedInstance = widget.instance!.copyWith(
-                        summary: _titleController.text,
-                        description: _descriptionController.text,
-                        start: _start,
-                        end: _end,
-                        edited: true,
-                        updated: DateTime.now(),
-                      );
-                      onSubmitEditInstance(context, updatedInstance);
+                      onSubmitEditInstance(context);
                     }
                     Navigator.pop(context);
                   }
@@ -192,7 +190,7 @@ class _HabitFormState extends State<HabitForm> {
     );
   }
 
-  Row buildPickStartEndTime(BuildContext context) {
+  Widget buildPickTime(BuildContext context) {
     return Row(
       children: [
         Expanded(
@@ -230,7 +228,7 @@ class _HabitFormState extends State<HabitForm> {
                   Text(
                     convertDateTimeToString(
                       _start,
-                      formatPattern: 'hh:mm',
+                      pattern: formatTimePattern,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -247,17 +245,27 @@ class _HabitFormState extends State<HabitForm> {
           child: GestureDetector(
             onTap: () async {
               FocusScope.of(context).unfocus(); // hide keyboard
-              final endTime = await pickTime(
+              var startTime = TimeOfDay.fromDateTime(_start);
+              final endPicked = await pickTime(
                 context,
                 initTime: TimeOfDay.fromDateTime(_end),
               );
-              endTime != null
+              endPicked != null
                   ? setState(
                       () {
-                        _end = _end.copyWith(
-                          hour: endTime.hour,
-                          minute: endTime.minute,
-                        );
+                        // picked time is before start time
+                        if (compareTimeOfDay(endPicked, startTime) == -1) {
+                          showAlertDialogMessage(
+                            context: context,
+                            message: 'The end time must after the start time',
+                            icon: const Icon(Icons.error),
+                          );
+                        } else {
+                          _end = _end.copyWith(
+                            hour: endPicked.hour,
+                            minute: endPicked.minute,
+                          );
+                        }
                       },
                     )
                   : null;
@@ -274,7 +282,7 @@ class _HabitFormState extends State<HabitForm> {
                   Text(
                     convertDateTimeToString(
                       _end,
-                      formatPattern: 'hh:mm',
+                      pattern: formatTimePattern,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -288,58 +296,59 @@ class _HabitFormState extends State<HabitForm> {
   }
 
   Widget buildStartDatePicker(BuildContext context) {
-    return Visibility(
-      visible: widget.type != EditType.editInstance,
-      child: GestureDetector(
-        onTap: () async {
-          debugPrint('buildStartDatePicker: onTap');
-          FocusScope.of(context).unfocus(); // hide keyboard
-          final date = await pickDate(context, initDate: _start);
-          date != null
-              ? setState(
-                  () {
-                    _start = _start.copyWith(
-                      year: date.year,
-                      month: date.month,
-                      day: date.day,
-                    );
-                    _end = _end.copyWith(
-                      year: date.year,
-                      month: date.month,
-                      day: date.day,
-                    );
-                  },
-                )
-              : null;
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Flexible(
-              child: Wrap(
-                spacing: 8.0,
-                children: [
-                  Icon(Icons.today_outlined),
-                  Text('Start date:', style: TextStyle(fontSize: 16.0)),
-                ],
-              ),
-              // child: Text('Start date:', style: TextStyle(fontSize: 16.0)),
+    return GestureDetector(
+      onTap: () async {
+        if (widget.type == EditType.editInstance) {
+          return;
+        }
+        FocusScope.of(context).unfocus(); // hide keyboard
+        final date = await pickDate(context, initDate: _start);
+        date != null
+            ? setState(
+                () {
+                  // due to the habit take place on the same day
+                  // so the {_start} and {_end} must be the same
+                  _start = _start.copyWith(
+                    year: date.year,
+                    month: date.month,
+                    day: date.day,
+                  );
+                  _end = _end.copyWith(
+                    year: date.year,
+                    month: date.month,
+                    day: date.day,
+                  );
+                },
+              )
+            : null;
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Flexible(
+            child: Wrap(
+              spacing: 8.0,
+              children: [
+                Icon(Icons.today_outlined),
+                Text('Start date:', style: TextStyle(fontSize: 16.0)),
+              ],
             ),
-            Flexible(
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Text(
-                  ddMMyyyyString(_start),
-                  style: const TextStyle(fontSize: 16.0),
-                ),
+            // child: Text('Start date:', style: TextStyle(fontSize: 16.0)),
+          ),
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Text(
+                convertDateTimeToString(_start),
+                style: const TextStyle(fontSize: 16.0),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -349,41 +358,22 @@ class _HabitFormState extends State<HabitForm> {
       visible: (widget.type != EditType.editInstance) && isEndDateChecked,
       child: GestureDetector(
         onTap: () async {
-          debugPrint('buildEndDatePicker: onTap');
           FocusScope.of(context).unfocus(); // hide keyboard
           final endPicked = await pickDate(context, initDate: _end);
-          debugPrint('buildEndDatePicker: endDate: $endPicked');
           endPicked != null
               ? setState(
                   () {
-                    debugPrint('buildEndDatePicker: setState');
-                    debugPrint('buildEndDatePicker: _start: $_start');
-                    debugPrint('buildEndDatePicker: _end: $_end');
-
                     if (endPicked.isBefore(_start)) {
                       showAlertDialogMessage(
                         context: context,
                         message: 'The end date must after the start date',
                         icon: const Icon(Icons.error),
                       );
-                    } else if (endPicked.isAfter(_start) ||
-                        endPicked.isAtSameMomentAs(getDate(_start))) {
-                      _end = _end.copyWith(
-                        year: endPicked.year,
-                        month: endPicked.month,
-                        day: endPicked.day,
-                      );
+                    } else {
+                      // else the endPicker is after || at the same time _start
+                      _endOfHabit = endPicked;
+                      debugPrint('_endOfHabit: $_endOfHabit');
                     }
-                    // _start = _start.copyWith(
-                    //   year: endDate.year,
-                    //   month: endDate.month,
-                    //   day: endDate.day,
-                    // );
-                    // _end = _end.copyWith(
-                    //   year: endDate.year,
-                    //   month: endDate.month,
-                    //   day: endDate.day,
-                    // );
                   },
                 )
               : null;
@@ -409,7 +399,9 @@ class _HabitFormState extends State<HabitForm> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Text(
-                  ddMMyyyyString(_end),
+                  _endOfHabit != null
+                      ? convertDateTimeToString(_endOfHabit!)
+                      : 'No end date',
                   style: const TextStyle(fontSize: 16.0),
                 ),
               ),
@@ -430,7 +422,14 @@ class _HabitFormState extends State<HabitForm> {
             description: _descriptionController.text,
             start: _start,
             end: _end,
-            recurrence: RRULE.daily().toString(),
+            recurrence: _endOfHabit != null
+                ? RRule.daily().toString()
+                : RRule.dailyUntil(
+                    until: convertDateTimeToString(
+                      _endOfHabit!,
+                      pattern: formatDatePattern,
+                    ),
+                  ).toString(),
             created: DateTime.now(),
             updated: DateTime.now(),
             creator: null,
@@ -448,8 +447,15 @@ class _HabitFormState extends State<HabitForm> {
 
   void onSubmitEditInstance(
     BuildContext context,
-    HabitInstanceEntity updatedInstance,
   ) {
+    final updatedInstance = widget.instance!.copyWith(
+      summary: _titleController.text,
+      description: _descriptionController.text,
+      start: _start,
+      end: _end,
+      edited: true,
+      updated: DateTime.now(),
+    );
     BlocProvider.of<HabitInstanceBloc>(context).add(
       InstanceUpdateEvent(instance: updatedInstance),
     );
@@ -457,8 +463,23 @@ class _HabitFormState extends State<HabitForm> {
 
   void onSubmitEditAllHabit(
     BuildContext context,
-    HabitEntity updatedHabit,
   ) {
+    final updatedHabit = widget.habit!.copyWith(
+      summary: _titleController.text,
+      description: _descriptionController.text,
+      start: _start,
+      end: _end,
+      recurrence: _hasEndDate
+          ? _endOfHabit != null
+              ? RRule.daily().toString()
+              : RRule.dailyUntil(
+                  until: convertDateTimeToString(
+                    _endOfHabit!,
+                    pattern: formatDatePattern,
+                  ),
+                ).toString()
+          : RRule.daily().toString(),
+    );
     BlocProvider.of<HabitBloc>(context).add(
       HabitUpdateEvent(habit: updatedHabit),
     );

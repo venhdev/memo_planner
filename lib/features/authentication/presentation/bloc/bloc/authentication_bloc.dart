@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:memo_planner/core/constants/constants.dart';
 
 import '../../../domain/entities/user_entity.dart';
 import '../../../domain/usecase/usecases.dart';
@@ -57,20 +58,14 @@ class AuthenticationBloc
     Emitter<AuthenticationState> emit,
   ) async {
     emit(const AuthenticationState.authenticating());
-    try {
-      final userEntityEither = await _signInWithEmailAndPasswordUC(
-          SignInParams(email: event.email, password: event.password));
+    final userEntityEither = await _signInWithEmailAndPasswordUC(
+        SignInParams(email: event.email, password: event.password));
 
-      userEntityEither.fold(
-        (failure) =>
-            emit(AuthenticationState.unauthenticated(message: failure.message)),
-        (userEntity) => emit(AuthenticationState.authenticated(userEntity)),
-      );
-    } on FirebaseAuthException catch (e) {
-      emit(AuthenticationState.unauthenticated(message: e.message.toString()));
-    } catch (e) {
-      emit(AuthenticationState.unauthenticated(message: e.toString()));
-    }
+    userEntityEither.fold(
+      (failure) =>
+          emit(AuthenticationState.unauthenticated(message: failure.message)),
+      (userEntity) => emit(AuthenticationState.authenticated(userEntity)),
+    );
   }
 
   void _onAuthenticationStarted(
@@ -81,7 +76,8 @@ class AuthenticationBloc
     if (user != null) {
       emit(AuthenticationState.authenticated(user));
     } else {
-      emit(const AuthenticationState.unauthenticated(message: 'User not login'));
+      emit(
+          const AuthenticationState.unauthenticated(message: kUserNotLogin));
     }
   }
 
@@ -92,9 +88,11 @@ class AuthenticationBloc
     emit(const AuthenticationState.authenticating());
     try {
       await _signOutUC();
-      emit(const AuthenticationState.unauthenticated(message: 'Sign out success'));
+      emit(const AuthenticationState.unauthenticated(
+          message: 'Sign out success'));
     } catch (e) {
-      emit(const AuthenticationState.unauthenticated(message: 'Sign out failed'));
+      emit(const AuthenticationState.unauthenticated(
+          message: 'Sign out failed'));
     }
   }
 
@@ -106,7 +104,8 @@ class AuthenticationBloc
     if (event.status == AuthenticationStatus.authenticated) {
       emit(AuthenticationState.authenticated(event.user!));
     } else {
-      emit(const AuthenticationState.unauthenticated(message: 'User not login'));
+      emit(
+          const AuthenticationState.unauthenticated(message: kUserNotLogin));
     }
   }
 
@@ -119,7 +118,8 @@ class AuthenticationBloc
       SignUpParams(email: event.email, password: event.password),
     );
     result.fold(
-      (failure) => emit(AuthenticationState.unauthenticated(message: failure.message)),
+      (failure) =>
+          emit(AuthenticationState.unauthenticated(message: failure.message)),
       (userEntity) => emit(AuthenticationState.authenticated(userEntity)),
     );
   }
