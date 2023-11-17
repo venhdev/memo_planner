@@ -35,7 +35,7 @@ class _HabitPageState extends State<HabitPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar.buildAppBar(
+      appBar: MyAppBar.habitAppBar(
         context: context,
       ),
       drawer: const AppNavigationDrawer(),
@@ -45,125 +45,123 @@ class _HabitPageState extends State<HabitPage> {
         },
         child: const Icon(Icons.add),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(8),
-        child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
-          builder: (context, state) {
-            if (state.status == AuthenticationStatus.authenticated) {
-              return BlocConsumer<HabitBloc, HabitState>(
-                listener: (context, state) {
-                  if (state is HabitLoaded) {
-                    if (state.message != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(state.message!),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  }
-                },
-                builder: (context, state) {
-                  if (state is HabitLoaded) {
-                    return Column(
-                      children: [
-                        habitSearchBar(
-                          context,
-                          controller: _searchController,
-                          onChange: () {
-                            setState(() {
-                              searchQuery = _searchController.text;
-                            });
-                          },
-                          onCancel: () {
-                            setState(() {
-                              _searchController.clear();
-                              searchQuery = '';
-                              FocusScope.of(context).unfocus();
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        EasyInfiniteDateTimeLine(
-                          controller: _controller,
-                          activeColor: Colors.green.shade300,
-                          dayProps: const EasyDayProps(
-                            activeDayStyle: DayStyle(
-                              borderRadius: 28,
-                            ),
-                            borderColor: Colors.black12,
-                            todayHighlightColor: Colors.green,
-                          ),
-                          firstDate: DateTime(2023),
-                          lastDate: DateTime(2026),
-                          focusDate: _focus,
-                          onDateChange: (selectedDate) {
-                            setState(() {
-                              _focus = selectedDate;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                final current = DateTime.now();
-                                _focus = DateTime(
-                                  current.year,
-                                  current.month,
-                                  current.day,
-                                );
-                                setState(() {
-                                  _controller.animateToDate(
-                                    _focus,
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.decelerate,
-                                  );
-                                });
-                              },
-                              child: const Icon(Icons.today),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                onTapFilter(context);
-                              },
-                              icon: const Icon(Icons.filter_alt),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        HabitList(
-                          focusDate: _focus,
-                          habitStream: state.habitStream,
-                          currentFilter: currentFilter,
-                          query: searchQuery,
-                        ),
-                      ],
+      body: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+        builder: (context, state) {
+          if (state.status == AuthenticationStatus.authenticated) {
+            return BlocConsumer<HabitBloc, HabitState>(
+              listener: (context, state) {
+                if (state is HabitLoaded) {
+                  if (state.message != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message!),
+                        backgroundColor: Colors.red,
+                      ),
                     );
-                  } else if (state is HabitLoading) {
-                    return const LoadingScreen();
-                  } else if (state is HabitInitial) {
-                    return const LoadingScreen();
-                  } else if (state is HabitError) {
-                    return MessageScreen(message: state.message);
-                  } else {
-                    return const MessageScreen(message: 'Something went wrong [e04]');
                   }
-                },
-              );
-            } else {
-              return MessageScreenWithAction(
-                message: 'Please sign in to continue',
-                buttonText: 'Sign in',
-                onPressed: () {
-                  context.go('/authentication/sign-in');
-                },
-              );
-            }
-          },
-        ),
+                }
+              },
+              builder: (context, state) {
+                if (state is HabitLoaded) {
+                  return Column(
+                    children: [
+                      const SizedBox(height: 12.0),
+                      habitSearchBar(
+                        context,
+                        controller: _searchController,
+                        onChange: () {
+                          setState(() {
+                            searchQuery = _searchController.text;
+                          });
+                        },
+                        onCancel: () {
+                          setState(() {
+                            _searchController.clear();
+                            searchQuery = '';
+                            FocusScope.of(context).unfocus();
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      EasyInfiniteDateTimeLine(
+                        controller: _controller,
+                        activeColor: Colors.green.shade300,
+                        dayProps: const EasyDayProps(
+                          activeDayStyle: DayStyle(
+                            borderRadius: 28,
+                          ),
+                          borderColor: Colors.black12,
+                          todayHighlightColor: Colors.green,
+                        ),
+                        firstDate: DateTime(2023),
+                        lastDate: DateTime(2026),
+                        focusDate: _focus,
+                        onDateChange: (selectedDate) {
+                          setState(() {
+                            _focus = selectedDate;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              final current = DateTime.now();
+                              _focus = DateTime(
+                                current.year,
+                                current.month,
+                                current.day,
+                              );
+                              setState(() {
+                                _controller.animateToDate(
+                                  _focus,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.decelerate,
+                                );
+                              });
+                            },
+                            child: const Icon(Icons.today),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              onTapFilter(context);
+                            },
+                            icon: const Icon(Icons.filter_alt),
+                          ),
+                        ],
+                      ),
+                      HabitList(
+                        focusDate: _focus,
+                        habitStream: state.habitStream,
+                        currentFilter: currentFilter,
+                        query: searchQuery,
+                      ),
+                      SizedBox(height: MediaQuery.of(context).padding.bottom),
+                    ],
+                  );
+                } else if (state is HabitLoading) {
+                  return const LoadingScreen();
+                } else if (state is HabitInitial) {
+                  return const LoadingScreen();
+                } else if (state is HabitError) {
+                  return MessageScreen(message: state.message);
+                } else {
+                  return const MessageScreen(message: 'Something went wrong [e04]');
+                }
+              },
+            );
+          } else {
+            return MessageScreenWithAction(
+              message: 'Please sign in to continue',
+              buttonText: 'Sign in',
+              onPressed: () {
+                context.go('/authentication/sign-in');
+              },
+            );
+          }
+        },
       ),
     );
   }
@@ -219,24 +217,27 @@ Widget habitSearchBar(
   required Function onChange,
   required Function onCancel,
 }) {
-  return SearchBar(
-      elevation: MaterialStateProperty.all<double>(2.0),
-      controller: controller,
-      padding: const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
-      onTap: () {},
-      onChanged: (_) {
-        onChange();
-      },
-      leading: const Icon(Icons.search),
-      trailing: [
-        Visibility(
-          visible: controller.text.isNotEmpty,
-          child: IconButton(
-            onPressed: () {
-              onCancel();
-            },
-            icon: const Icon(Icons.close),
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    child: SearchBar(
+        elevation: MaterialStateProperty.all<double>(2.0),
+        controller: controller,
+        padding: const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
+        onTap: () {},
+        onChanged: (_) {
+          onChange();
+        },
+        leading: const Icon(Icons.search),
+        trailing: [
+          Visibility(
+            visible: controller.text.isNotEmpty,
+            child: IconButton(
+              onPressed: () {
+                onCancel();
+              },
+              icon: const Icon(Icons.close),
+            ),
           ),
-        ),
-      ]);
+        ]),
+  );
 }

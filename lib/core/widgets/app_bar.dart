@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MyAppBar {
-  static AppBar buildAppBar({
+  static AppBar habitAppBar({
     required BuildContext context,
     String? title,
   }) {
@@ -10,7 +10,6 @@ class MyAppBar {
         return IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () {
-            debugPrint('Open drawer');
             Scaffold.of(context).openDrawer();
           },
         );

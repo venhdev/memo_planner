@@ -7,24 +7,27 @@ import '../../features/goal/presentation/screens/goal_page.dart';
 import '../../features/habit/presentation/screens/screens.dart';
 import '../../features/habit/presentation/widgets/habit_form.dart';
 
-part 'app_navigation_bar.dart';
+part 'app_scaffold_navigation_bar.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'root');
-final GlobalKey<NavigatorState> _shellNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'shell');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
 
 class AppRouters {
   static final GoRouter router = GoRouter(
     debugLogDiagnostics: true, // NOTE only set to true if you need to debug
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/habit',
-    routes: [
+    routes: <RouteBase>[
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
+          // Return the widget that implements the custom shell (in this case
+          // using a BottomNavigationBar). The StatefulNavigationShell is passed
+          // to be able access the state of the shell and to navigate to other
+          // branches in a stateful way.
           return ScaffoldWithNavBar(navigationShell: navigationShell);
         },
         branches: <StatefulShellBranch>[
+          // The route branch for the first tab of the bottom navigation bar.
           StatefulShellBranch(
             navigatorKey: _shellNavigatorKey,
             routes: <RouteBase>[
@@ -35,11 +38,13 @@ class AppRouters {
               ),
             ],
           ),
+          // The route branch for the second tab
           StatefulShellBranch(
-            routes: [
+            routes: <RouteBase>[
               goalRoutes(),
             ],
           ),
+          // The route branch for the third tab
           StatefulShellBranch(
             routes: <RouteBase>[
               authenticationRoutes(),
@@ -58,8 +63,7 @@ GoRoute habitRoutes() {
     routes: [
       GoRoute(
         path: 'add',
-        builder: (context, state) =>
-            const EditHabitScreen(type: EditType.addHabit),
+        builder: (context, state) => const EditHabitScreen(type: EditType.addHabit),
         // builder: (context, state) => const AddHabitScreen(),
       ),
       GoRoute(
@@ -109,3 +113,5 @@ GoRoute authenticationRoutes() {
     ],
   );
 }
+
+// https://pub.dev/documentation/go_router/latest/go_router/StatefulShellRoute-class.html

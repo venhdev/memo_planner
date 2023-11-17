@@ -13,7 +13,7 @@ class AuthenticationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar.buildAppBar(
+      appBar: MyAppBar.habitAppBar(
         context: context,
       ),
       drawer: const AppNavigationDrawer(),

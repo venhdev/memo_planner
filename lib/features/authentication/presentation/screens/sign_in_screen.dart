@@ -28,7 +28,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar.buildAppBar(
+      appBar: MyAppBar.habitAppBar(
         context: context,
         title: 'Sign In',
       ),

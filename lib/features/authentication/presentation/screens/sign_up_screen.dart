@@ -29,7 +29,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar.buildAppBar(context: context, title: 'Sign Up'),
+      appBar: MyAppBar.habitAppBar(context: context, title: 'Sign Up'),
       drawer: const AppNavigationDrawer(),
       body: BlocListener<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {

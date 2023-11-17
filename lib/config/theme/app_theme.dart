@@ -24,7 +24,7 @@ class AppTheme {
     buttonTheme: const ButtonThemeData(
       highlightColor: Colors.lightGreen,
     ),
-    primarySwatch: Colors.lightGreen,
+    primarySwatch: Colors.blue,
     textTheme: GoogleFonts.robotoTextTheme(
       ThemeData.light().textTheme,
     ),

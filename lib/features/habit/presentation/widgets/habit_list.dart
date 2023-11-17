@@ -102,18 +102,19 @@ class _FilterHabitListState extends State<FilterHabitList> {
     }).toList();
 
     return Expanded(
-      child: ListView.builder(
-        shrinkWrap: true,
-        physics: const BouncingScrollPhysics(),
-        itemCount: progressingHabits.length,
-        itemBuilder: (context, index) {
-          final habitMap = progressingHabits[index].data();
-          var habit = HabitModel.fromDocument(habitMap);
-          return HabitItem(
-            habit: habit,
-            focusDate: widget.focusDate,
-          );
-        },
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: ListView.builder(
+          itemCount: progressingHabits.length,
+          itemBuilder: (context, index) {
+            final habitMap = progressingHabits[index].data();
+            var habit = HabitModel.fromDocument(habitMap);
+            return HabitItem(
+              habit: habit,
+              focusDate: widget.focusDate,
+            );
+          },
+        ),
       ),
     );
   }
