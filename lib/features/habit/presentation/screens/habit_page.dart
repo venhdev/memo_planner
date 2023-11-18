@@ -103,34 +103,37 @@ class _HabitPageState extends State<HabitPage> {
                         },
                       ),
                       const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              final current = DateTime.now();
-                              _focus = DateTime(
-                                current.year,
-                                current.month,
-                                current.day,
-                              );
-                              setState(() {
-                                _controller.animateToDate(
-                                  _focus,
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.decelerate,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                final current = DateTime.now();
+                                _focus = DateTime(
+                                  current.year,
+                                  current.month,
+                                  current.day,
                                 );
-                              });
-                            },
-                            child: const Icon(Icons.today),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              onTapFilter(context);
-                            },
-                            icon: const Icon(Icons.filter_alt),
-                          ),
-                        ],
+                                setState(() {
+                                  _controller.animateToDate(
+                                    _focus,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.decelerate,
+                                  );
+                                });
+                              },
+                              child: const Icon(Icons.today),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                onTapFilter(context);
+                              },
+                              icon: const Icon(Icons.filter_alt),
+                            ),
+                          ],
+                        ),
                       ),
                       HabitList(
                         focusDate: _focus,

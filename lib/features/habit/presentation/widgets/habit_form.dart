@@ -9,6 +9,7 @@ import '../../domain/entities/habit_instance_entity.dart';
 import '../../domain/entities/rrule.dart';
 import '../bloc/habit/habit_bloc.dart';
 import '../bloc/instance/instance_bloc.dart';
+import 'week_day_selector.dart';
 
 enum EditType { unknown, addHabit, editHabit, editInstance }
 
@@ -32,15 +33,17 @@ class _HabitFormState extends State<HabitForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+
   // the "FIRST DATE" that the habit take place, and hold the start time of day
   DateTime _start = getDate(DateTime.now());
   // have the same day with _start, and hold the end time of day
   DateTime _end = getDate(DateTime.now());
-  // the "END DATE" of the habit (to set UNTIL in RRule)
+  // the "END DATE" of the habit (store at UNTIL in RRule)
   DateTime? _endOfHabit;
 
   bool _hasEndDate = false;
-  final List<String> recurrenceList = RRule.list;
+  String _freq = FREQ.daily.name;
+  var weekdays = List.filled(7, true);
 
   @override
   void initState() {
@@ -91,9 +94,7 @@ class _HabitFormState extends State<HabitForm> {
                 ),
                 controller: _titleController,
                 decoration: const InputDecoration(
-                    labelText: 'Habit Title',
-                    hintText: 'What is your habit?',
-                    border: OutlineInputBorder()),
+                    labelText: 'Habit Title', hintText: 'What is your habit?', border: OutlineInputBorder()),
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
                     return '*Please enter your habit name';
@@ -107,31 +108,13 @@ class _HabitFormState extends State<HabitForm> {
                 textAlign: TextAlign.center,
                 controller: _descriptionController,
                 decoration: const InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Describe your habit (optional)',
-                    border: OutlineInputBorder()),
+                    labelText: 'Description', hintText: 'Describe your habit (optional)', border: OutlineInputBorder()),
               ),
 
               const SizedBox(height: 16.0),
 
               // dropdown to select recurrence
-              DropdownButtonFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Recurrence',
-                    hintText: 'How often do you want to do this habit?',
-                    border: OutlineInputBorder(),
-                  ),
-                  value: recurrenceList.first,
-                  icon: const Icon(Icons.arrow_downward),
-                  onChanged: (value) {},
-                  items: recurrenceList
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child:
-                          Text(value, style: const TextStyle(fontSize: 16.0)),
-                    );
-                  }).toList()),
+              buildPickRecurrence(),
 
               const Divider(),
               buildStartDatePicker(context),
@@ -187,6 +170,55 @@ class _HabitFormState extends State<HabitForm> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget buildPickRecurrence() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: DropdownButtonFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Recurrence',
+                    hintText: 'How often do you want to do this habit?',
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _freq,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  onChanged: (value) {
+                    setState(() {
+                      _freq = value!;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(8.0),
+                  items: RRule.getFREQs.map<DropdownMenuItem<String>>(
+                    (String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    },
+                  ).toList()),
+            ),
+          ],
+        ),
+        Visibility(
+          visible: _freq == FREQ.weekly.name,
+          child: MyWeekDaySelector(
+            weekdays: weekdays,
+            height: 52.0,
+            onChanged: (value) {
+              setState(() {
+                weekdays[value] = !weekdays[value];
+              });
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -399,9 +431,7 @@ class _HabitFormState extends State<HabitForm> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Text(
-                  _endOfHabit != null
-                      ? convertDateTimeToString(_endOfHabit!)
-                      : 'No end date',
+                  _endOfHabit != null ? convertDateTimeToString(_endOfHabit!) : 'No end date',
                   style: const TextStyle(fontSize: 16.0),
                 ),
               ),
@@ -411,6 +441,9 @@ class _HabitFormState extends State<HabitForm> {
       ),
     );
   }
+
+  String getRecurrence() =>
+      _freq == FREQ.daily.name ? RRule.daily().toString() : RRule.weekly(weekdays: weekdays).toString();
 
   void onSubmitAddHabit(BuildContext context) {
     if (_start.isBefore(_end) || _start.isAtSameMomentAs(_end)) {
@@ -422,14 +455,7 @@ class _HabitFormState extends State<HabitForm> {
             description: _descriptionController.text,
             start: _start,
             end: _end,
-            recurrence: _endOfHabit != null
-                ? RRule.daily().toString()
-                : RRule.dailyUntil(
-                    until: convertDateTimeToString(
-                      _endOfHabit!,
-                      pattern: formatDatePattern,
-                    ),
-                  ).toString(),
+            recurrence: getRecurrence(),
             created: DateTime.now(),
             updated: DateTime.now(),
             creator: null,
@@ -446,7 +472,7 @@ class _HabitFormState extends State<HabitForm> {
   }
 
   void onSubmitEditInstance(
-    BuildContext context,
+    BuildContext context
   ) {
     final updatedInstance = widget.instance!.copyWith(
       summary: _titleController.text,
@@ -461,24 +487,14 @@ class _HabitFormState extends State<HabitForm> {
     );
   }
 
-  void onSubmitEditAllHabit(
-    BuildContext context,
-  ) {
+  void onSubmitEditAllHabit(BuildContext context) {
     final updatedHabit = widget.habit!.copyWith(
       summary: _titleController.text,
       description: _descriptionController.text,
       start: _start,
       end: _end,
-      recurrence: _hasEndDate
-          ? _endOfHabit != null
-              ? RRule.daily().toString()
-              : RRule.dailyUntil(
-                  until: convertDateTimeToString(
-                    _endOfHabit!,
-                    pattern: formatDatePattern,
-                  ),
-                ).toString()
-          : RRule.daily().toString(),
+      recurrence: getRecurrence(),
+      updated: DateTime.now(),
     );
     BlocProvider.of<HabitBloc>(context).add(
       HabitUpdateEvent(habit: updatedHabit),

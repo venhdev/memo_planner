@@ -65,6 +65,7 @@ DateTime getDate(DateTime date) {
 //       dateTime.day.toString().padLeft(2, '0');
 // } //bad performance
 
+/// Use to compare {day, month, year} of two DateTime
 /// This function will return:
 /// - 1: dateTime1 > dateTime2
 /// - 0: dateTime1 == dateTime2
@@ -80,9 +81,12 @@ int compareDateTimeByDay(DateTime dateTime1, DateTime dateTime2) {
   } else {
     return 0;
   }
-   
 }
-
+/// Use to compare time {hour, minute} of two DateTime
+/// This function will return:
+/// - 1: dateTime1 > dateTime2
+/// - 0: dateTime1 == dateTime2
+/// - -1: dateTime1 < dateTime2
 int compareDateTimeByTime(DateTime date1, DateTime date2) {
   TimeOfDay time1 = TimeOfDay.fromDateTime(date1);
   TimeOfDay time2 = TimeOfDay.fromDateTime(date2);
@@ -108,3 +112,4 @@ int compareTimeOfDay(TimeOfDay time1, TimeOfDay time2) {
     }
   }
 }
+

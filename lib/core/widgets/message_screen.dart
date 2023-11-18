@@ -21,7 +21,7 @@ class MessageScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Back'),
+              child: const Text('< Back'),
             ),
           ),
         ],
@@ -40,7 +40,7 @@ class MessageScreenWithAction extends StatelessWidget {
 
   final String message;
   final String? buttonText;
-  final Function onPressed;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {

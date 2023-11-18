@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/widgets/widgets.dart';
 import '../../features/authentication/presentation/screens/screens.dart';
 import '../../features/goal/presentation/screens/goal_page.dart';
 import '../../features/habit/presentation/screens/screens.dart';

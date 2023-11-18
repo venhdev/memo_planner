@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:memo_planner/core/widgets/app_bar.dart';
-import 'package:memo_planner/features/goal/presentation/widgets/test_item.dart';
+import 'package:go_router/go_router.dart';
+import 'package:memo_planner/core/widgets/message_screen.dart';
 
 class GoalPage extends StatelessWidget {
   const GoalPage({super.key});
@@ -9,17 +9,12 @@ class GoalPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemBuilder: (context, index) {
-                return TestItem(index: index);
-              },
-              itemCount: 10,
-            ),
-          ),
-        ],
+      body: MessageScreenWithAction(
+        message: 'Back to Habit Page',
+        onPressed: () {
+          context.go('/habit');
+        },
+        buttonText: 'Habit',
       ),
     );
   }
