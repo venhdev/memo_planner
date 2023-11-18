@@ -17,22 +17,22 @@ class EmptyHabit extends StatelessWidget {
               height: 200,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           const Text(
-            'You have no habits today',
+            'Everything is done!',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 20),
-          const Text(
-            'Add your habits to make your life better',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          const SizedBox(height: 24),
+          // const Text(
+          //   'Add more things to do to make your day more productive.',
+          //   style: TextStyle(
+          //     fontSize: 16,
+          //     fontWeight: FontWeight.w500,
+          //   ),
+          // ),
         ],
       ),
     );

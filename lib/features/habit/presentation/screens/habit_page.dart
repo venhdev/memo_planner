@@ -11,6 +11,8 @@ import '../widgets/widgets.dart';
 
 enum FilterOptions { name, time }
 
+enum Routine { morning, afternoon, evening }
+
 class HabitPage extends StatefulWidget {
   const HabitPage({super.key});
 
@@ -25,6 +27,7 @@ class _HabitPageState extends State<HabitPage> {
 
   String searchQuery = '';
   FilterOptions currentFilter = FilterOptions.time;
+  Routine? currentRoutine;
 
   @override
   void dispose() {
@@ -102,7 +105,7 @@ class _HabitPageState extends State<HabitPage> {
                           });
                         },
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Row(
@@ -130,15 +133,21 @@ class _HabitPageState extends State<HabitPage> {
                               onPressed: () {
                                 onTapFilter(context);
                               },
-                              icon: const Icon(Icons.filter_alt),
+                              icon: const Icon(Icons.sort),
                             ),
                           ],
                         ),
                       ),
+                      // routine (morning, afternoon, evening) using chip
+                      const SizedBox(height: 8),
+                      buildRoutinePicker(),
+                      const SizedBox(height: 16),
+
                       HabitList(
                         focusDate: _focus,
                         habitStream: state.habitStream,
                         currentFilter: currentFilter,
+                        currentRoutine: currentRoutine,
                         query: searchQuery,
                       ),
                       SizedBox(height: MediaQuery.of(context).padding.bottom),
@@ -172,6 +181,53 @@ class _HabitPageState extends State<HabitPage> {
           );
         }
       },
+    );
+  }
+
+  Widget buildRoutinePicker() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            const SizedBox(width: 10),
+            ActionChip(
+              backgroundColor: currentRoutine == Routine.morning ? Colors.cyan[200] : null,
+              avatar: const Icon(Icons.sunny_snowing),
+              label: const Text('Morning'),
+              onPressed: () {
+                setState(() {
+                  currentRoutine == Routine.morning ? currentRoutine = null : currentRoutine = Routine.morning;
+                });
+              },
+            ),
+            const SizedBox(width: 10),
+            ActionChip(
+              backgroundColor: currentRoutine == Routine.afternoon ? Colors.yellow[300] : null,
+              avatar: const Icon(Icons.sunny),
+              label: const Text('Afternoon'),
+              onPressed: () {
+                setState(() {
+                  currentRoutine == Routine.afternoon ? currentRoutine = null : currentRoutine = Routine.afternoon;
+                });
+              },
+            ),
+            const SizedBox(width: 10),
+            ActionChip(
+              backgroundColor: currentRoutine == Routine.evening ? Colors.purple[200] : null,
+              avatar: const Icon(Icons.bedtime),
+              label: const Text('Evening'),
+              onPressed: () {
+                setState(() {
+                  currentRoutine == Routine.evening ? currentRoutine = null : currentRoutine = Routine.evening;
+                });
+              },
+            ),
+            const SizedBox(width: 10),
+          ],
+        ),
+      ),
     );
   }
 

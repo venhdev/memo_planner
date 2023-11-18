@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:memo_planner/core/utils/helpers.dart';
-import 'package:memo_planner/core/widgets/message_screen.dart';
-import 'package:memo_planner/features/habit/presentation/screens/habit_page.dart';
 
 import '../../../../core/constants/typedef.dart';
+import '../../../../core/utils/helpers.dart';
 import '../../../../core/widgets/loading_screen.dart';
+import '../../../../core/widgets/message_screen.dart';
 import '../../data/models/habit_model.dart';
 import '../../domain/entities/rrule.dart';
+import '../screens/habit_page.dart';
 import 'widgets.dart';
 
 class HabitList extends StatelessWidget {
@@ -16,6 +16,7 @@ class HabitList extends StatelessWidget {
     required this.habitStream,
     required this.focusDate,
     required this.currentFilter,
+    required this.currentRoutine,
     this.query = '',
   });
 
@@ -23,6 +24,7 @@ class HabitList extends StatelessWidget {
   final DateTime focusDate;
   final String query;
   final FilterOptions currentFilter;
+  final Routine? currentRoutine;
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +38,13 @@ class HabitList extends StatelessWidget {
             if (habits.isEmpty) {
               return const EmptyHabit();
             }
-
             // Filter by query that user type
             final filteredHabits = habits.where((element) {
               final habit = HabitModel.fromDocument(element.data());
               return habit.summary!.contains(query);
             }).toList();
 
-            // Sort by filter
+            // Sort by filter option
             if (currentFilter == FilterOptions.name) {
               filteredHabits.sort((a, b) {
                 final habitA = HabitModel.fromDocument(a.data());
@@ -55,6 +56,26 @@ class HabitList extends StatelessWidget {
                 final habitA = HabitModel.fromDocument(a.data());
                 final habitB = HabitModel.fromDocument(b.data());
                 return compareDateTimeByTime(habitA.start!, habitB.start!);
+              });
+            }
+            // Filter by routine selected -- handle by startTime
+            // - currentRoutine == null >> show all habits
+            // - morning >> start time = 00:00 - 11:59
+            // - afternoon >> start time = 12:00 - 17:59
+            // - evening >> start time = 18:00 - 23:59
+
+            if (currentRoutine != null) {
+              filteredHabits.removeWhere((element) {
+                final habit = HabitModel.fromDocument(element.data());
+                if (currentRoutine == Routine.morning) {
+                  return habit.start!.hour > 0 && habit.start!.hour < 12;
+                } else if (currentRoutine == Routine.afternoon) {
+                  return habit.start!.hour >= 12 || habit.start!.hour < 18;
+                } else if (currentRoutine == Routine.evening) {
+                  return habit.start!.hour <= 18;
+                } else {
+                  return true;
+                }
               });
             }
 

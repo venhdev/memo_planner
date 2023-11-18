@@ -22,7 +22,8 @@ class HabitEntity extends Equatable {
   final String? description;
 
   final DateTime? start; // start time
-  final DateTime? end; // end time end time of the event. For a recurring habit, this is the end time of the first instance.
+  final DateTime?
+      end; // end time end time of the event. For a recurring habit, this is the end time of the first instance.
   final String? recurrence; // recurrence rule
 
   final DateTime? created; //Creation time of the habit
@@ -30,10 +31,7 @@ class HabitEntity extends Equatable {
 
   final UserEntity? creator; //The creator of the habit. Read-only.
 
-
   final String kind = 'habit#summary';
-
-
 
   // ie. recurrence: 'RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20231130'
   DateTime? get until {
@@ -47,7 +45,6 @@ class HabitEntity extends Equatable {
     return null;
   }
 
-  
   // copyWith
   HabitEntity copyWith({
     String? hid,
