@@ -10,6 +10,15 @@ const List<String> kDayOfWeek = [
   'SA', // Saturday
   'SU', // Sunday
 ];
+const List<String> kDayOfWeekNumber = [
+  '2', // Monday
+  '3', // Tuesday
+  '4', // Wednesday
+  '5', // Thursday
+  '6', // Friday
+  '7', // Saturday
+  'SU', // Sunday
+];
 
 class MyWeekDaySelector extends StatelessWidget {
   const MyWeekDaySelector({

@@ -34,21 +34,21 @@ class _HabitPageState extends State<HabitPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MyAppBar.habitAppBar(
-        context: context,
-      ),
-      drawer: const AppNavigationDrawer(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.go('/habit/add');
-        },
-        child: const Icon(Icons.add),
-      ),
-      body: BlocBuilder<AuthenticationBloc, AuthenticationState>(
-        builder: (context, state) {
-          if (state.status == AuthenticationStatus.authenticated) {
-            return BlocConsumer<HabitBloc, HabitState>(
+    return BlocBuilder<AuthenticationBloc, AuthenticationState>(
+      builder: (context, state) {
+        if (state.status == AuthenticationStatus.authenticated) {
+          return Scaffold(
+            appBar: MyAppBar.habitAppBar(
+              context: context,
+            ),
+            drawer: const AppNavigationDrawer(),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                context.go('/habit/add');
+              },
+              child: const Icon(Icons.add),
+            ),
+            body: BlocConsumer<HabitBloc, HabitState>(
               listener: (context, state) {
                 if (state is HabitLoaded) {
                   if (state.message != null) {
@@ -154,18 +154,24 @@ class _HabitPageState extends State<HabitPage> {
                   return const MessageScreen(message: 'Something went wrong [e04]');
                 }
               },
-            );
-          } else {
-            return MessageScreenWithAction(
+            ),
+          );
+        } else {
+          return Scaffold(
+            appBar: MyAppBar.habitAppBar(
+              context: context,
+            ),
+            drawer: const AppNavigationDrawer(),
+            body: MessageScreenWithAction(
               message: 'Please sign in to continue',
               buttonText: 'Sign in',
               onPressed: () {
                 context.go('/authentication/sign-in');
               },
-            );
-          }
-        },
-      ),
+            ),
+          );
+        }
+      },
     );
   }
 

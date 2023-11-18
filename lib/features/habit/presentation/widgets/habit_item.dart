@@ -27,10 +27,12 @@ class HabitItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.grey,
-        ),
         borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green[50]!,
+          ),
+        ],
       ),
       child: buildStreamInstance(
         stream: di<GetHabitInstanceStreamUC>()(
@@ -111,8 +113,8 @@ class HabitItemBody extends StatelessWidget {
       },
       child: Slidable(
         startActionPane: ActionPane(
-          dragDismissible: true,
           motion: const DrawerMotion(),
+          extentRatio: 0.2,
           children: [
             // Edit action
             SlidableAction(
@@ -123,12 +125,13 @@ class HabitItemBody extends StatelessWidget {
               backgroundColor: Colors.cyan,
               foregroundColor: Colors.white,
               icon: Icons.edit,
-              label: 'Edit',
+              // label: 'Edit',
             ),
           ],
         ),
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
+          extentRatio: 0.2,
           children: [
             // Delete action
             SlidableAction(
@@ -139,7 +142,6 @@ class HabitItemBody extends StatelessWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               icon: Icons.delete,
-              label: 'Delete',
             ),
           ],
         ),
@@ -150,26 +152,22 @@ class HabitItemBody extends StatelessWidget {
           if (isICreated) {
             if (instance!.edited!) {
               summary = instance!.summary!;
-              startTime =
-                  convertDateTimeToString(instance!.start!, pattern: formatTimePattern);
-              endTime =
-                  convertDateTimeToString(instance!.end!, pattern: formatTimePattern);
+              startTime = convertDateTimeToString(instance!.start!, pattern: kTimeFormatPattern);
+              endTime = convertDateTimeToString(instance!.end!, pattern: kTimeFormatPattern);
             } else {
               summary = habit.summary!;
-              startTime =
-                  convertDateTimeToString(habit.start!, pattern: formatTimePattern);
-              endTime = convertDateTimeToString(habit.end!, pattern: formatTimePattern);
+              startTime = convertDateTimeToString(habit.start!, pattern: kTimeFormatPattern);
+              endTime = convertDateTimeToString(habit.end!, pattern: kTimeFormatPattern);
             }
           } else {
             summary = habit.summary!;
-            startTime = convertDateTimeToString(habit.start!, pattern: formatTimePattern);
-            endTime = convertDateTimeToString(habit.end!, pattern: formatTimePattern);
+            startTime = convertDateTimeToString(habit.start!, pattern: kTimeFormatPattern);
+            endTime = convertDateTimeToString(habit.end!, pattern: kTimeFormatPattern);
           }
           return ListTile(
             title: Text(
               summary,
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
               textAlign: TextAlign.center,
             ),
             subtitle: Text(
@@ -182,8 +180,7 @@ class HabitItemBody extends StatelessWidget {
             ),
             leading: Builder(builder: (context) {
               var canCheck = false;
-              if (habit.created!.isBefore(focusDate) &&
-                  habit.end!.isAfter(focusDate)) {
+              if (habit.created!.isBefore(focusDate) && habit.end!.isAfter(focusDate)) {
                 canCheck = true;
               }
               return IgnorePointer(
@@ -243,8 +240,7 @@ class HabitItemBody extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                BlocProvider.of<HabitBloc>(context)
-                    .add(HabitDeleteEvent(habit: habit));
+                BlocProvider.of<HabitBloc>(context).add(HabitDeleteEvent(habit: habit));
                 Navigator.pop(context);
               },
               child: const Text('Yes'),

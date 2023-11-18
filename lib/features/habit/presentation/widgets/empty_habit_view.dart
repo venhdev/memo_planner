@@ -7,16 +7,19 @@ class EmptyHabit extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return Expanded(
       child: Column(
         children: [
-          SvgPicture.asset(
-            'assets/images/no-data.svg',
-            height: 200,
+          Flexible(
+            fit: FlexFit.loose,
+            child: SvgPicture.asset(
+              'assets/images/no-data.svg',
+              height: 200,
+            ),
           ),
           const SizedBox(height: 20),
           const Text(
-            'You have no habits',
+            'You have no habits today',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,

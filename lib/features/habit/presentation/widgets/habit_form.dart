@@ -260,7 +260,7 @@ class _HabitFormState extends State<HabitForm> {
                   Text(
                     convertDateTimeToString(
                       _start,
-                      pattern: formatTimePattern,
+                      pattern: kTimeFormatPattern,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -314,7 +314,7 @@ class _HabitFormState extends State<HabitForm> {
                   Text(
                     convertDateTimeToString(
                       _end,
-                      pattern: formatTimePattern,
+                      pattern: kTimeFormatPattern,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -442,8 +442,18 @@ class _HabitFormState extends State<HabitForm> {
     );
   }
 
-  String getRecurrence() =>
-      _freq == FREQ.daily.name ? RRule.daily().toString() : RRule.weekly(weekdays: weekdays).toString();
+  String getUntil() => convertDateTimeToString(_endOfHabit!, pattern: kDateFormatPattern);
+
+  String getRecurrenceRuleString() =>
+      _freq == FREQ.daily.name //daily
+        ? _hasEndDate
+          ? RRule.dailyUntil(until: getUntil()).toString()
+          : RRule.daily().toString()
+        : _freq == FREQ.weekly.name //weekly
+          ? _hasEndDate
+            ? RRule.weeklyUntil(weekdays: weekdays, until: getUntil()).toString()
+            : RRule.weekly(weekdays: weekdays).toString()
+          : '';
 
   void onSubmitAddHabit(BuildContext context) {
     if (_start.isBefore(_end) || _start.isAtSameMomentAs(_end)) {
@@ -455,7 +465,7 @@ class _HabitFormState extends State<HabitForm> {
             description: _descriptionController.text,
             start: _start,
             end: _end,
-            recurrence: getRecurrence(),
+            recurrence: getRecurrenceRuleString(),
             created: DateTime.now(),
             updated: DateTime.now(),
             creator: null,
@@ -493,7 +503,7 @@ class _HabitFormState extends State<HabitForm> {
       description: _descriptionController.text,
       start: _start,
       end: _end,
-      recurrence: getRecurrence(),
+      recurrence: getRecurrenceRuleString(),
       updated: DateTime.now(),
     );
     BlocProvider.of<HabitBloc>(context).add(

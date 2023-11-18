@@ -7,9 +7,9 @@ const String pathToHabits = 'habits';
 const String pathToHabitInstances = 'instances';
 
 // this is pattern use to store date in firestore RRule
-const String formatDatePattern = 'yyyyMMdd';
+const String kDateFormatPattern = 'yyyyMMdd';
 // this is pattern use to display time in app
-const String formatTimePattern = 'hh:mm a';
+const String kTimeFormatPattern = 'hh:mm a';
 
 
 // ------------------  Firebase Constants ------------------

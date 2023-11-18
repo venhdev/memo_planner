@@ -37,13 +37,13 @@ class HabitList extends StatelessWidget {
               return const EmptyHabit();
             }
 
-            // filter by query that user type
+            // Filter by query that user type
             final filteredHabits = habits.where((element) {
               final habit = HabitModel.fromDocument(element.data());
               return habit.summary!.contains(query);
             }).toList();
 
-            // sort by name
+            // Sort by filter
             if (currentFilter == FilterOptions.name) {
               filteredHabits.sort((a, b) {
                 final habitA = HabitModel.fromDocument(a.data());
@@ -51,12 +51,10 @@ class HabitList extends StatelessWidget {
                 return habitA.summary!.compareTo(habitB.summary!);
               });
             } else if (currentFilter == FilterOptions.time) {
-              // sort by start time
               filteredHabits.sort((a, b) {
                 final habitA = HabitModel.fromDocument(a.data());
                 final habitB = HabitModel.fromDocument(b.data());
                 return compareDateTimeByTime(habitA.start!, habitB.start!);
-                // return habitA.start!.compareTo(habitB.start!);
               });
             }
 
@@ -100,6 +98,8 @@ class _FilterHabitListState extends State<FilterHabitList> {
       );
     }).toList();
 
+    if (progressingHabits.isEmpty) return const EmptyHabit();
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -119,10 +119,9 @@ class _FilterHabitListState extends State<FilterHabitList> {
   }
 }
 
-
-
 bool isTodayHabit({required DateTime startOfHabit, required String recurrence, required DateTime focusDate}) {
   final rule = RRule.fromString(recurrence); // read rrule from string
+  debugPrint('rule = $rule');
   var endOfHabit = rule.until != null ? convertStringToDateTime(rule.until!) : null;
 
   //! no endOfHabit
@@ -130,9 +129,12 @@ bool isTodayHabit({required DateTime startOfHabit, required String recurrence, r
   // - weekly habit >> startOfHabit <= focusDate && focusDate is in rule.byDay
   if (endOfHabit == null) {
     if (rule.freq == FREQ.daily) {
-      return startOfHabit.isBefore(focusDate) || compareDateTimeByDay(startOfHabit, focusDate) == 0;
+      // subtract 1 day because startOfHabit may contain hh:mm. ex:
+      // startOfHabit = 2021-09-01 09:00:00
+      // focusDate = 2021-09-01 00:00:00 -> startOfHabit is not before focusDate even though they are the same day
+      return startOfHabit.subtract(const Duration(days: 1)).isBefore(focusDate);
     } else if (rule.freq == FREQ.weekly) {
-      return startOfHabit.isBefore(focusDate) && rule.isMatchingWeekDate(focusDate);
+      return (startOfHabit.subtract(const Duration(days: 1)).isBefore(focusDate)) && rule.isMatchingWeekDate(focusDate);
     } else {
       return false;
     }
@@ -158,11 +160,12 @@ bool isInRange({
   required DateTime focusDate,
 }) {
   return endOfHabit == null
-      ? startOfHabit.isBefore(focusDate) || compareDateTimeByDay(startOfHabit, focusDate) == 0
-      // startOfHabit may contain hh:mm -> cannot use isAtSameMomentAs
-      : startOfHabit.isBefore(focusDate) && endOfHabit.isAfter(focusDate) ||
-          compareDateTimeByDay(endOfHabit, focusDate) == 0 || // end date equal to focus date
-          compareDateTimeByDay(startOfHabit, focusDate) == 0; // start date equal to focus date
+      // startOfHabit may contain hh:mm >> cannot use isAtSameMomentAs >> subtract 1 day
+      ? startOfHabit.subtract(const Duration(days: 1)).isBefore(focusDate)
+      // start <= focusDate && end >= focusDate
+      // endOfHabit retrieve from rrule.until >> not contain hh:mm >> can use isAtSameMomentAs
+      : (startOfHabit.subtract(const Duration(days: 1)).isBefore(focusDate)) &&
+          (endOfHabit.isAfter(focusDate) || endOfHabit.isAtSameMomentAs(focusDate));
 }
 
 // bool isInProgress(DateTime start, DateTime end, DateTime focusDate) {

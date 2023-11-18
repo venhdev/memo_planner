@@ -12,7 +12,7 @@ DateTime convertTimestampToDateTime(Timestamp timestamp) {
   return DateTime.fromMicrosecondsSinceEpoch(timestamp.microsecondsSinceEpoch);
 }
 
-/// use to Convert DateTime to format [formatDatePattern]
+/// use to Convert DateTime to format [kDateFormatPattern]
 String convertDateTimeToyyyyMMdd(DateTime dateTime) {
   return dateTime.toIso8601String().substring(0, 10).replaceAll('-', '');
 }
@@ -25,7 +25,7 @@ DateTime convertStringToDateTime(
   if (pattern != null) {
     if (RegExp(r'\W').hasMatch(pattern.pattern!)) {
       return pattern.parse(date);
-    } else if (pattern.pattern! == formatDatePattern) {
+    } else if (pattern.pattern! == kDateFormatPattern) {
       DateTime.parse(date);
     } else {
       throw const FormatException(

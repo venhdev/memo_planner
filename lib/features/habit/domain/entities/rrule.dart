@@ -5,16 +5,18 @@ class RRule {
   factory RRule.daily() {
     return const RRule(freq: FREQ.daily, interval: 1);
   }
-  factory RRule.dailyUntil({String? until}) {
+  factory RRule.dailyUntil({required String until}) {
     return RRule(freq: FREQ.daily, interval: 1, until: until);
   }
-  factory RRule.weeklyFull() {
-    return RRule.daily();
-  }
   factory RRule.weekly({required List<bool> weekdays}) {
-    if (weekdays.every((day) => day == true)) return RRule.weeklyFull();
+    if (weekdays.every((day) => day == true)) return RRule.daily();
     String? byDay = RRule.getWeekDayString(weekdays);
     return RRule(freq: FREQ.weekly, byDay: byDay);
+  }
+  factory RRule.weeklyUntil({required List<bool> weekdays, required String until}) {
+    if (weekdays.every((day) => day == true)) return RRule.dailyUntil(until: until);
+    String? byDay = RRule.getWeekDayString(weekdays);
+    return RRule(freq: FREQ.weekly, until: until, byDay: byDay);
   }
 
   // from String -- iCalendar/RFC 5545-compliant String
@@ -160,7 +162,7 @@ class RRule {
     }
 
     String weekdayString = weekdayList.join(',');
-    return ';BYDAY=$weekdayString';
+    return weekdayString;
   }
 }
 
