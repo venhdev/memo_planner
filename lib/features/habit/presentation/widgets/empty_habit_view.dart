@@ -8,14 +8,12 @@ class EmptyHabit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(
+      child: ListView(
+        shrinkWrap: true,
         children: [
-          Flexible(
-            fit: FlexFit.loose,
-            child: SvgPicture.asset(
-              'assets/images/no-data.svg',
-              height: 200,
-            ),
+          SvgPicture.asset(
+            'assets/images/no-data.svg',
+            height: 200,
           ),
           const SizedBox(height: 24),
           const Text(
@@ -24,6 +22,7 @@ class EmptyHabit extends StatelessWidget {
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           // const Text(

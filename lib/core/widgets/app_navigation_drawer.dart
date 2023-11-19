@@ -120,20 +120,20 @@ class AppNavigationDrawer extends StatelessWidget {
         runSpacing: 8.0,
         children: [
           ListTile(
-            leading: const Icon(Icons.calendar_month),
+            leading: const Icon(Icons.checklist),
             title: const Text('Habit'),
             onTap: () {
               Navigator.pop(context);
               context.go('/habit');
             },
           ),
-          // ListTile(
-          //   leading: const Icon(Icons.settings),
-          //   title: const Text('Settings'),
-          //   onTap: () {},
-          // ),
           ListTile(
-            leading: const Icon(Icons.person),
+            leading: const Icon(Icons.moving),
+            title: const Text('Goal'),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: const Icon(Icons.person_outline),
             title: const Text('User'),
             onTap: () {
               Navigator.pop(context);

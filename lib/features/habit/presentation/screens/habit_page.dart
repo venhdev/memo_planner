@@ -142,7 +142,7 @@ class _HabitPageState extends State<HabitPage> {
                       const SizedBox(height: 8),
                       buildRoutinePicker(),
                       const SizedBox(height: 16),
-
+                  
                       HabitList(
                         focusDate: _focus,
                         habitStream: state.habitStream,
@@ -166,18 +166,12 @@ class _HabitPageState extends State<HabitPage> {
             ),
           );
         } else {
-          return Scaffold(
-            appBar: MyAppBar.habitAppBar(
-              context: context,
-            ),
-            drawer: const AppNavigationDrawer(),
-            body: MessageScreenWithAction(
-              message: 'Please sign in to continue',
-              buttonText: 'Sign in',
-              onPressed: () {
-                context.go('/authentication/sign-in');
-              },
-            ),
+          return MessageScreenWithAction(
+            message: 'Please sign in to continue',
+            buttonText: 'Sign in',
+            onPressed: () {
+              context.go('/authentication');
+            },
           );
         }
       },
