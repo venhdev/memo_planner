@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 
@@ -58,12 +57,11 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
     try {
       await _firebaseAuth.signOut();
       if (_googleSignIn.currentUser != null) {
-        debugPrint('Signing out from Google');
+        log('Signing out from Google');
         await _googleSignIn.signOut();
       }
     } catch (e) {
-      log(e.toString());
-      log('runtimeType: ${e.runtimeType.toString()}');
+      log('rethrow --> Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       rethrow;
     }
   }

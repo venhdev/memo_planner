@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Future<DateTime?> pickDate(
+Future<DateTime?> showMyDatePicker(
   BuildContext context, {
   required DateTime initDate,
 }) =>
@@ -10,7 +10,7 @@ Future<DateTime?> pickDate(
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
     );
-Future<TimeOfDay?> pickTime(
+Future<TimeOfDay?> showMyTimePicker(
   BuildContext context, {
   required TimeOfDay initTime,
 }) =>
@@ -18,4 +18,3 @@ Future<TimeOfDay?> pickTime(
       context: context,
       initialTime: initTime,
     );
-

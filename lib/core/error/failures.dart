@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+enum Code { unknown, unauthorized, unauthenticated, notFound }
+
 // General failure message
 const String failureMessage = 'Something went wrong !!!';
 const String serverFailureFailureMessage = 'Server Failure';
@@ -8,10 +10,10 @@ const String networkFailureMessage = 'Network Failure';
 
 class Failure extends Equatable {
   const Failure({
-    this.code = '1000',
+    this.code = 'unknown-failure',
     this.message = failureMessage,
   });
-  
+
   final String code;
   final String message;
 
@@ -21,16 +23,22 @@ class Failure extends Equatable {
 
 // General failure message
 class ServerFailure extends Failure {
-  const ServerFailure({code = 'server-failure-code', message = serverFailureFailureMessage})
-      : super(code: code, message: message);
+  const ServerFailure({
+    String code = 'server-failure',
+    String message = serverFailureFailureMessage,
+  }) : super(code: code, message: message);
 }
 
 class CacheFailure extends Failure {
-  const CacheFailure({code = '3000', message = cacheCacheFailureMessage})
-      : super(code: code, message: message);
+  const CacheFailure({
+    String code = 'cache-failure',
+    String message = cacheCacheFailureMessage,
+  }) : super(code: code, message: message);
 }
 
 class NetworkFailure extends Failure {
-  const NetworkFailure({code = '4000', message = networkFailureMessage})
-      : super(code: code, message: message);
+  const NetworkFailure({
+    String code = 'network-failure',
+    String message = networkFailureMessage,
+  }) : super(code: code, message: message);
 }

@@ -1,5 +1,6 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/constants.dart';
@@ -34,10 +35,7 @@ class HabitDataSourceImpl extends HabitDataSource {
   Future<void> addHabit(HabitEntity habit) async {
     try {
       // get the collection reference
-      final habitCollectionRef = _firestore
-          .collection(pathToUsers)
-          .doc(habit.creator!.email)
-          .collection(pathToHabits);
+      final habitCollectionRef = _firestore.collection(pathToUsers).doc(habit.creator!.email).collection(pathToHabits);
 
       // create a new document with a unique id
       final hid = habitCollectionRef.doc().id;
@@ -56,45 +54,31 @@ class HabitDataSourceImpl extends HabitDataSource {
   @override
   Future<void> deleteHabit(HabitEntity habit) async {
     try {
-      final habitCollRef = _firestore
-          .collection(pathToUsers)
-          .doc(habit.creator!.email)
-          .collection(pathToHabits);
+      final habitCollRef = _firestore.collection(pathToUsers).doc(habit.creator!.email).collection(pathToHabits);
 
-      await habitCollRef
-          .doc(habit.hid)
-          .collection(pathToHabitInstances)
-          .get()
-          .then((snapshot) {
+      await habitCollRef.doc(habit.hid).collection(pathToHabitInstances).get().then((snapshot) {
         for (var ds in snapshot.docs) {
           ds.reference.delete();
         }
       });
-
-      await habitCollRef
-          .doc(habit.hid)
-          .delete()
-          .then((doc) => debugPrint('Habit ${habit.summary} deleted'));
-    } on FirebaseException catch (e) {
-      throw ServerException(code: e.code, message: e.toString());
+      await habitCollRef.doc(habit.hid).delete();
     } catch (e) {
-      throw ServerException(message: e.toString());
+      log('rethrow --> Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      rethrow;
     }
   }
 
   @override
   Future<void> updateHabit(HabitEntity habit) async {
     try {
-      final habitCollectionRef = _firestore
-          .collection(pathToUsers)
-          .doc(habit.creator!.email)
-          .collection(pathToHabits);
+      final habitCollectionRef = _firestore.collection(pathToUsers).doc(habit.creator!.email).collection(pathToHabits);
 
       final habitModel = HabitModel.fromEntity(habit);
 
       await habitCollectionRef.doc(habit.hid).update(habitModel.toDocument());
     } on FirebaseException catch (e) {
-      throw ServerException(code: e.code, message: e.toString());
+      log('rethrow --> Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      rethrow;
     } catch (e) {
       throw ServerException(message: e.toString());
     }
@@ -102,11 +86,7 @@ class HabitDataSourceImpl extends HabitDataSource {
 
   @override
   SQuerySnapshot getHabitStream(UserEntity user) {
-    final habitCollRef = _firestore
-        .collection(pathToUsers)
-        .doc(user.email)
-        .collection(pathToHabits)
-        .orderBy('summary');
+    final habitCollRef = _firestore.collection(pathToUsers).doc(user.email).collection(pathToHabits).orderBy('summary');
     return habitCollRef.snapshots();
   }
 
@@ -114,11 +94,7 @@ class HabitDataSourceImpl extends HabitDataSource {
   Future<HabitEntity?> getHabitByHid(String hid) async {
     final user = _authenticationDataSource.currentUser;
     if (user != null) {
-      final habitDocRef = _firestore
-          .collection(pathToUsers)
-          .doc(user.email)
-          .collection(pathToHabits)
-          .doc(hid);
+      final habitDocRef = _firestore.collection(pathToUsers).doc(user.email).collection(pathToHabits).doc(hid);
       final habitDoc = await habitDocRef.get();
 
       if (habitDoc.exists) {
@@ -135,8 +111,7 @@ class HabitDataSourceImpl extends HabitDataSource {
   // 2. the middle day of the list is completed [...0,1,0...]
   // 3. the last day of the list is completed [...0,1]
   @override
-  Future<List<StreakInstanceEntity>> getTopStreakOfHabit(
-      HabitEntity habit) async {
+  Future<List<StreakInstanceEntity>> getTopStreakOfHabit(HabitEntity habit) async {
     final habitICollRef = _firestore
         .collection(pathToUsers)
         .doc(habit.creator!.email)
@@ -148,9 +123,7 @@ class HabitDataSourceImpl extends HabitDataSource {
     List<HabitInstanceModel> instances = [];
 
     if (habitIDocRef.docs.isNotEmpty) {
-      instances = habitIDocRef.docs
-          .map((doc) => HabitInstanceModel.fromDocument(doc.data()))
-          .toList();
+      instances = habitIDocRef.docs.map((doc) => HabitInstanceModel.fromDocument(doc.data())).toList();
     } else {
       return [];
     }
@@ -169,8 +142,7 @@ class HabitDataSourceImpl extends HabitDataSource {
         currentStreakLength++;
         // check if the next day has init instance or not
         final isCreated = await isCreatedInstance(
-          iid: getIid(
-              habit.hid!, currentStreakDate.add(const Duration(days: 1))),
+          iid: getIid(habit.hid!, currentStreakDate.add(const Duration(days: 1))),
           collectionReference: habitICollRef,
         );
 

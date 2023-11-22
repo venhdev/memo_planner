@@ -45,7 +45,7 @@ class TaskModel extends TaskEntity {
       summary: data['summary'],
       description: data['description'],
       creator: UserModel.fromDocument(data['creator']),
-      dueDate: convertTimestampToDateTime(data['dueDate'] as Timestamp),
+      dueDate: convertTimestampToDateTime(data['dueDate'] as Timestamp?),
       completed: data['completed'],
     );
   }

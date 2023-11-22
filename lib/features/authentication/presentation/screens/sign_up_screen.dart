@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/authentication/presentation/bloc/bloc/authentication_bloc.dart';
+import 'package:memo_planner/features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 
 import '../../../../core/widgets/widgets.dart';
 

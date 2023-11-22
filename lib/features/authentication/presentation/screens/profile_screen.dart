@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memo_planner/features/authentication/domain/entities/user_entity.dart';
 
-import '../bloc/bloc/authentication_bloc.dart';
+import '../bloc/authentication/authentication_bloc.dart';
 import '../widgets/profile_menu.dart';
 
 class ProfileScreen extends StatefulWidget {

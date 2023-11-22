@@ -1,6 +1,6 @@
 /*
 goal#target:
-- tid:String --target id
+- targetId:String --target id
 - summary:String
 - description:String
 - target:int --[measurable] e.g. 20
@@ -32,7 +32,7 @@ class TargetEntity extends Equatable {
   final int? target;
   final int? progress;
   final String? unit;
-  
+
   final String kind;
 
   @override
@@ -46,4 +46,28 @@ class TargetEntity extends Equatable {
         creator,
         kind,
       ];
+
+  //copyWith
+  TargetEntity copyWith({
+    String? targetId,
+    String? summary,
+    String? description,
+    int? target,
+    int? progress,
+    String? unit,
+    UserEntity? creator,
+    String? kind,
+  }) {
+    return TargetEntity(
+      targetId: targetId ?? this.targetId,
+      summary: summary ?? this.summary,
+      description: description ?? this.description,
+      target: target ?? this.target,
+      progress: progress ?? this.progress,
+      unit: unit ?? this.unit,
+      creator: creator ?? this.creator,
+      kind: kind ?? this.kind,
+    );
+  }
+
 }

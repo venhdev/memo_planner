@@ -5,6 +5,8 @@ part 'habit_constants.dart';
 const String pathToUsers = 'users';
 const String pathToHabits = 'habits';
 const String pathToHabitInstances = 'instances';
+const String pathToTasks = 'tasks';
+const String pathToTargets = 'targets';
 
 // this is pattern use to store date in firestore RRule
 const String kDateFormatPattern = 'yyyyMMdd';

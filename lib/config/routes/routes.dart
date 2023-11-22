@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:memo_planner/features/goal/presentation/screens/task_edit_screen.dart';
 
+import '../../core/constants/enum.dart';
 import '../../features/authentication/presentation/screens/screens.dart';
 import '../../features/goal/presentation/screens/goal_page.dart';
+import '../../features/goal/presentation/screens/task_detail_screen.dart';
 import '../../features/habit/presentation/screens/screens.dart';
-import '../../features/habit/presentation/widgets/habit_form.dart';
 
 part 'app_scaffold_navigation_bar.dart';
 
@@ -62,7 +64,7 @@ GoRoute habitRoutes() {
     routes: [
       GoRoute(
         path: 'add',
-        builder: (context, state) => const EditHabitScreen(type: EditType.addHabit),
+        builder: (context, state) => const EditHabitScreen(type: EditType.add),
         // builder: (context, state) => const AddHabitScreen(),
       ),
       GoRoute(
@@ -75,14 +77,12 @@ GoRoute habitRoutes() {
           path: 'edit-habit/:id',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
-            // return EditHabitScreen(hid: id);
-            return EditHabitScreen(id: id, type: EditType.editHabit);
+            return EditHabitScreen(id: id, type: EditType.edit);
           }),
       GoRoute(
           path: 'edit-instance/:id',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
-            // return EditHabitInstanceScreen(iid: id);
             return EditHabitScreen(id: id, type: EditType.editInstance);
           }),
     ],
@@ -93,6 +93,34 @@ GoRoute goalRoutes() {
   return GoRoute(
     path: '/goal',
     builder: (context, state) => const GoalPage(),
+    routes: [
+      GoRoute(
+        path: 'task',
+        builder: (context, state) => const GoalPage(),
+        routes: [
+          GoRoute(
+            path: 'add',
+            builder: (context, state) {
+              return const TaskEditScreen(type: EditType.add);
+            },
+          ),
+          GoRoute(
+            path: 'edit/:id',
+            builder: (context, state) {
+              final taskId = state.pathParameters['id']!;
+              return TaskEditScreen(id: taskId, type: EditType.edit);
+            },
+          ),
+          GoRoute(
+            path: 'detail/:id',
+            builder: (context, state) {
+              final taskId = state.pathParameters['id']!;
+              return TaskDetailScreen(id: taskId);
+            },
+          ),
+        ],
+      ),
+    ],
   );
 }
 

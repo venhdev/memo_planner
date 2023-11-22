@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,7 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/helpers.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../../../authentication/presentation/bloc/bloc/authentication_bloc.dart';
+import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../bloc/habit/habit_bloc.dart';
 import '../widgets/widgets.dart';
 
@@ -40,12 +42,14 @@ class _HabitPageState extends State<HabitPage> {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       builder: (context, state) {
         if (state.status == AuthenticationStatus.authenticated) {
+          log('----------------called');
           return Scaffold(
             appBar: MyAppBar.habitAppBar(
               context: context,
             ),
             drawer: const AppNavigationDrawer(),
             floatingActionButton: FloatingActionButton(
+              heroTag: 'fab_habit',
               onPressed: () {
                 context.go('/habit/add');
               },
@@ -150,6 +154,7 @@ class _HabitPageState extends State<HabitPage> {
                         currentRoutine: currentRoutine,
                         query: searchQuery,
                       ),
+                      
                       SizedBox(height: MediaQuery.of(context).padding.bottom),
                     ],
                   );

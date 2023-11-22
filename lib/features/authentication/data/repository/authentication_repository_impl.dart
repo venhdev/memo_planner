@@ -2,12 +2,11 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/constants.dart';
-import '../../../../core/error/failures.dart';
 import '../../../../core/constants/typedef.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repository/authentication_repository.dart';
 import '../data_sources/authentication_data_source.dart';
@@ -38,8 +37,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     String password,
   ) async {
     try {
-      final userCredential =
-          await _firebaseAuthDataSource.signInWithEmailAndPassword(email, password);
+      final userCredential = await _firebaseAuthDataSource.signInWithEmailAndPassword(email, password);
       return Right(UserModel.fromUserCredential(userCredential.user!));
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
@@ -81,7 +79,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         return null;
       }
     } on FirebaseAuthException catch (e) {
-      debugPrint('AuthenticationRepositoryImpl: getCurrentUser: ${e.message}');
+      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return null;
     }
   }
@@ -92,7 +90,6 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       final userCredential = await _firebaseAuthDataSource.signUpWithEmail(email, password);
       return Right(UserModel.fromUserCredential(userCredential.user!));
     } on FirebaseAuthException catch (e) {
-      
       // not handle: 'email-already-in-use'
       switch (e.code) {
         case 'invalid-email':

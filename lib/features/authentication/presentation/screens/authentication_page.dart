@@ -5,7 +5,7 @@ import 'package:memo_planner/features/authentication/presentation/screens/screen
 
 import '../../../../core/widgets/widgets.dart';
 import '../../../habit/presentation/bloc/habit/habit_bloc.dart';
-import '../bloc/bloc/authentication_bloc.dart';
+import '../bloc/authentication/authentication_bloc.dart';
 
 class AuthenticationPage extends StatelessWidget {
   const AuthenticationPage({super.key});

@@ -8,8 +8,10 @@ String getIid(String hid, DateTime date) {
 }
 
 /// use to Convert Timestamp From FireStore to DateTime
-DateTime convertTimestampToDateTime(Timestamp timestamp) {
-  return DateTime.fromMicrosecondsSinceEpoch(timestamp.microsecondsSinceEpoch);
+DateTime? convertTimestampToDateTime(Timestamp? timestamp) {
+  return timestamp != null ? DateTime.fromMicrosecondsSinceEpoch(timestamp.microsecondsSinceEpoch) : null;
+
+  // return DateTime.fromMicrosecondsSinceEpoch(timestamp.microsecondsSinceEpoch);
 }
 
 /// use to Convert DateTime to format [kDateFormatPattern]
@@ -82,6 +84,7 @@ int compareDateTimeByDay(DateTime dateTime1, DateTime dateTime2) {
     return 0;
   }
 }
+
 /// Use to compare time {hour, minute} of two DateTime
 /// This function will return:
 /// - 1: dateTime1 > dateTime2
@@ -112,4 +115,3 @@ int compareTimeOfDay(TimeOfDay time1, TimeOfDay time2) {
     }
   }
 }
-

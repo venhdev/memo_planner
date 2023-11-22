@@ -1,5 +1,6 @@
+import 'dart:developer';
+
 import 'package:dartz/dartz.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/typedef.dart';
@@ -33,7 +34,7 @@ class HabitInstanceRepositoryImpl implements HabitInstanceRepository {
           _habitInstanceDataSource.getHabitInstanceStream(habit, focusDate);
       return habitInstances;
     } catch (e) {
-      debugPrint(e.toString());
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
     }
   }

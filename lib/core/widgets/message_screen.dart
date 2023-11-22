@@ -2,8 +2,11 @@
 import 'package:flutter/material.dart';
 
 class MessageScreen extends StatelessWidget {
-  const MessageScreen(
-      {super.key, required this.message, this.enableBack = true});
+  const MessageScreen({super.key, required this.message, this.enableBack = true});
+  factory MessageScreen.error([String? message]) => MessageScreen(
+        message: message ?? 'Unknown error',
+        enableBack: false,
+      );
 
   final String message;
   final bool enableBack;
@@ -31,6 +34,11 @@ class MessageScreen extends StatelessWidget {
 }
 
 class MessageScreenWithAction extends StatelessWidget {
+  factory MessageScreenWithAction.unauthenticated(VoidCallback onPressed) => MessageScreenWithAction(
+        message: 'You are not authenticated. Please login to continue.',
+        buttonText: 'Login',
+        onPressed: onPressed,
+      );
   const MessageScreenWithAction({
     super.key,
     required this.message,

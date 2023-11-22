@@ -1,26 +1,27 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:memo_planner/features/goal/domain/entities/task_entity.dart';
+import 'package:memo_planner/features/goal/presentation/bloc/task/task_bloc.dart';
 
 class TaskItem extends StatelessWidget {
   const TaskItem({
     super.key,
-    required this.completed,
+    required this.task,
   });
-
-  final bool completed;
+  final TaskEntity task;
 
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      // slide RTL to delete
-      // slide LTR to edit
+    return GestureDetector(
+      onTap: () => context.go('/goal/task/detail/${task.taskId}'),
       child: Card(
         color: Colors.green[50],
-        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        margin: EdgeInsets.symmetric(vertical: 10),
         child: ListTile(
-          title: Text('Task summary', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(task.summary!, style: TextStyle(fontWeight: FontWeight.bold)),
           subtitle: Row(
             children: [
               //TODO change to clock icon by time
@@ -31,8 +32,10 @@ class TaskItem extends StatelessWidget {
           ),
           // TODO change to checkbox by status
           trailing: Checkbox(
-            value: completed,
-            onChanged: (value) {},
+            value: task.completed,
+            onChanged: (value) {
+              context.read<TaskBloc>().add(TaskEventUpdated(task.copyWith(completed: value)));
+            },
           ),
         ),
       ),

@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:memo_planner/core/widgets/message_screen.dart';
+import 'package:memo_planner/features/goal/presentation/widgets/empty_task_view.dart';
 
+import '../../domain/entities/task_entity.dart';
 import 'task_item.dart';
 
 class TaskList extends StatelessWidget {
-  const TaskList({super.key});
+  const TaskList(
+    this.tasks, {
+    super.key,
+  });
+
+  final List<TaskEntity> tasks;
 
   @override
   Widget build(BuildContext context) {
+    if (tasks.isEmpty) return const EmptyTaskView();
     return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: 10,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: tasks.length,
       itemBuilder: (context, index) {
-        return const TaskItem(
-          completed: false,
-        );
+        return TaskItem(task: tasks[index]);
       },
     );
   }

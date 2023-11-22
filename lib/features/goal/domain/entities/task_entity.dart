@@ -4,12 +4,12 @@ import '../../../authentication/domain/entities/user_entity.dart';
 
 class TaskEntity extends Equatable {
   const TaskEntity({
-    required this.taskId,
+    this.taskId,
     required this.summary,
-    required this.description,
-    required this.creator,
-    required this.dueDate,
-    required this.completed,
+    this.description,
+    this.creator,
+    this.dueDate,
+    this.completed = false,
     this.kind = 'goal#task',
   });
 
@@ -33,4 +33,25 @@ class TaskEntity extends Equatable {
         completed,
         kind,
       ];
+
+  // copyWith
+  TaskEntity copyWith({
+    String? taskId,
+    String? summary,
+    String? description,
+    UserEntity? creator,
+    DateTime? dueDate,
+    bool? completed,
+    String? kind,
+  }) {
+    return TaskEntity(
+      taskId: taskId ?? this.taskId,
+      summary: summary ?? this.summary,
+      description: description ?? this.description,
+      creator: creator ?? this.creator,
+      dueDate: dueDate ?? this.dueDate,
+      completed: completed ?? this.completed,
+      kind: kind ?? this.kind,
+    );
+  }
 }
