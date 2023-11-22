@@ -11,6 +11,7 @@ class TaskEntity extends Equatable {
     this.dueDate,
     this.completed = false,
     this.kind = 'goal#task',
+    this.dueDateNull = false,
   });
 
   final String? taskId; // goal id
@@ -21,7 +22,8 @@ class TaskEntity extends Equatable {
   final DateTime? dueDate;
   final bool? completed;
 
-  final String kind;
+  final String kind; // goal#task -- default value
+  final bool dueDateNull; // allow null
 
   @override
   List<Object?> get props => [
@@ -32,6 +34,7 @@ class TaskEntity extends Equatable {
         dueDate,
         completed,
         kind,
+        dueDateNull,
       ];
 
   // copyWith
@@ -42,16 +45,17 @@ class TaskEntity extends Equatable {
     UserEntity? creator,
     DateTime? dueDate,
     bool? completed,
-    String? kind,
+    bool dueDateNull = false, // allow null
   }) {
     return TaskEntity(
       taskId: taskId ?? this.taskId,
       summary: summary ?? this.summary,
       description: description ?? this.description,
       creator: creator ?? this.creator,
-      dueDate: dueDate ?? this.dueDate,
+      dueDate: dueDateNull ? dueDate : (dueDate ?? this.dueDate),
       completed: completed ?? this.completed,
-      kind: kind ?? this.kind,
+      // allow null
+      dueDateNull: dueDateNull,
     );
   }
 }

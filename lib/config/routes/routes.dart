@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:memo_planner/features/goal/domain/entities/task_entity.dart';
 import 'package:memo_planner/features/goal/presentation/screens/task_edit_screen.dart';
 
 import '../../core/constants/enum.dart';
@@ -112,10 +113,10 @@ GoRoute goalRoutes() {
             },
           ),
           GoRoute(
-            path: 'detail/:id',
+            path: 'detail',
             builder: (context, state) {
-              final taskId = state.pathParameters['id']!;
-              return TaskDetailScreen(id: taskId);
+              final task = GoRouterState.of(context).extra! as TaskEntity;
+              return TaskDetailScreen(task: task);
             },
           ),
         ],

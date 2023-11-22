@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:memo_planner/core/widgets/message_screen.dart';
 
 class EmptyTaskView extends StatelessWidget {
-  const EmptyTaskView({super.key});
+  const EmptyTaskView({super.key, this.message = 'Every task is done'});
+
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(8.0),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
       child: MessageScreen(
-        message: 'Every task is done',
+        message: message!,
         enableBack: false,
       ),
     );

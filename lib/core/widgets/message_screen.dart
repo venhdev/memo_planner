@@ -41,12 +41,12 @@ class MessageScreenWithAction extends StatelessWidget {
       );
   const MessageScreenWithAction({
     super.key,
-    required this.message,
+    this.message,
     this.buttonText = 'Button',
     required this.onPressed,
   });
 
-  final String message;
+  final String? message;
   final String? buttonText;
   final VoidCallback onPressed;
 
@@ -56,7 +56,7 @@ class MessageScreenWithAction extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(message),
+          Text(message?? 'Something went wrong'),
           ElevatedButton(
             onPressed: () {
               onPressed();

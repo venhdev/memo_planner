@@ -24,51 +24,46 @@ class _TaskScreenState extends State<TaskScreen> {
         builder: (context, state) {
           if (state.status == TaskStatus.loaded || state.status == TaskStatus.success) {
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
               child: Column(
                 children: [
                   const AddTaskQuick(),
                   StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: state.stream!,
                     builder: (context, snapshot) {
-                      return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: state.stream!,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.active) {
-                            if (snapshot.hasData) {
-                              var tasks = snapshot.data!.docs;
-                              var completedTasks = tasks.where((element) => element['completed'] == true).toList();
-                              var uncompletedTasks = tasks.where((element) => element['completed'] == false).toList();
-                              //convert to task model
-                              var completedTaskModel = completedTasks.map((e) => TaskModel.fromDocument(e.data())).toList();
-                              var uncompletedTaskModel = uncompletedTasks.map((e) => TaskModel.fromDocument(e.data())).toList();
+                      if (snapshot.connectionState == ConnectionState.active) {
+                        if (snapshot.hasData) {
+                          var tasks = snapshot.data!.docs;
+                          var completedTasks = tasks.where((element) => element['completed'] == true).toList();
+                          var uncompletedTasks = tasks.where((element) => element['completed'] == false).toList();
+                          //convert to task model
+                          var completedTaskModel = completedTasks.map((e) => TaskModel.fromDocument(e.data())).toList();
+                          var uncompletedTaskModel = uncompletedTasks.map((e) => TaskModel.fromDocument(e.data())).toList();
 
-                              if (tasks.isNotEmpty) {
-                                return Expanded(
-                                  child: ListView(
-                                    children: [
-                                      TaskList(uncompletedTaskModel),
-                                      _buildShowCompleted(),
-                                      Visibility(
-                                        visible: showCompletedTask,
-                                        child: TaskList(completedTaskModel),
-                                      ),
-                                    ],
+                          if (tasks.isNotEmpty) {
+                            return Expanded(
+                              child: ListView(
+                                children: [
+                                  TaskList(uncompletedTaskModel),
+                                  _buildShowCompleted(),
+                                  Visibility(
+                                    visible: showCompletedTask,
+                                    child: TaskList(completedTaskModel, message: 'You have no completed task'),
                                   ),
-                                );
-                              } else {
-                                return const MessageScreen(message: 'No task found');
-                              }
-                            } else if (snapshot.hasError) {
-                              return MessageScreen.error(snapshot.error.toString());
-                            } else {
-                              return MessageScreen.error();
-                            }
+                                ],
+                              ),
+                            );
                           } else {
-                            return const LoadingScreen();
+                            return const MessageScreen(message: 'No task found');
                           }
-                        },
-                      );
+                        } else if (snapshot.hasError) {
+                          return MessageScreen.error(snapshot.error.toString());
+                        } else {
+                          return MessageScreen.error();
+                        }
+                      } else {
+                        return const LoadingScreen();
+                      }
                     },
                   ),
                 ],

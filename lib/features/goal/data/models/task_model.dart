@@ -13,7 +13,7 @@ class TaskModel extends TaskEntity {
     required UserEntity? creator,
     required DateTime? dueDate,
     required bool? completed,
-    String kind = 'goal#task',
+    bool dueDateNull = false,
   }) : super(
           taskId: taskId,
           summary: summary,
@@ -21,7 +21,7 @@ class TaskModel extends TaskEntity {
           creator: creator,
           dueDate: dueDate,
           completed: completed,
-          kind: kind,
+          dueDateNull: dueDateNull,
         );
 
   factory TaskModel.fromEntity(TaskEntity entity) {
@@ -32,6 +32,8 @@ class TaskModel extends TaskEntity {
       creator: entity.creator,
       dueDate: entity.dueDate,
       completed: entity.completed,
+      // allow null
+      dueDateNull: entity.dueDateNull,
     );
   }
 
@@ -61,7 +63,7 @@ class TaskModel extends TaskEntity {
       if (summary != null) 'summary': summary,
       if (description != null) 'description': description,
       if (creator != null) 'creator': UserModel.fromEntity(creator!).toDocument(),
-      if (dueDate != null) 'dueDate': dueDate,
+      if (dueDate != null || dueDateNull == true) 'dueDate': dueDate,
       if (completed != null) 'completed': completed,
       'kind': kind,
     };
