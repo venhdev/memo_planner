@@ -4,11 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:memo_planner/features/goal/presentation/screens/task_screen.dart';
 
 import '../../../../core/widgets/widgets.dart';
-import '../../../authentication/presentation/bloc/bloc/authentication_bloc.dart';
+import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import 'target_screen.dart';
 
 class GoalPage extends StatelessWidget {
-  const GoalPage({super.key});
+  const GoalPage({
+    super.key,
+    this.initialIndex = 0,
+  });
+
+  final int initialIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +21,7 @@ class GoalPage extends StatelessWidget {
       builder: (context, state) {
         if (state.status == AuthenticationStatus.authenticated) {
           return DefaultTabController(
-            initialIndex: 0,
+            initialIndex: initialIndex,
             length: 2,
             child: Scaffold(
               drawer: const AppNavigationDrawer(),
@@ -24,8 +29,8 @@ class GoalPage extends StatelessWidget {
                 context: context,
                 bottom: const TabBar(
                   tabs: [
-                    Tab(text: 'Task'),
-                    Tab(text: 'Target'),
+                    Tab(text: 'Task'), // index 0
+                    Tab(text: 'Target'), // index 1
                   ],
                 ),
               ),

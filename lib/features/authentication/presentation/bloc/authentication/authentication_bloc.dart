@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/constants/constants.dart';
 
+import '../../../../../core/constants/constants.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../../domain/usecase/usecases.dart';
 

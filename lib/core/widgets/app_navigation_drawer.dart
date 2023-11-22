@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/authentication/presentation/bloc/bloc/authentication_bloc.dart';
+import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 
 class AppNavigationDrawer extends StatelessWidget {
   const AppNavigationDrawer({
@@ -138,6 +138,14 @@ class AppNavigationDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               context.go('/authentication');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.person_outline),
+            title: const Text('Add Task'),
+            onTap: () {
+              Navigator.pop(context);
+              context.go('/goal/task/add');
             },
           ),
         ],

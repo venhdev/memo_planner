@@ -67,8 +67,8 @@ class HabitModel extends HabitEntity {
       if (recurrence != null) 'recurrence': recurrence,
       if (created != null) 'created': created,
       if (updated != null) 'updated': updated,
-      if (creator != null)
-        'creator': UserModel.fromEntity(creator!).toDocument(),
+      if (creator != null) 'creator': UserModel.fromEntity(creator!).toDocument(),
+      'kind': kind
     };
   }
 }

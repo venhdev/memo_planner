@@ -1,5 +1,7 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/typedef.dart';
@@ -32,8 +34,10 @@ class HabitRepositoryImpl implements HabitRepository {
     try {
       await _habitDataSource.deleteHabit(habit);
       return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(code: e.code, message: e.message));
+    } on FirebaseException catch (e) {
+      return Left(ServerFailure(code: e.code, message: e.message!));
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 
@@ -44,6 +48,8 @@ class HabitRepositoryImpl implements HabitRepository {
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(code: e.code, message: e.message));
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 
@@ -53,9 +59,7 @@ class HabitRepositoryImpl implements HabitRepository {
       final habits = _habitDataSource.getHabitStream(user);
       return habits;
     } catch (e) {
-      debugPrint(
-          'HabitRepositoryImpl:getHabitStream:Exception --type of e: ${e.runtimeType}');
-      debugPrint(e.toString());
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
     }
   }
@@ -70,6 +74,7 @@ class HabitRepositoryImpl implements HabitRepository {
         return const Left(ServerFailure(message: 'Habit not found'));
       }
     } on ServerException catch (e) {
+      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return Left(ServerFailure(code: e.code, message: e.message));
     }
   }
@@ -81,9 +86,9 @@ class HabitRepositoryImpl implements HabitRepository {
       final streaks = await _habitDataSource.getTopStreakOfHabit(habit!);
       final result = StreakEntity(habit: habit, streaks: streaks);
       return Right(result);
-    } catch (e) {
-      debugPrint(e.toString());
-      return const Left(ServerFailure(code: '404', message: 'Habit not found'));
+    } on FirebaseException catch (e) {
+      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      return Left(ServerFailure(code: e.code, message: e.message!));
     }
   }
 }

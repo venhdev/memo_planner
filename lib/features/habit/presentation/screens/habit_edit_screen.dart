@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:memo_planner/features/authentication/domain/entities/user_entity.dart';
 
 import '../../../../config/dependency_injection.dart';
+import '../../../../core/constants/enum.dart';
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../domain/entities/habit_entity.dart';
 import '../../domain/entities/habit_instance_entity.dart';
 import '../../domain/usecase/get_create_habit_instance_by_iid.dart';
@@ -32,7 +37,7 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
   void initState() {
     super.initState();
     // do some init stuff
-    if (widget.type == EditType.editHabit) {
+    if (widget.type == EditType.edit) {
       // get habit by hid
       hFuture = di<GetHabitByHidUC>()(widget.id!);
     } else if (widget.type == EditType.editInstance) {
@@ -45,40 +50,53 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: widget.type == EditType.addHabit
+        title: widget.type == EditType.add
             ? const Text('Add Habit')
-            : widget.type == EditType.editHabit
+            : widget.type == EditType.edit
                 ? const Text('Edit Habit')
                 : const Text('Edit Instance'),
       ),
-      body: Builder(builder: (context) {
-        if (widget.type == EditType.editHabit) {
-          return buildByType(
-            context,
-            hFuture: hFuture,
-          );
-        } else if (widget.type == EditType.editInstance) {
-          return buildByType(
-            context,
-            iFuture: iFuture,
-          );
-        } else { // addHabit
-          return buildByType(
-            context,
-          );
-        }
-      }),
+      body: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+        builder: (context, state) {
+          if (state.status == AuthenticationStatus.authenticated) {
+            if (widget.type == EditType.edit) {
+              return _build(
+                context,
+                hFuture: hFuture,
+                user: state.user!,
+              );
+            } else if (widget.type == EditType.editInstance) {
+              return _build(
+                context,
+                iFuture: iFuture,
+                user: state.user!,
+              );
+            } else {
+              // addHabit
+              return _build(
+                context,
+                user: state.user!,
+              );
+            }
+          } else {
+            return MessageScreenWithAction.unauthenticated(() {
+              context.go('/authentication');
+            });
+          }
+        },
+      ),
     );
   }
 
-  Widget buildByType(
+  Widget _build(
     BuildContext context, {
     ResultEither<HabitEntity>? hFuture,
     ResultEither<HabitInstanceEntity>? iFuture,
+    required UserEntity user,
   }) {
     debugPrint('buildForm: type: ${widget.type}');
     return FutureBuilder(
-      future: widget.type == EditType.editHabit
+      future: widget.type == EditType.edit
           ? hFuture
           : widget.type == EditType.editInstance
               ? iFuture
@@ -92,9 +110,9 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
               },
               (r) {
                 if (r is HabitEntity) {
-                  return HabitForm(type: EditType.editHabit, habit: r);
+                  return HabitForm(type: EditType.edit, habit: r, user: user);
                 } else if (r is HabitInstanceEntity) {
-                  return HabitForm(type: EditType.editInstance, instance: r);
+                  return HabitForm(type: EditType.editInstance, instance: r, user: user);
                 }
                 return const MessageScreen(message: 'Unknown Error [e05]');
               },
@@ -105,7 +123,7 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
         } else if (snapshot.connectionState == ConnectionState.waiting) {
           return const LoadingScreen();
         } else if (snapshot.connectionState == ConnectionState.none) {
-          return const HabitForm(type: EditType.addHabit);
+          return HabitForm(type: EditType.add, user: user);
         }
         return const MessageScreen(message: 'Unknown Error [e06]');
       },

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/constants/enum.dart';
 import '../../../../core/utils/helpers.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../authentication/domain/entities/user_entity.dart';
 import '../../domain/entities/habit_entity.dart';
 import '../../domain/entities/habit_instance_entity.dart';
 import '../../domain/entities/rrule.dart';
@@ -11,19 +13,19 @@ import '../bloc/habit/habit_bloc.dart';
 import '../bloc/instance/instance_bloc.dart';
 import 'week_day_selector.dart';
 
-enum EditType { unknown, addHabit, editHabit, editInstance }
-
 class HabitForm extends StatefulWidget {
   const HabitForm({
     super.key,
     this.habit,
     this.instance,
     required this.type,
+    required this.user,
   });
 
   final EditType type;
   final HabitEntity? habit;
   final HabitInstanceEntity? instance;
+  final UserEntity user;
 
   @override
   State<HabitForm> createState() => _HabitFormState();
@@ -48,7 +50,7 @@ class _HabitFormState extends State<HabitForm> {
   @override
   void initState() {
     super.initState();
-    if (widget.type == EditType.editHabit) {
+    if (widget.type == EditType.edit) {
       _titleController.text = widget.habit!.summary!;
       _descriptionController.text = widget.habit!.description!;
       _start = widget.habit!.start!;
@@ -60,7 +62,7 @@ class _HabitFormState extends State<HabitForm> {
       _descriptionController.text = widget.instance!.description!;
       _start = widget.instance!.start!;
       _end = widget.instance!.end!;
-    } else if (widget.type == EditType.addHabit) {
+    } else if (widget.type == EditType.add) {
       _endOfHabit = _start.add(const Duration(days: 30));
     }
   }
@@ -148,9 +150,9 @@ class _HabitFormState extends State<HabitForm> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    if (widget.type == EditType.addHabit) {
+                    if (widget.type == EditType.add) {
                       onSubmitAddHabit(context);
-                    } else if (widget.type == EditType.editHabit) {
+                    } else if (widget.type == EditType.edit) {
                       onSubmitEditAllHabit(context);
                     } else if (widget.type == EditType.editInstance) {
                       onSubmitEditInstance(context);
@@ -159,9 +161,9 @@ class _HabitFormState extends State<HabitForm> {
                   }
                 },
                 child: Text(
-                  widget.type == EditType.addHabit
+                  widget.type == EditType.add
                       ? 'Add New Habit'
-                      : widget.type == EditType.editHabit
+                      : widget.type == EditType.edit
                           ? 'Edit All Habit'
                           : 'Edit Only This',
                 ),
@@ -229,7 +231,7 @@ class _HabitFormState extends State<HabitForm> {
           child: GestureDetector(
             onTap: () async {
               FocusScope.of(context).unfocus(); // hide keyboard
-              final startTime = await pickTime(
+              final startTime = await showMyTimePicker(
                 context,
                 initTime: TimeOfDay.fromDateTime(_start),
               );
@@ -278,7 +280,7 @@ class _HabitFormState extends State<HabitForm> {
             onTap: () async {
               FocusScope.of(context).unfocus(); // hide keyboard
               var startTime = TimeOfDay.fromDateTime(_start);
-              final endPicked = await pickTime(
+              final endPicked = await showMyTimePicker(
                 context,
                 initTime: TimeOfDay.fromDateTime(_end),
               );
@@ -334,7 +336,7 @@ class _HabitFormState extends State<HabitForm> {
           return;
         }
         FocusScope.of(context).unfocus(); // hide keyboard
-        final date = await pickDate(context, initDate: _start);
+        final date = await showMyDatePicker(context, initDate: _start);
         date != null
             ? setState(
                 () {
@@ -391,7 +393,7 @@ class _HabitFormState extends State<HabitForm> {
       child: GestureDetector(
         onTap: () async {
           FocusScope.of(context).unfocus(); // hide keyboard
-          final endPicked = await pickDate(context, initDate: _end);
+          final endPicked = await showMyDatePicker(context, initDate: _end);
           endPicked != null
               ? setState(
                   () {
@@ -444,15 +446,14 @@ class _HabitFormState extends State<HabitForm> {
 
   String getUntil() => convertDateTimeToString(_endOfHabit!, pattern: kDateFormatPattern);
 
-  String getRecurrenceRuleString() =>
-      _freq == FREQ.daily.name //daily
-        ? _hasEndDate
+  String getRecurrenceRuleString() => _freq == FREQ.daily.name //daily
+      ? _hasEndDate
           ? RRule.dailyUntil(until: getUntil()).toString()
           : RRule.daily().toString()
-        : _freq == FREQ.weekly.name //weekly
+      : _freq == FREQ.weekly.name //weekly
           ? _hasEndDate
-            ? RRule.weeklyUntil(weekdays: weekdays, until: getUntil()).toString()
-            : RRule.weekly(weekdays: weekdays).toString()
+              ? RRule.weeklyUntil(weekdays: weekdays, until: getUntil()).toString()
+              : RRule.weekly(weekdays: weekdays).toString()
           : '';
 
   void onSubmitAddHabit(BuildContext context) {
@@ -481,9 +482,7 @@ class _HabitFormState extends State<HabitForm> {
     }
   }
 
-  void onSubmitEditInstance(
-    BuildContext context
-  ) {
+  void onSubmitEditInstance(BuildContext context) {
     final updatedInstance = widget.instance!.copyWith(
       summary: _titleController.text,
       description: _descriptionController.text,

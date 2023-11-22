@@ -2,14 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/features/habit/domain/usecase/add_habit_instance.dart';
-import 'package:memo_planner/features/habit/domain/usecase/get_habit_stream.dart';
+
 import '../../../../../core/constants/typedef.dart';
 import '../../../../authentication/domain/usecase/get_current_user.dart';
-
 import '../../../domain/entities/habit_entity.dart';
 import '../../../domain/usecase/add_habit.dart';
+import '../../../domain/usecase/add_habit_instance.dart';
 import '../../../domain/usecase/delete_habit.dart';
+import '../../../domain/usecase/get_habit_stream.dart';
 import '../../../domain/usecase/update_habit.dart';
 
 part 'habit_event.dart';
@@ -49,6 +49,8 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
         final habitStream = _getHabitStreamUC(user);
         currentSteam = habitStream;
         emit(HabitLoaded(habitStream: habitStream));
+      } else {
+        emit(const HabitError(message: 'User is not authenticated'));
       }
     } catch (e) {
       emit(HabitError(message: e.toString()));
@@ -57,9 +59,7 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
 
   void _onAddHabitEvent(HabitAddEvent event, Emitter<HabitState> emit) async {
     try {
-      final HabitEntity habit = event.habit.copyWith(
-        creator: _getCurrentUserUC(),
-      );
+      final HabitEntity habit = event.habit.copyWith(creator: _getCurrentUserUC());
       final result = await _addHabitUC(habit);
 
       result.fold(
@@ -73,8 +73,7 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
     }
   }
 
-  void _onAddHabitInstanceEvent(
-      HabitAddInstanceEvent event, Emitter<HabitState> emit) async {
+  void _onAddHabitInstanceEvent(HabitAddInstanceEvent event, Emitter<HabitState> emit) async {
     try {
       await _addHabitInstanceUC(
         AddHabitInstanceParams(
@@ -102,8 +101,7 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
     }
   }
 
-  void _onDeleteHabitEvent(
-      HabitDeleteEvent event, Emitter<HabitState> emit) async {
+  void _onDeleteHabitEvent(HabitDeleteEvent event, Emitter<HabitState> emit) async {
     try {
       await _deleteHabitUC(event.habit);
       emit(HabitLoaded(

@@ -28,7 +28,8 @@ class HabitList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('HabitList.build:\n query:$query\n currentFilter:$currentFilter\n focusDate:$focusDate');
+    debugPrint('HabitList.build:\n query:$query\n currentFilter:$currentFilter\n focusDate:$focusDate'
+        '\n currentRoutine:$currentRoutine');
     return StreamBuilder(
       stream: habitStream,
       builder: (context, snapshot) {
@@ -65,16 +66,20 @@ class HabitList extends StatelessWidget {
             // - evening >> start time = 18:00 - 23:59
 
             if (currentRoutine != null) {
-              filteredHabits.removeWhere((element) {
+              // to delete the habit that not in currentRoutine time
+             filteredHabits.removeWhere((element) {
                 final habit = HabitModel.fromDocument(element.data());
                 if (currentRoutine == Routine.morning) {
-                  return habit.start!.hour > 0 && habit.start!.hour < 12;
+                  // delete the habit that start time is after 12:00
+                  return habit.start!.hour >= 12;
                 } else if (currentRoutine == Routine.afternoon) {
-                  return habit.start!.hour >= 12 || habit.start!.hour < 18;
+                  // delete the habit that start time is before 12:00 or after 18:00
+                  return habit.start!.hour < 12 || habit.start!.hour >= 18;
                 } else if (currentRoutine == Routine.evening) {
-                  return habit.start!.hour <= 18;
+                  // delete the habit that start time is before 18:00
+                  return habit.start!.hour < 18;
                 } else {
-                  return true;
+                  return false;
                 }
               });
             }
@@ -142,7 +147,6 @@ class _FilterHabitListState extends State<FilterHabitList> {
 
 bool isTodayHabit({required DateTime startOfHabit, required String recurrence, required DateTime focusDate}) {
   final rule = RRule.fromString(recurrence); // read rrule from string
-  debugPrint('rule = $rule');
   var endOfHabit = rule.until != null ? convertStringToDateTime(rule.until!) : null;
 
   //! no endOfHabit

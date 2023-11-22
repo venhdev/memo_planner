@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 
-import 'task_item.dart';
-
 class CompletedTaskList extends StatelessWidget {
   const CompletedTaskList({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: 10,
       itemBuilder: (context, index) {
-        return const TaskItem(
-          completed: true,
-        );
+        return const Placeholder();
       },
     );
   }
