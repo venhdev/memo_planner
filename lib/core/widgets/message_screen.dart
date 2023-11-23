@@ -36,7 +36,7 @@ class MessageScreen extends StatelessWidget {
 class MessageScreenWithAction extends StatelessWidget {
   factory MessageScreenWithAction.unauthenticated(VoidCallback onPressed) => MessageScreenWithAction(
         message: 'You are not authenticated. Please login to continue.',
-        buttonText: 'Login',
+        buttonText: 'Sign in',
         onPressed: onPressed,
       );
   const MessageScreenWithAction({

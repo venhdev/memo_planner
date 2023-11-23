@@ -15,7 +15,7 @@ class AddTargetUC extends UseCaseWithParams<ResultVoid, TargetEntity> {
   @override
   ResultVoid call(TargetEntity params) async {
     final user = _authenticationRepository.getCurrentUser();
-    params.copyWith(creator: user);
+    params = params.copyWith(creator: user);
     return await _targetRepository.addTarget(params);
   }
 }

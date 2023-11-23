@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memo_planner/features/goal/domain/entities/task_entity.dart';
-import 'package:memo_planner/features/goal/presentation/screens/task_edit_screen.dart';
 
 import '../../core/constants/enum.dart';
 import '../../features/authentication/presentation/screens/screens.dart';
 import '../../features/goal/presentation/screens/goal_page.dart';
-import '../../features/goal/presentation/screens/task_detail_screen.dart';
+import '../../features/goal/presentation/screens/target_screen/target_screen.dart';
+import '../../features/goal/presentation/screens/task_screen/task_screen.dart';
 import '../../features/habit/presentation/screens/screens.dart';
 
 part 'app_scaffold_navigation_bar.dart';
@@ -95,6 +95,7 @@ GoRoute goalRoutes() {
     path: '/goal',
     builder: (context, state) => const GoalPage(),
     routes: [
+      // task routes
       GoRoute(
         path: 'task',
         builder: (context, state) => const GoalPage(),
@@ -118,6 +119,17 @@ GoRoute goalRoutes() {
               final task = GoRouterState.of(context).extra! as TaskEntity;
               return TaskDetailScreen(task: task);
             },
+          ),
+        ],
+      ),
+      // target routes
+      GoRoute(
+        path: 'target',
+        builder: (context, state) => const GoalPage(initialIndex: 1),
+        routes: [
+          GoRoute(
+            path: 'add',
+            builder: (context, state) => const TargetEditScreen(),
           ),
         ],
       ),

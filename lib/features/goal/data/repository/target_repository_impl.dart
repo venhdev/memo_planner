@@ -41,9 +41,9 @@ class TargetRepositoryImpl extends TargetRepository {
   }
 
   @override
-  ResultEither<SQuerySnapshot> getTargetStream(String uid) async {
+  ResultEither<SQuerySnapshot> getTargetStream(String email) async {
     try {
-      return Right(await targetDataSource.getTargetStream(uid));
+      return Right(await targetDataSource.getTargetStream(email));
     } on FirebaseException catch (e) {
       log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return Left(ServerFailure(code: e.code, message: e.message!));

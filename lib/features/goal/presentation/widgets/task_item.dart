@@ -28,7 +28,17 @@ class TaskItem extends StatelessWidget {
             children: [
               Icon(Icons.lock_clock, color: Colors.black),
               SizedBox(width: 5),
-              Text(getRemainingTime(task.dueDate)),
+              Text(
+                getRemainingTime(task.dueDate),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: task.dueDate != null
+                      ? task.dueDate!.isBefore(DateTime.now())
+                          ? Colors.red
+                          : Colors.black
+                      : Colors.black,
+                ),
+              ),
             ],
           ),
           // TODO change to checkbox by status

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:memo_planner/features/authentication/presentation/screens/screens.dart';
 
 import '../../../../core/widgets/widgets.dart';
+import '../../../goal/presentation/bloc/task/task_bloc.dart';
 import '../../../habit/presentation/bloc/habit/habit_bloc.dart';
 import '../bloc/authentication/authentication_bloc.dart';
 
@@ -28,7 +29,8 @@ class AuthenticationPage extends StatelessWidget {
         if (state.status == AuthenticationStatus.authenticated) {
           showAlertDialogMessage(context: context, message: 'Login Success!', icon: const Icon(Icons.check));
           BlocProvider.of<HabitBloc>(context).add(HabitStartedEvent());
-          context.go('/authentication');
+          BlocProvider.of<TaskBloc>(context).add(TaskEventInitial());
+          context.go('/habit');
 
           // duration for 1s and then go to /habit
           // Future.delayed(const Duration(seconds: 1), () {

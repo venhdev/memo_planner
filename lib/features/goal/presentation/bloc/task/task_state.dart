@@ -1,6 +1,5 @@
 part of 'task_bloc.dart';
 
-enum TaskStatus { initial, loading, loaded, success, failure }
 
 class TaskState extends Equatable {
   const TaskState({
@@ -10,12 +9,12 @@ class TaskState extends Equatable {
   });
 
   const TaskState.initial({
-    this.status = TaskStatus.initial,
+    this.status = BlocStatus.initial,
     this.stream,
-    this.message = 'initial state',
+    this.message = 'task initial state',
   });
 
-  final TaskStatus status;
+  final BlocStatus status;
   final SQuerySnapshot? stream;
   final String? message;
 
@@ -27,7 +26,7 @@ class TaskState extends Equatable {
       ];
 
   TaskState copyWith({
-    TaskStatus? status,
+    BlocStatus? status,
     SQuerySnapshot? stream,
     String? message,
   }) {

@@ -6,6 +6,7 @@ import 'config/dependency_injection.dart';
 import 'config/routes/routes.dart';
 import 'config/theme/app_theme.dart';
 import 'features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
+import 'features/goal/presentation/bloc/target/target_bloc.dart';
 import 'features/goal/presentation/bloc/task/task_bloc.dart';
 import 'features/habit/presentation/bloc/habit/habit_bloc.dart';
 import 'features/habit/presentation/bloc/instance/instance_bloc.dart';
@@ -28,6 +29,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => di<TaskBloc>()..add(TaskEventInitial()),
+        ),
+        BlocProvider(
+          create: (_) => di<TargetBloc>()..add(TargetEventInitial()),
         ),
         BlocProvider(
           create: (_) => di<HabitInstanceBloc>(),

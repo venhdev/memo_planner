@@ -13,7 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart' as _i3;
 import 'package:get_it/get_it.dart' as _i1;
 import 'package:google_sign_in/google_sign_in.dart' as _i5;
 import 'package:injectable/injectable.dart' as _i2;
-import 'package:memo_planner/config/dependency_injection.dart' as _i52;
+import 'package:memo_planner/config/dependency_injection.dart' as _i53;
 import 'package:memo_planner/features/authentication/data/data_sources/authentication_data_source.dart'
     as _i14;
 import 'package:memo_planner/features/authentication/data/repository/authentication_repository_impl.dart'
@@ -64,8 +64,10 @@ import 'package:memo_planner/features/goal/domain/usecase/update_task.dart'
     as _i13;
 import 'package:memo_planner/features/goal/domain/usecase/usecases.dart'
     as _i51;
-import 'package:memo_planner/features/goal/presentation/bloc/task/task_bloc.dart'
+import 'package:memo_planner/features/goal/presentation/bloc/target/target_bloc.dart'
     as _i50;
+import 'package:memo_planner/features/goal/presentation/bloc/task/task_bloc.dart'
+    as _i52;
 import 'package:memo_planner/features/habit/data/data_sources/habit_data_source.dart'
     as _i22;
 import 'package:memo_planner/features/habit/data/data_sources/habit_instance_data_source.dart'
@@ -223,7 +225,14 @@ extension GetItInjectableX on _i1.GetIt {
           gh<_i49.ChangeHabitInstanceStatusUC>(),
           gh<_i49.UpdateHabitInstanceUC>(),
         ));
-    gh.factory<_i50.TaskBloc>(() => _i50.TaskBloc(
+    gh.factory<_i50.TargetBloc>(() => _i50.TargetBloc(
+          gh<_i19.GetCurrentUserUC>(),
+          gh<_i51.GetTargetStreamUC>(),
+          gh<_i51.AddTargetUC>(),
+          gh<_i51.UpdateTargetUC>(),
+          gh<_i51.DeleteTargetUC>(),
+        ));
+    gh.factory<_i52.TaskBloc>(() => _i52.TaskBloc(
           gh<_i51.GetTaskStreamUC>(),
           gh<_i51.AddTaskUC>(),
           gh<_i51.UpdateTaskUC>(),
@@ -234,4 +243,4 @@ extension GetItInjectableX on _i1.GetIt {
   }
 }
 
-class _$RegisterModule extends _i52.RegisterModule {}
+class _$RegisterModule extends _i53.RegisterModule {}

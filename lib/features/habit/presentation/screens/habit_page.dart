@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,7 +40,6 @@ class _HabitPageState extends State<HabitPage> {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       builder: (context, state) {
         if (state.status == AuthenticationStatus.authenticated) {
-          log('----------------called');
           return Scaffold(
             appBar: MyAppBar.habitAppBar(
               context: context,
@@ -171,13 +168,7 @@ class _HabitPageState extends State<HabitPage> {
             ),
           );
         } else {
-          return MessageScreenWithAction(
-            message: 'Please sign in to continue',
-            buttonText: 'Sign in',
-            onPressed: () {
-              context.go('/authentication');
-            },
-          );
+          return MessageScreenWithAction.unauthenticated(() {context.go('/authentication');});
         }
       },
     );

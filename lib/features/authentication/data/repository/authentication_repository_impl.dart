@@ -25,9 +25,15 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       final result = await _firebaseAuthDataSource.signInWithGoogle();
       return Right(UserModel.fromUserCredential(result.user!));
     } on FirebaseAuthException catch (e) {
+      log('FirebaseAuthException: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return Left(ServerFailure(code: e.code, message: e.message!));
     } on Exception catch (e) {
+      log('Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(ServerFailure(message: e.toString()));
+    } on AssertionError catch (e) {
+      // login canceled
+      log('AssertionError: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return const Left(ServerFailure(message: 'Login failed'));
     }
   }
 

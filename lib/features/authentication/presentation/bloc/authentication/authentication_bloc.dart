@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,8 +49,10 @@ class AuthenticationBloc
         (userEntity) => emit(AuthenticationState.authenticated(userEntity)),
       );
     } on FirebaseAuthException catch (e) {
+      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       emit(AuthenticationState.unauthenticated(message: e.message.toString()));
     } catch (e) {
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       emit(AuthenticationState.unauthenticated(message: e.toString()));
     }
   }

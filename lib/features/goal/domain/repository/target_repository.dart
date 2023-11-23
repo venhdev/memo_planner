@@ -5,5 +5,5 @@ abstract class TargetRepository {
   ResultVoid addTarget(TargetEntity target);
   ResultVoid updateTarget(TargetEntity target);
   ResultVoid deleteTarget(TargetEntity target);
-  ResultEither<SQuerySnapshot> getTargetStream(String uid);
+  ResultEither<SQuerySnapshot> getTargetStream(String email);
 }

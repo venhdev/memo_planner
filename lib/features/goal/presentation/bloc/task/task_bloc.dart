@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../../core/constants/enum.dart';
 import '../../../../../core/constants/typedef.dart';
 import '../../../../authentication/domain/usecase/get_current_user.dart';
 import '../../../domain/entities/task_entity.dart';
@@ -32,32 +33,30 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   final DeleteTaskUC _deleteTaskUC;
 
   void _onInitial(TaskEventInitial event, Emitter<TaskState> emit) async {
-    emit(state.copyWith(status: TaskStatus.loading));
+    emit(state.copyWith(status: BlocStatus.loading));
     var user = _getCurrentUserUC();
     if (user != null) {
       var streamEither = await _getTaskStreamUC(user.email!);
       streamEither.fold(
-        (l) => emit(state.copyWith(status: TaskStatus.failure, message: l.message)),
-        (r) => emit(state.copyWith(status: TaskStatus.loaded, stream: r)),
+        (l) => emit(state.copyWith(status: BlocStatus.failure, message: l.message)),
+        (r) => emit(state.copyWith(status: BlocStatus.loaded, stream: r)),
       );
     } else {
-      emit(state.copyWith(status: TaskStatus.failure, message: 'User not found'));
+      emit(state.copyWith(status: BlocStatus.failure, message: 'User not found'));
     }
   }
 
   void _onAdded(TaskEventAdded event, Emitter<TaskState> emit) async {
     final rs = await _addTaskUC(event.task);
-    rs.fold(
-      (l) => emit(state.copyWith(status: TaskStatus.failure, message: l.message)),
-      (r) => emit(state.copyWith(status: TaskStatus.success, message: 'Task added'))
-    );
+    rs.fold((l) => emit(state.copyWith(status: BlocStatus.failure, message: l.message)),
+        (r) => emit(state.copyWith(status: BlocStatus.success, message: 'Task added')));
   }
 
   void _onUpdated(TaskEventUpdated event, Emitter<TaskState> emit) async {
     final rs = await _updateTaskUC(event.task);
     rs.fold(
-      (l) => emit(state.copyWith(status: TaskStatus.failure, message: l.message)),
-      (r) => emit(state.copyWith(status: TaskStatus.success, message: 'Task updated')),
+      (l) => emit(state.copyWith(status: BlocStatus.failure, message: l.message)),
+      (r) => emit(state.copyWith(status: BlocStatus.success, message: 'Task updated')),
     );
   }
 
@@ -65,8 +64,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     final rs = await _deleteTaskUC(event.task);
 
     rs.fold(
-      (l) => emit(state.copyWith(status: TaskStatus.failure, message: l.message)),
-      (r) => emit(state.copyWith(status: TaskStatus.success, message: 'Task deleted')),
+      (l) => emit(state.copyWith(status: BlocStatus.failure, message: l.message)),
+      (r) => emit(state.copyWith(status: BlocStatus.success, message: 'Task deleted')),
     );
   }
 }

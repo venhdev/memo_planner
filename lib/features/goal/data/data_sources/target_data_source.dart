@@ -10,7 +10,7 @@ abstract class TargetDataSource {
   Future<void> addTarget(TargetEntity target);
   Future<void> updateTarget(TargetEntity target);
   Future<void> deleteTarget(TargetEntity target);
-  Future<SQuerySnapshot> getTargetStream(String uid);
+  Future<SQuerySnapshot> getTargetStream(String email);
 }
 
 @Singleton(as: TargetDataSource)
@@ -29,20 +29,20 @@ class TargetDataSourceImpl extends TargetDataSource {
   @override
   Future<void> deleteTarget(TargetEntity target) async {
     var targetDocRef =
-        _firestore.collection(pathToUsers).doc(target.creator!.uid).collection(pathToTargets).doc(target.targetId);
+        _firestore.collection(pathToUsers).doc(target.creator!.email).collection(pathToTargets).doc(target.targetId);
 
     await targetDocRef.delete();
   }
 
   @override
-  Future<SQuerySnapshot> getTargetStream(String uid) async {
-    return _firestore.collection(pathToUsers).doc(uid).collection(pathToTargets).snapshots();
+  Future<SQuerySnapshot> getTargetStream(String email) async {
+    return _firestore.collection(pathToUsers).doc(email).collection(pathToTargets).snapshots();
   }
 
   @override
   Future<void> updateTarget(TargetEntity target) async {
     var targetDocRef =
-        _firestore.collection(pathToUsers).doc(target.creator!.uid).collection(pathToTargets).doc(target.targetId);
+        _firestore.collection(pathToUsers).doc(target.creator!.email).collection(pathToTargets).doc(target.targetId);
 
     await targetDocRef.update(TargetModel.fromEntity(target).toDocument());
   }

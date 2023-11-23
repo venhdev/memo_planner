@@ -120,7 +120,24 @@ int compareTimeOfDay(TimeOfDay time1, TimeOfDay time2) {
 String getRemainingTime(DateTime? dateTime) {
   if (dateTime != null) {
     Duration duration = dateTime.difference(DateTime.now());
-    if (duration.inDays > 0) {
+    if (duration > Duration.zero) {
+      return '${duration.inDays}d '
+          '${duration.inHours.remainder(24)}h '
+          '${duration.inMinutes.remainder(60)}m';
+    } else {
+      return 'Overdue\n'
+      '${duration.inDays.abs()}d '
+          '${duration.inHours.remainder(24).abs()}h '
+          '${duration.inMinutes.remainder(60).abs()}m';
+    }
+  } else {
+    return 'No due date';
+  }
+}
+
+
+/**
+ * if (duration.inDays > 0) {
       return '${duration.inDays} days';
     } else if (duration.inHours > 0) {
       return '${duration.inHours} hours';
@@ -129,7 +146,4 @@ String getRemainingTime(DateTime? dateTime) {
     } else {
       return '${duration.inSeconds} seconds';
     }
-  } else {
-    return 'No due date';
-  }
-}
+ */
