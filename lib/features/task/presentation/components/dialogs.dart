@@ -9,7 +9,7 @@ import '../../../authentication/presentation/bloc/authentication/authentication_
 import '../../domain/entities/task_list_entity.dart';
 import '../../domain/repository/task_list_repository.dart';
 
-Future<void> showDialogForAddTaskList(
+Future<void> showDialogForAddOrEditTaskList(
   BuildContext context, {
   required TextEditingController controller,
   bool isAdd = true, // check if use this dialog for add or edit
@@ -46,45 +46,47 @@ Future<void> showDialogForAddTaskList(
           ),
           TextButton(
             onPressed: () async {
-              final currentUser = context.read<AuthenticationBloc>().state.user;
-              isAdd
-                  ? await di<TaskListRepository>()
-                      .addTaskList(
-                      TaskListEntity(
-                        lid: null,
-                        gid: null,
-                        listName: controller.text,
-                        iconData: Icons.list,
-                        creator: currentUser,
-                        members: [currentUser!.email!],
-                      ),
-                    )
-                      .then((value) {
-                      showMySnackbarWithAwesome(
-                        context,
-                        title: 'List created',
-                        message: 'You have created a new list',
-                        contentType: ContentType.success,
-                      );
-                      Navigator.of(context).pop();
-                    })
-                  : await di<TaskListRepository>()
-                      .editTaskList(
-                      taskList!.copyWith(listName: controller.text),
-                    )
-                      .then(
-                      (value) {
+              if (controller.text.isNotEmpty) {
+                final currentUser = context.read<AuthenticationBloc>().state.user;
+                isAdd
+                    ? await di<TaskListRepository>()
+                        .addTaskList(
+                        TaskListEntity(
+                          lid: null,
+                          gid: null,
+                          listName: controller.text,
+                          iconData: Icons.list,
+                          creator: currentUser,
+                          members: [currentUser!.email!],
+                        ),
+                      )
+                        .then((value) {
                         showMySnackbarWithAwesome(
                           context,
-                          title: 'List renamed',
-                          message: 'You have renamed the list',
+                          title: 'List created',
+                          message: 'You have created a new list',
                           contentType: ContentType.success,
                         );
                         Navigator.of(context).pop();
-                      },
-                    );
+                      })
+                    : await di<TaskListRepository>()
+                        .editTaskList(
+                        taskList!.copyWith(listName: controller.text),
+                      )
+                        .then(
+                        (value) {
+                          showMySnackbarWithAwesome(
+                            context,
+                            title: 'List renamed',
+                            message: 'You have renamed the list',
+                            contentType: ContentType.success,
+                          );
+                          Navigator.of(context).pop();
+                        },
+                      );
 
-              controller.clear();
+                controller.clear();
+              }
             },
             child: Text(
               isAdd ? 'CREATE' : 'SAVE',

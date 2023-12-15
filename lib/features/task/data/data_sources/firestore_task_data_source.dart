@@ -24,6 +24,8 @@ abstract class FireStoreTaskDataSource {
   SQuerySnapshot getAllTaskStream(String lid);
 
   Future<void> addTask(TaskEntity task);
+  Future<void> editTask(TaskEntity updatedTask);
+  Future<void> deleteTask(String tid);
 }
 
 @Singleton(as: FireStoreTaskDataSource)
@@ -62,7 +64,16 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
 
   @override
   Future<void> deleteTaskList(String lid) async {
-    _firestore.collection(pathToTaskLists).doc(lid).delete();
+    // get taskListRef
+    final docRef = _firestore.collection(pathToTaskLists).doc(lid);
+    await docRef.delete();
+
+    //remove all tasks in: /task-lists/ {lid} /tasks/ {tid}
+    final tasks = await docRef.collection(pathToTasks).get();
+    for (final task in tasks.docs) {
+      // TODO: remove notification -> call deleteTask(tid)
+      await task.reference.delete();
+    }
   }
 
   @override
@@ -96,5 +107,17 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
     task = task.copyWith(tid: tid);
 
     return collRef.doc(tid).set(TaskModel.fromEntity(task).toMap());
+  }
+
+  @override
+  Future<void> deleteTask(String tid) {
+    // TODO: implement deleteTask
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> editTask(TaskEntity updatedTask) {
+    // TODO: implement editTask
+    throw UnimplementedError();
   }
 }

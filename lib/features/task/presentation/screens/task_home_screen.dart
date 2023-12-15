@@ -68,7 +68,7 @@ class TaskHomeScreen extends StatelessWidget {
           padding: const EdgeInsets.only(right: 8.0),
           child: IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () async => showDialogForAddTaskList(
+            onPressed: () async => showDialogForAddOrEditTaskList(
               context,
               controller: TextEditingController(),
             ),

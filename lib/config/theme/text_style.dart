@@ -13,4 +13,10 @@ class MyTextStyle {
     fontWeight: FontWeight.bold,
     fontFamily: 'Roboto',
   );
+  static TextStyle blackBold87 = const TextStyle(
+    color: Colors.black87,
+    fontWeight: FontWeight.bold,
+    fontFamily: 'Roboto',
+    fontSize: 16.0,
+  );
 }

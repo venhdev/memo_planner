@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:memo_planner/features/task/data/models/task_list_model.dart';
 import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart';
 import 'package:memo_planner/features/task/domain/repository/task_repository.dart';
@@ -42,9 +41,10 @@ class SingleTaskListScreen extends StatelessWidget {
             drawer: const AppNavigationDrawer(),
             appBar: _buildAppBar(context, taskList),
             floatingActionButton: FloatingActionButton(
+              // handleAdd
               onPressed: () => showModalBottomSheet(
                 context: context,
-                builder: (context) => FormAddTask(lid),
+                builder: (context) => AddTaskModal(lid),
               ),
               child: const Icon(Icons.add),
             ),
@@ -92,26 +92,10 @@ class SingleTaskListScreen extends StatelessWidget {
             onSelected: (MenuItem result) {
               switch (result) {
                 case MenuItem.rename:
-                  showDialogForAddTaskList(
-                    context,
-                    controller: TextEditingController(text: taskList.listName!),
-                    isAdd: false,
-                    taskList: taskList,
-                  );
+                  handleRename(context, taskList);
                   break;
                 case MenuItem.delete:
-                  showMyDialogToConfirm(
-                    context,
-                    title: 'Delete List',
-                    content: 'This list will be deleted permanently!',
-                    onConfirm: () {
-                      log('pop to home');
-                      Navigator.pop(context);
-                      log('start call deleteTaskList');
-                      di<TaskListRepository>().deleteTaskList(taskList.lid!);
-                      log('done call deleteTaskList');
-                    },
-                  );
+                  handleDelete(context, taskList);
                   break;
                 default:
               }
@@ -129,6 +113,27 @@ class SingleTaskListScreen extends StatelessWidget {
           )
         ],
       );
+
+  Future<void> handleDelete(BuildContext context, TaskListEntity taskList) {
+    return showMyDialogToConfirm(
+      context,
+      title: 'Delete List',
+      content: 'This list will be deleted permanently!',
+      onConfirm: () {
+        Navigator.pop(context); // back to previous screen: TaskHomeScreen
+        di<TaskListRepository>().deleteTaskList(taskList.lid!);
+      },
+    );
+  }
+
+  Future<void> handleRename(BuildContext context, TaskListEntity taskList) {
+    return showDialogForAddOrEditTaskList(
+      context,
+      controller: TextEditingController(text: taskList.listName!),
+      isAdd: false,
+      taskList: taskList,
+    );
+  }
 
   Widget _build(BuildContext context, List<TaskEntity> tasks) => ListView.builder(
         itemCount: tasks.length,

@@ -45,7 +45,6 @@ Future<void> showMyDialogToConfirm(
           TextButton(
             onPressed: () async {
               onConfirm();
-              log('pop pop dialog');
               Navigator.of(context).pop();
             },
             child: Text('Yes', style: MyTextStyle.redTextDialog),

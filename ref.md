@@ -5,6 +5,7 @@
 - Draggable Modal Bottom Sheet: <https://www.youtube.com/watch?v=AjAQglJKcb4&t=7s>
 - PopupMenuButton <https://api.flutter.dev/flutter/material/PopupMenuButton-class.html>
 <!-- - ReorderableListView <https://api.flutter.dev/flutter/material/ReorderableListView-class.html> -->
+- ChoiceChip <https://api.flutter.dev/flutter/material/ChoiceChip-class.html>
 
 ## Notification
 

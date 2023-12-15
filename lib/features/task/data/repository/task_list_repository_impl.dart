@@ -32,7 +32,9 @@ class TaskListRepositoryImpl implements TaskListRepository {
   @override
   ResultVoid deleteTaskList(String lid) async {
     try {
-      return Right(await _dataSource.deleteTaskList(lid));
+      await _dataSource.deleteTaskList(lid);
+
+      return const Right(null);
     } catch (e) {
       return Left(Failure(message: e.toString()));
     }
