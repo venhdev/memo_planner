@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:memo_planner/features/task/data/models/task_list_model.dart';
 import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart';
 import 'package:memo_planner/features/task/domain/repository/task_repository.dart';
@@ -10,10 +11,12 @@ import '../../../../core/components/widgets.dart';
 import '../../data/models/task_model.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/entities/task_list_entity.dart';
+import '../components/dialogs.dart';
 import '../components/form_add_task.dart';
 
+enum MenuItem { rename, delete, itemThree }
+
 /// Show only the tasks of a single list
-///
 //! Not using for default Group: Today, All Tasks, Scheduled, Done... >> use [MultiTaskListScreen] instead
 class SingleTaskListScreen extends StatelessWidget {
   const SingleTaskListScreen(this.lid, {super.key});
@@ -28,7 +31,13 @@ class SingleTaskListScreen extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active && snapshot.hasData) {
           final map = snapshot.data!.data();
-          final taskList = TaskListModel.fromMap(map!);
+
+          // > To avoid error when the list has been deleted -> ! on null value
+          // > Notify user that the list has been deleted if they are still in this screen
+          if (map == null) {
+            return const MessageScreen(message: 'This list has been permanently deleted');
+          }
+          final taskList = TaskListModel.fromMap(map);
           return Scaffold(
             drawer: const AppNavigationDrawer(),
             appBar: _buildAppBar(context, taskList),
@@ -74,8 +83,50 @@ class SingleTaskListScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(Icons.person_add),
           ),
+
+          // PopupMenu
+          PopupMenuButton<MenuItem>(
+            // Callback that sets the selected popup menu item.
+            onSelected: (MenuItem result) {
+              switch (result) {
+                case MenuItem.rename:
+                  showDialogForAddTaskList(
+                    context,
+                    controller: TextEditingController(text: taskList.listName!),
+                    isAdd: false,
+                    taskList: taskList,
+                  );
+                  break;
+                case MenuItem.delete:
+                  showMyDialogToConfirm(
+                    context,
+                    title: 'Delete List',
+                    content: 'This list will be deleted permanently!',
+                    onConfirm: () {
+                      log('pop to home');
+                      Navigator.pop(context);
+                      log('start call deleteTaskList');
+                      di<TaskListRepository>().deleteTaskList(taskList.lid!);
+                      log('done call deleteTaskList');
+                    },
+                  );
+                  break;
+                default:
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<MenuItem>>[
+              const PopupMenuItem<MenuItem>(
+                value: MenuItem.rename,
+                child: Text('Rename List'),
+              ),
+              const PopupMenuItem<MenuItem>(
+                value: MenuItem.delete,
+                child: Text('Delete List'),
+              ),
+            ],
+          )
         ],
       );
 

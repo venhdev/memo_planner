@@ -8,13 +8,9 @@ import 'package:memo_planner/core/constants/enum.dart';
 import 'package:memo_planner/features/task/data/models/task_list_model.dart';
 import 'package:memo_planner/features/task/presentation/components/task_group_item.dart';
 
-import '../../../../config/dependency_injection.dart';
-import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../domain/entities/task_list_entity.dart';
-import '../../domain/repository/task_list_repository.dart';
 import '../bloc/task_bloc.dart';
-
-enum MenuItem { itemOne, itemTwo, itemThree }
+import '../components/dialogs.dart';
 
 // show all list of tasks
 class TaskHomeScreen extends StatelessWidget {
@@ -88,23 +84,6 @@ class TaskHomeScreen extends StatelessWidget {
             // )
           ),
         ),
-        // PopupMenuButton<MenuItem>(
-        //   // Callback that sets the selected popup menu item.
-        //   itemBuilder: (BuildContext context) => <PopupMenuEntry<MenuItem>>[
-        //     const PopupMenuItem<MenuItem>(
-        //       value: MenuItem.itemOne,
-        //       child: Text('Item 1'),
-        //     ),
-        //     const PopupMenuItem<MenuItem>(
-        //       value: MenuItem.itemTwo,
-        //       child: Text('Item 2'),
-        //     ),
-        //     const PopupMenuItem<MenuItem>(
-        //       value: MenuItem.itemThree,
-        //       child: Text('Item 3'),
-        //     ),
-        //   ],
-        // )
       ],
     );
   }
@@ -137,70 +116,6 @@ class TaskHomeScreen extends StatelessWidget {
           },
         ),
       ],
-    );
-  }
-
-  Future<void> showDialogForAddTaskList(
-    BuildContext context, {
-    required TextEditingController controller,
-  }) async {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('New list'),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-          content: // text field
-              TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Enter your list name',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                controller.clear();
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'CANCEL',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontFamily: 'Roboto',
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                final currentUser = context.read<AuthenticationBloc>().state.user;
-                di<TaskListRepository>().addTaskList(
-                  TaskListEntity(
-                    lid: null,
-                    gid: null,
-                    listName: controller.text,
-                    iconData: Icons.list,
-                    creator: currentUser,
-                    members: [currentUser!.email!],
-                  ),
-                );
-
-                controller.clear();
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'CREATE',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontFamily: 'Roboto',
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

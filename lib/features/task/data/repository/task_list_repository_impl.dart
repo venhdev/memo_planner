@@ -30,13 +30,21 @@ class TaskListRepositoryImpl implements TaskListRepository {
   }
 
   @override
-  ResultVoid deleteTaskList(String tid) {
-    throw UnimplementedError();
+  ResultVoid deleteTaskList(String lid) async {
+    try {
+      return Right(await _dataSource.deleteTaskList(lid));
+    } catch (e) {
+      return Left(Failure(message: e.toString()));
+    }
   }
 
   @override
-  ResultVoid editTaskList(TaskListEntity updatedTaskList) {
-    throw UnimplementedError();
+  ResultVoid editTaskList(TaskListEntity updatedTaskList) async {
+    try {
+      return Right(await _dataSource.editTaskList(updatedTaskList));
+    } catch (e) {
+      return Left(Failure(message: e.toString()));
+    }
   }
 
   @override

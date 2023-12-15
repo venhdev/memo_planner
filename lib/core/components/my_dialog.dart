@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:memo_planner/config/theme/text_style.dart';
 
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 
@@ -26,12 +29,12 @@ void showMyDialogConfirmSignOut(BuildContext context) {
   );
 }
 
-void showMyDialogToConfirm(
+Future<void> showMyDialogToConfirm(
   BuildContext context, {
   required String title,
   required String content,
   required VoidCallback onConfirm,
-}) {
+}) async {
   showDialog(
     context: context,
     builder: (context) {
@@ -40,17 +43,18 @@ void showMyDialogToConfirm(
         content: Text(content),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               onConfirm();
+              log('pop pop dialog');
               Navigator.of(context).pop();
             },
-            child: const Text('Yes'),
+            child: Text('Yes', style: MyTextStyle.redTextDialog),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text('No'),
+            child: Text('No', style: MyTextStyle.blueTextDialog),
           ),
         ],
       );
