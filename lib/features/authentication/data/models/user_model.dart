@@ -9,13 +9,11 @@ class UserModel extends UserEntity {
     String? displayName,
     String? email,
     String? photoURL,
-    String? phoneNumber,
   }) : super(
           uid: uid,
           displayName: displayName,
           email: email,
           photoURL: photoURL,
-          phoneNumber: phoneNumber,
         );
 
   factory UserModel.fromDocument(Map<String, dynamic> data) {
@@ -33,7 +31,6 @@ class UserModel extends UserEntity {
       displayName: user.displayName,
       email: user.email,
       photoURL: user.photoURL,
-      phoneNumber: user.phoneNumber,
     );
   }
 
@@ -43,7 +40,6 @@ class UserModel extends UserEntity {
       displayName: user.displayName,
       email: user.email,
       photoURL: user.photoURL,
-      phoneNumber: user.phoneNumber,
     );
   }
 
@@ -53,7 +49,6 @@ class UserModel extends UserEntity {
       uid: data['uid'],
       displayName: data['displayName'],
       email: data['email'],
-      phoneNumber: data['phoneNumber'],
       photoURL: data['photoURL'],
     );
   }
@@ -68,7 +63,6 @@ class UserModel extends UserEntity {
       'uid': uid,
       'displayName': displayName,
       'email': email,
-      'phoneNumber': phoneNumber,
       'photoURL': photoURL,
     };
   }

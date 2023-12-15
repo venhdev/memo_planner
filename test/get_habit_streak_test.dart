@@ -3,6 +3,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memo_planner/core/notification/reminder.dart';
 import 'package:memo_planner/features/authentication/domain/entities/user_entity.dart';
 import 'package:memo_planner/features/habit/domain/entities/habit_entity.dart';
 
@@ -14,19 +15,19 @@ void main() {
     final DateTime tomorrow = today.add(const Duration(days: 1));
 
     final HabitEntity tHabit = HabitEntity(
-      hid: '9gPpJwRG9s9BSK9ErueL',
+      hid: '1',
       summary: '11',
       description: '11',
       creator: const UserEntity(
         uid: 'uLoTvqUTRlNGBGdl33K5eL6h4i82',
         email: 'venh.ha@gmail.com',
         displayName: 'Vềnh Hà',
-        photoURL:
-            'https://lh3.googleusercontent.com/a/ACg8ocI-Sm5oWZbAx6nWUDqu2Y0TRGYYB9ILftudfSSRc7h7NCs=s96-c',
+        photoURL: 'https://lh3.googleusercontent.com/a/ACg8ocI-Sm5oWZbAx6nWUDqu2Y0TRGYYB9ILftudfSSRc7h7NCs=s96-c',
       ),
       created: DateTime.now(),
       updated: DateTime.now(),
       end: DateTime.now(),
+      reminders: Reminder(),
       recurrence: 'daily',
       start: DateTime.now(),
     );

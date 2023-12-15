@@ -14,36 +14,52 @@ class ScaffoldWithNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        // Here, the items of BottomNavigationBar are hard coded. In a real
-        // world scenario, the items would most likely be generated from the
-        // branches of the shell route, which can be fetched using
-        // `navigationShell.route.branches`.
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.checklist), label: 'Habit'),
-          BottomNavigationBarItem(icon: Icon(Icons.moving), label: 'Goal'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'User'),
-        ],
-        currentIndex: navigationShell.currentIndex,
-        onTap: (int index) => _onTap(context, index),
-      ),
+    // handle authentication
+    return BlocConsumer<AuthenticationBloc, AuthenticationState>(
+      listenWhen: (previous, current) => previous.status != current.status,
+      listener: (context, state) {
+        if (state.status == AuthenticationStatus.authenticated) {
+          showMyAlertDialogMessage(
+            context: context,
+            message: state.message ?? 'Hi ${state.user!.displayName}',
+            icon: const Icon(Icons.check),
+          );
+          
+          //? because when user sign out, maybe not in the habit screen
+          context.go('/habit');
+        } else if (state.status == AuthenticationStatus.unauthenticated) {
+          showMyAlertDialogMessage(
+            context: context,
+            message: state.message!,
+            icon: const Icon(Icons.error),
+          );
+        }
+      },
+      buildWhen: (previous, current) => previous.status != current.status,
+      builder: (context, state) {
+        if (state.status == AuthenticationStatus.authenticated) {
+          return Scaffold(
+            body: navigationShell,
+            bottomNavigationBar: BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(Icons.checklist), label: 'Habit'),
+                BottomNavigationBarItem(icon: Icon(Icons.task_alt), label: 'Task'),
+                BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'User'),
+              ],
+              currentIndex: navigationShell.currentIndex,
+              onTap: (int index) => _onTap(context, index),
+            ),
+          );
+        } else {
+          return const SignInScreen();
+        }
+      },
     );
   }
 
-  /// Navigate to the current location of the branch at the provided index when
-  /// tapping an item in the BottomNavigationBar.
   void _onTap(BuildContext context, int index) {
-    // When navigating to a new branch, it's recommended to use the goBranch
-    // method, as doing so makes sure the last navigation state of the
-    // Navigator for the branch is restored.
     navigationShell.goBranch(
       index,
-      // A common pattern when using bottom navigation bars is to support
-      // navigating to the initial location when tapping the item that is
-      // already active. This example demonstrates how to support this behavior,
-      // using the initialLocation parameter of goBranch.
       initialLocation: index == navigationShell.currentIndex,
     );
   }

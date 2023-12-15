@@ -5,10 +5,11 @@ import '../entities/streak_entity.dart';
 
 abstract class HabitRepository {
   SQuerySnapshot getHabitStream(UserEntity user);
+  SDocumentSnapshot getOneHabitStream(String hid);
   ResultEither<HabitEntity> getHabitByHid(String hid);
   ResultVoid addHabit(HabitEntity habit);
   ResultVoid updateHabit(HabitEntity habit);
   ResultVoid deleteHabit(HabitEntity habit);
 
-  ResultEither<StreakEntity> getTopStreaks(String hid);
+  ResultEither<StreakEntity> getTopStreaks(String hid,  String collectionEmailPath);
 }

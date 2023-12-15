@@ -1,7 +1,4 @@
-import 'dart:developer';
-
 import 'package:equatable/equatable.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -13,8 +10,7 @@ part 'authentication_event.dart';
 part 'authentication_state.dart';
 
 @injectable
-class AuthenticationBloc
-    extends Bloc<AuthenticationEvent, AuthenticationState> {
+class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
   AuthenticationBloc(
     this._signInWithEmailAndPasswordUC,
     this._signOutUC,
@@ -22,11 +18,11 @@ class AuthenticationBloc
     this._getCurrentUserUC,
     this._signUpWithEmailUC,
   ) : super(const AuthenticationState.unknown()) {
-    on<AuthenticationStartedEvent>(_onAuthenticationStarted);
-    on<AuthenticationStatusChangedEvent>(_onAuthenticationStatusChanged);
+    on<AuthenticationEventStarted>(_onAuthenticationStarted);
+    on<AuthenticationEventStatusChanged>(_onAuthenticationStatusChanged);
     on<SignUpWithEmailEvent>(_onSignUpWithEmail);
-    on<SignInWithEmailAndPasswordEvent>(_onSignedInWithEmailAndPassword);
-    on<SignInWithGoogleEvent>(_onSignInWithGoogle);
+    on<AuthenticationEventSignIn>(_onSignedInWithEmailAndPassword);
+    on<AuthenticationEventSignInWithGoogle>(_onSignInWithGoogle);
     on<SignOutEvent>(_onSignOut);
   }
 
@@ -37,43 +33,32 @@ class AuthenticationBloc
   final GetCurrentUserUC _getCurrentUserUC;
 
   void _onSignInWithGoogle(
-    SignInWithGoogleEvent event,
-    Emitter<AuthenticationState> emit,
-  ) async {
-    try {
-      emit(const AuthenticationState.authenticating());
-      final userEntityEither = await _signInWithGoogleUC();
-      userEntityEither.fold(
-        (failure) =>
-            emit(AuthenticationState.unauthenticated(message: failure.message)),
-        (userEntity) => emit(AuthenticationState.authenticated(userEntity)),
-      );
-    } on FirebaseAuthException catch (e) {
-      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
-      emit(AuthenticationState.unauthenticated(message: e.message.toString()));
-    } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      emit(AuthenticationState.unauthenticated(message: e.toString()));
-    }
-  }
-
-  void _onSignedInWithEmailAndPassword(
-    SignInWithEmailAndPasswordEvent event,
+    AuthenticationEventSignInWithGoogle event,
     Emitter<AuthenticationState> emit,
   ) async {
     emit(const AuthenticationState.authenticating());
-    final userEntityEither = await _signInWithEmailAndPasswordUC(
-        SignInParams(email: event.email, password: event.password));
+    final userEntityEither = await _signInWithGoogleUC();
+    userEntityEither.fold(
+      (failure) => emit(AuthenticationState.unauthenticated(message: failure.message)),
+      (userEntity) => emit(AuthenticationState.authenticated(userEntity, message: 'Welcome back ${userEntity.displayName}')),
+    );
+  }
+
+  void _onSignedInWithEmailAndPassword(
+    AuthenticationEventSignIn event,
+    Emitter<AuthenticationState> emit,
+  ) async {
+    emit(const AuthenticationState.authenticating());
+    final userEntityEither = await _signInWithEmailAndPasswordUC(SignInParams(email: event.email, password: event.password));
 
     userEntityEither.fold(
-      (failure) =>
-          emit(AuthenticationState.unauthenticated(message: failure.message)),
-      (userEntity) => emit(AuthenticationState.authenticated(userEntity)),
+      (failure) => emit(AuthenticationState.unauthenticated(message: failure.message)),
+      (userEntity) => emit(AuthenticationState.authenticated(userEntity, message: 'Welcome back ${userEntity.displayName}')),
     );
   }
 
   void _onAuthenticationStarted(
-    AuthenticationStartedEvent event,
+    AuthenticationEventStarted event,
     Emitter<AuthenticationState> emit,
   ) async {
     final user = _getCurrentUserUC();
@@ -81,7 +66,8 @@ class AuthenticationBloc
       emit(AuthenticationState.authenticated(user));
     } else {
       emit(
-          const AuthenticationState.unauthenticated(message: kUserNotLogin));
+        const AuthenticationState.unauthenticated(message: kUserNotLogin),
+      );
     }
   }
 
@@ -92,24 +78,21 @@ class AuthenticationBloc
     emit(const AuthenticationState.authenticating());
     try {
       await _signOutUC();
-      emit(const AuthenticationState.unauthenticated(
-          message: 'Sign out success'));
+      emit(const AuthenticationState.unauthenticated(message: 'Sign out success'));
     } catch (e) {
-      emit(const AuthenticationState.unauthenticated(
-          message: 'Sign out failed'));
+      emit(const AuthenticationState.unauthenticated(message: 'Sign out failed'));
     }
   }
 
   void _onAuthenticationStatusChanged(
-    AuthenticationStatusChangedEvent event,
+    AuthenticationEventStatusChanged event,
     Emitter<AuthenticationState> emit,
   ) {
     emit(const AuthenticationState.authenticating());
     if (event.status == AuthenticationStatus.authenticated) {
       emit(AuthenticationState.authenticated(event.user!));
     } else {
-      emit(
-          const AuthenticationState.unauthenticated(message: kUserNotLogin));
+      emit(const AuthenticationState.unauthenticated(message: kUserNotLogin));
     }
   }
 
@@ -122,8 +105,7 @@ class AuthenticationBloc
       SignUpParams(email: event.email, password: event.password),
     );
     result.fold(
-      (failure) =>
-          emit(AuthenticationState.unauthenticated(message: failure.message)),
+      (failure) => emit(AuthenticationState.unauthenticated(message: failure.message)),
       (userEntity) => emit(AuthenticationState.authenticated(userEntity)),
     );
   }

@@ -1,89 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer' as dev;
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:memo_planner/core/constants/constants.dart';
 
-String getIid(String hid, DateTime date) {
-  return '${hid}_${convertDateTimeToyyyyMMdd(date)}';
-}
+import 'converter.dart';
 
-/// use to Convert Timestamp From FireStore to DateTime
-DateTime? convertTimestampToDateTime(Timestamp? timestamp) {
-  return timestamp != null ? DateTime.fromMicrosecondsSinceEpoch(timestamp.microsecondsSinceEpoch) : null;
-
-  // return DateTime.fromMicrosecondsSinceEpoch(timestamp.microsecondsSinceEpoch);
-}
-
-/// use to Convert DateTime to format [kDateFormatPattern]
-String convertDateTimeToyyyyMMdd(DateTime dateTime) {
-  return dateTime.toIso8601String().substring(0, 10).replaceAll('-', '');
-}
-
-/// When specify [pattern], it must have separator like "dd-MM-yyyy"
-DateTime convertStringToDateTime(
-  String date, {
-  DateFormat? pattern,
-}) {
-  if (pattern != null) {
-    if (RegExp(r'\W').hasMatch(pattern.pattern!)) {
-      return pattern.parse(date);
-    } else if (pattern.pattern! == kDateFormatPattern) {
-      DateTime.parse(date);
-    } else {
-      throw const FormatException(
-        'pattern must have separator like "dd-MM-yyyy"',
-      );
-    }
-  }
-  return DateTime.parse(date);
-}
-
-/// Default convert DateTime to String 'dd-MM-yyyy'
-///
-/// Change [pattern] to change the format
-String convertDateTimeToString(
-  DateTime date, {
-  String pattern = 'dd-MM-yyyy',
-}) {
-  return DateFormat(pattern).format(date);
-}
-
-/// use to Convert DateTime to format yyyy-MM-dd
-// String convertDateTimeToddMMyyyy(DateTime dateTime) {
-//   return dateTime.toIso8601String().substring(0, 10);
-// }
-
-/// use to get Date from DateTime
-///
-/// => yyyy-MM-dd : 00:00:00.000
-DateTime getDate(DateTime date) {
-  return DateTime(date.year, date.month, date.day);
-}
-
-// ----------------------------------------------------------------
-// String convertDateTimeToyyyyMMdd(DateTime dateTime) {
-//   return dateTime.year.toString() +
-//       dateTime.month.toString().padLeft(2, '0') +
-//       dateTime.day.toString().padLeft(2, '0');
-// } //bad performance
-
-/// Use to compare {day, month, year} of two DateTime
-/// This function will return:
-/// - 1: dateTime1 > dateTime2
-/// - 0: dateTime1 == dateTime2
-/// - -1: dateTime1 < dateTime2
-int compareDateTimeByDay(DateTime dateTime1, DateTime dateTime2) {
-  DateTime date1 = getDate(dateTime1);
-  DateTime date2 = getDate(dateTime2);
-
-  if (date1.isAfter(date2)) {
-    return 1;
-  } else if (date1.isBefore(date2)) {
-    return -1;
-  } else {
-    return 0;
-  }
-}
+export 'converter.dart';
 
 /// Use to compare time {hour, minute} of two DateTime
 /// This function will return:
@@ -126,7 +48,7 @@ String getRemainingTime(DateTime? dateTime) {
           '${duration.inMinutes.remainder(60)}m';
     } else {
       return 'Overdue\n'
-      '${duration.inDays.abs()}d '
+          '${duration.inDays.abs()}d '
           '${duration.inHours.remainder(24).abs()}h '
           '${duration.inMinutes.remainder(60).abs()}m';
     }
@@ -135,15 +57,53 @@ String getRemainingTime(DateTime? dateTime) {
   }
 }
 
+/// use to get Date from DateTime
+///
+/// => yyyy-MM-dd : 00:00:00.000
+DateTime getDate(DateTime date) {
+  return DateTime(date.year, date.month, date.day);
+}
 
-/**
- * if (duration.inDays > 0) {
-      return '${duration.inDays} days';
-    } else if (duration.inHours > 0) {
-      return '${duration.inHours} hours';
-    } else if (duration.inMinutes > 0) {
-      return '${duration.inMinutes} minutes';
-    } else {
-      return '${duration.inSeconds} seconds';
-    }
- */
+// ----------------------------------------------------------------
+// String convertDateTimeToyyyyMMdd(DateTime dateTime) {
+//   return dateTime.year.toString() +
+//       dateTime.month.toString().padLeft(2, '0') +
+//       dateTime.day.toString().padLeft(2, '0');
+// } //bad performance
+
+/// Use to compare {day, month, year} of two DateTime
+/// This function will return:
+/// - 1: dateTime1 > dateTime2
+/// - 0: dateTime1 == dateTime2
+/// - -1: dateTime1 < dateTime2
+int compareDateTimeByDay(DateTime dateTime1, DateTime dateTime2) {
+  DateTime date1 = getDate(dateTime1);
+  DateTime date2 = getDate(dateTime2);
+
+  if (date1.isAfter(date2)) {
+    return 1;
+  } else if (date1.isBefore(date2)) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
+int generateNotificationId(DateTime date) {
+  final id = convertDateTimeToInt(date); // convert time to int. 12:34 -> 1234
+  final random = Random().nextInt(998) + 1; // from 1 to 999
+  final result = random * 10000 + id; // 1 * 10000 + 1234 = 11234
+  // get the first 4 digits
+  // final first4Digits = result ~/ 10000;
+  // l.log('object get first4Digits: ${first4Digits}');
+
+  dev.log('object generateNotificationId: $result');
+  return result;
+}
+
+// get the last 4 digits
+// int getTimeByNotificationId(int id) {
+//   final last4Digits = id % 10000;
+//   dev.log('object getNotificationId: $last4Digits');
+//   return last4Digits;
+// }

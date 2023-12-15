@@ -7,24 +7,24 @@ sealed class HabitEvent extends Equatable {
   List<Object> get props => [];
 }
 
-final class HabitStartedEvent extends HabitEvent {
-  HabitStartedEvent();
+final class HabitEventInitial extends HabitEvent {
+  HabitEventInitial();
   final DateTime currentDate = DateTime.now();
 
   @override
   List<Object> get props => [currentDate];
 }
 
-final class HabitAddEvent extends HabitEvent {
-  const HabitAddEvent({required this.habit});
+final class HabitEventAdd extends HabitEvent {
+  const HabitEventAdd({required this.habit});
   final HabitEntity habit;
 
   @override
   List<Object> get props => [habit];
 }
 
-final class HabitAddInstanceEvent extends HabitEvent {
-  const HabitAddInstanceEvent({required this.habit, required this.date});
+final class HabitEventAddInstance extends HabitEvent {
+  const HabitEventAddInstance({required this.habit, required this.date});
   final HabitEntity habit;
   final DateTime date;
 
@@ -32,8 +32,8 @@ final class HabitAddInstanceEvent extends HabitEvent {
   List<Object> get props => [habit, date];
 }
 
-final class HabitUpdateEvent extends HabitEvent {
-  const HabitUpdateEvent({required this.habit});
+final class HabitEventUpdate extends HabitEvent {
+  const HabitEventUpdate({required this.habit});
   final HabitEntity habit;
 
   @override

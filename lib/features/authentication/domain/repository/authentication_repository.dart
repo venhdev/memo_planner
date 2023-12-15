@@ -18,4 +18,5 @@ abstract class AuthenticationRepository {
   );
   ResultVoid signOut();
   UserEntity? getCurrentUser();
+  Future<UserEntity?> getUserByEmail(String email);
 }

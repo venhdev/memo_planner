@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/usecase/usecase.dart';
 import '../../../../core/constants/typedef.dart';
+import '../../../../core/usecase/usecase.dart';
 import '../repository/authentication_repository.dart';
 
 @singleton

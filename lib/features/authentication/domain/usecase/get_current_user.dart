@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import '../../../../core/usecase/usecase.dart';
 
+import '../../../../core/usecase/usecase.dart';
 import '../entities/user_entity.dart';
 import '../repository/authentication_repository.dart';
 

@@ -80,15 +80,26 @@ class HabitRepositoryImpl implements HabitRepository {
   }
 
   @override
-  ResultEither<StreakEntity> getTopStreaks(String hid) async {
+  ResultEither<StreakEntity> getTopStreaks(String hid, String collectionEmailPath) async {
     try {
       final habit = await _habitDataSource.getHabitByHid(hid);
-      final streaks = await _habitDataSource.getTopStreakOfHabit(habit!);
-      final result = StreakEntity(habit: habit, streaks: streaks);
+      final streaks = await _habitDataSource.getTopHabitStreakOfUser(hid, collectionEmailPath);
+      final result = StreakEntity(habit: habit!, streaks: streaks);
       return Right(result);
     } on FirebaseException catch (e) {
       log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return Left(ServerFailure(code: e.code, message: e.message!));
+    }
+  }
+
+  @override
+  SDocumentSnapshot getOneHabitStream(String hid) {
+    try {
+      final habits = _habitDataSource.getOneHabitStream(hid);
+      return habits;
+    } catch (e) {
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return const Stream.empty();
     }
   }
 }

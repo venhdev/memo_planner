@@ -16,4 +16,4 @@ typedef ResultVoid = ResultEither<void>;
 /// => Stream<QuerySnapshot<Map<String, dynamic>>>
 /// - This is return of .snapshots() method of [CollectionReference]
 typedef SQuerySnapshot = Stream<QuerySnapshot<Map<String, dynamic>>>;
-
+typedef SDocumentSnapshot = Stream<DocumentSnapshot<Map<String, dynamic>>>;

@@ -1,23 +1,35 @@
 part 'habit_constants.dart';
 
+//! Object type
+const String kHabit = 'habit#summary';
+const String kHabitInstance = 'habit#instance';
+const String kTaskList = 'task#list';
+const String kTask = 'task#instance';
+
+/*
+ * /habits/ [habit#summary] / instances [habit#instance]
+ * /tasks/ [task#list] / task / [task#instance]
+ */
+
 //! Firebase Firestore
 // use to define the name of the collection in Firestore
-const String pathToUsers = 'users';
-const String pathToHabits = 'habits';
-const String pathToHabitInstances = 'instances';
-const String pathToTasks = 'tasks';
-const String pathToTargets = 'targets';
+const String pathToUsers = 'users'; //* /users/{email}
+const String pathToHabits = 'habits'; //* /habits/{hid}
+//* /habits/ {hid} / <email> / {iid}
+// const String pathToHabitInstances = 'instances'; *deprecated => user's email is used as collection path
+const String pathToGroups = 'groups'; //* /groups/{gid}
+const String pathToTaskLists = 'task-lists'; //* /tasks/{tid}
+const String pathToTasks = 'tasks'; //* /tasks/{tid}/instances/{iid}
 
 // this is pattern use to store date in firestore RRule
 const String kDateFormatPattern = 'yyyyMMdd';
 // this is pattern use to display time in app
 const String kTimeFormatPattern = 'hh:mm a';
 
-
 // ------------------  Firebase Constants ------------------
 //! Authentication
 // The first time run app, user not login
-const String kUserNotLogin = 'User not login';
+const String kUserNotLogin = 'Please login to continue!';
 
 const String kSignInFailMessage = 'Login failed';
 const String kSignInSuccessMessage = 'Login failed';
@@ -41,3 +53,8 @@ const String kAuthNetworkRequestFailed = 'Your network is not stable';
 //? ----------- has not been caught yet -----------
 // // user-not-found
 // const String kAuthUserNotFound = 'User not found';
+
+// ! Notification channel id
+const String kDefaultNotificationChannelId = 'default_notification';
+const String kScheduleNotificationChannelId = 'schedule_notification';
+const String kDailyNotificationChannelId = 'daily_notification';

@@ -23,7 +23,12 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   ResultEither<UserEntity> signInWithGoogle() async {
     try {
       final result = await _firebaseAuthDataSource.signInWithGoogle();
-      return Right(UserModel.fromUserCredential(result.user!));
+      final user = UserModel.fromUserCredential(result.user!);
+      await _firebaseAuthDataSource.updateOrCreateUserInfo(user); // update or create user in 'users' collection
+      // add current FCM token to user in 'users' collection
+      await _firebaseAuthDataSource.addCurrentFCMTokenToUser(user.email!);
+
+      return Right(user);
     } on FirebaseAuthException catch (e) {
       log('FirebaseAuthException: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return Left(ServerFailure(code: e.code, message: e.message!));
@@ -44,6 +49,8 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   ) async {
     try {
       final userCredential = await _firebaseAuthDataSource.signInWithEmailAndPassword(email, password);
+      // add current FCM token
+      await _firebaseAuthDataSource.addCurrentFCMTokenToUser(userCredential.user!.email!);
       return Right(UserModel.fromUserCredential(userCredential.user!));
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
@@ -67,6 +74,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   @override
   ResultVoid signOut() async {
     try {
+      // remove current FCM token from user in 'users' collection
       await _firebaseAuthDataSource.signOut();
       return const Right(null);
     } on FirebaseAuthException catch (e) {
@@ -94,9 +102,13 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   ResultEither<UserEntity> signUpWithEmail(String email, String password) async {
     try {
       final userCredential = await _firebaseAuthDataSource.signUpWithEmail(email, password);
-      return Right(UserModel.fromUserCredential(userCredential.user!));
+      final user = UserModel.fromUserCredential(userCredential.user!);
+      await _firebaseAuthDataSource.updateOrCreateUserInfo(user);
+      // add current FCM token to user in 'users' collection
+      await _firebaseAuthDataSource.addCurrentFCMTokenToUser(user.email!);
+      return Right(user);
     } on FirebaseAuthException catch (e) {
-      // not handle: 'email-already-in-use'
+      // not yet handle: 'email-already-in-use'
       switch (e.code) {
         case 'invalid-email':
           return Left(ServerFailure(code: e.code, message: kAuthInvalidEmail));
@@ -109,6 +121,16 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<UserEntity?> getUserByEmail(String email) async {
+    try {
+      return await _firebaseAuthDataSource.getUserByEmail(email);
+    } on FirebaseAuthException catch (e) {
+      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      return null;
     }
   }
 }

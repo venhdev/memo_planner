@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../../core/utils/helpers.dart';
+import '../../../../core/constants/constants.dart';
+import '../../../../core/utils/converter.dart';
+import '../../../../core/notification/reminder.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 
 // The entity design to sync with Google Calendar
@@ -11,10 +13,13 @@ class HabitEntity extends Equatable {
     required this.description,
     required this.start,
     required this.end,
+    required this.reminders, // v1.1
     required this.recurrence,
     required this.created,
-    required this.updated,
-    required this.creator,
+    this.updated,
+    this.creator,
+    this.members, //v1.1
+
   });
 
   final String? hid;
@@ -22,16 +27,18 @@ class HabitEntity extends Equatable {
   final String? description;
 
   final DateTime? start; // start time
-  final DateTime?
-      end; // end time end time of the event. For a recurring habit, this is the end time of the first instance.
+  // end time of the event. For a recurring habit, this is the end time of the first instance.
+  final DateTime? end;
   final String? recurrence; // recurrence rule
+  final Reminder? reminders; // reminder
 
   final DateTime? created; //Creation time of the habit
   final DateTime? updated; //Last modification time of the habit
 
   final UserEntity? creator; //The creator of the habit. Read-only.
+  final List<String>? members; //The members of the habit. //v1.1 --only contain email
 
-  final String kind = 'habit#summary';
+  final String kind = kHabit; // The type of the resource. This is always 'habit#summary'.
 
   // ie. recurrence: 'RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20231130'
   DateTime? get until {
@@ -52,10 +59,12 @@ class HabitEntity extends Equatable {
     String? description,
     DateTime? start,
     DateTime? end,
+    Reminder? reminders,
     String? recurrence,
     DateTime? created,
     DateTime? updated,
     UserEntity? creator,
+    List<String>? members,
   }) {
     return HabitEntity(
       hid: hid ?? this.hid,
@@ -63,10 +72,12 @@ class HabitEntity extends Equatable {
       description: description ?? this.description,
       start: start ?? this.start,
       end: end ?? this.end,
+      reminders: reminders ?? this.reminders,
       recurrence: recurrence ?? this.recurrence,
       created: created ?? this.created,
       updated: updated ?? this.updated,
       creator: creator ?? this.creator,
+      members: members ?? this.members,
     );
   }
 
@@ -81,6 +92,7 @@ class HabitEntity extends Equatable {
         created,
         updated,
         creator,
+        members,
       ];
 }
 

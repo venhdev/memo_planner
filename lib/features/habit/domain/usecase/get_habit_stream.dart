@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/constants/typedef.dart';
+import '../../../../core/constants/typedef.dart';
 
 import '../../../../core/usecase/usecase.dart';
 import '../../../authentication/domain/entities/user_entity.dart';

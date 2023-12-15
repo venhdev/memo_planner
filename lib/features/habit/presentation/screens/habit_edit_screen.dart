@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/authentication/domain/entities/user_entity.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/constants/enum.dart';
 import '../../../../core/constants/typedef.dart';
-import '../../../../core/widgets/widgets.dart';
+import '../../../../core/components/widgets.dart';
+import '../../../authentication/domain/entities/user_entity.dart';
 import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../domain/entities/habit_entity.dart';
 import '../../domain/entities/habit_instance_entity.dart';
 import '../../domain/usecase/get_create_habit_instance_by_iid.dart';
 import '../../domain/usecase/get_habit_by_hid.dart';
-import '../widgets/widgets.dart';
+import '../components/edit/edit_screen_components.dart';
 
 class EditHabitScreen extends StatefulWidget {
   const EditHabitScreen({
@@ -105,14 +105,14 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasData) {
             return snapshot.data!.fold(
-              (l) {
-                return MessageScreen(message: l.toString());
+              (failure) {
+                return MessageScreen(message: failure.toString());
               },
-              (r) {
-                if (r is HabitEntity) {
-                  return HabitForm(type: EditType.edit, habit: r, user: user);
-                } else if (r is HabitInstanceEntity) {
-                  return HabitForm(type: EditType.editInstance, instance: r, user: user);
+              (result) {
+                if (result is HabitEntity) {
+                  return HabitForm(type: EditType.edit, habit: result, user: user);
+                } else if (result is HabitInstanceEntity) {
+                  return HabitForm(type: EditType.editInstance, instance: result, user: user);
                 }
                 return const MessageScreen(message: 'Unknown Error [e05]');
               },

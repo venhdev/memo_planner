@@ -7,10 +7,15 @@ sealed class AuthenticationEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class AuthenticationStartedEvent extends AuthenticationEvent {}
+class AuthenticationEventStarted extends AuthenticationEvent {
+  const AuthenticationEventStarted();
 
-class AuthenticationStatusChangedEvent extends AuthenticationEvent {
-  const AuthenticationStatusChangedEvent({
+  @override
+  List<Object> get props => [];
+}
+
+class AuthenticationEventStatusChanged extends AuthenticationEvent {
+  const AuthenticationEventStatusChanged({
     required this.status,
     required this.user,
   });
@@ -24,8 +29,8 @@ class AuthenticationStatusChangedEvent extends AuthenticationEvent {
       ];
 }
 
-class SignInWithEmailAndPasswordEvent extends AuthenticationEvent {
-  const SignInWithEmailAndPasswordEvent({
+class AuthenticationEventSignIn extends AuthenticationEvent {
+  const AuthenticationEventSignIn({
     required this.email,
     required this.password,
   });
@@ -36,7 +41,7 @@ class SignInWithEmailAndPasswordEvent extends AuthenticationEvent {
   List<Object> get props => [email, password];
 }
 
-class SignInWithGoogleEvent extends AuthenticationEvent {}
+class AuthenticationEventSignInWithGoogle extends AuthenticationEvent {}
 
 class SignOutEvent extends AuthenticationEvent {}
 

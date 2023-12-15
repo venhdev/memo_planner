@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/constants/constants.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 
 /// This object will be automatically created when a user tick in checkbox of a habit
@@ -35,7 +36,7 @@ class HabitInstanceEntity extends Equatable {
   final bool? completed; // Whether the habit is completed or not
   final bool? edited; // Default false, when user edit only the instance => true
 
-  final String kind = 'habit#instance';
+  final String kind = kHabitInstance;
 
   // copyWith
   HabitInstanceEntity copyWith({

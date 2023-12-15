@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:memo_planner/features/habit/domain/entities/habit_entity.dart';
+import 'habit_entity.dart';
 
 import 'streak_instance_entity.dart';
 

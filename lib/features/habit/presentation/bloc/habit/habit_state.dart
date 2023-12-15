@@ -13,15 +13,18 @@ final class HabitLoading extends HabitState {}
 
 final class HabitLoaded extends HabitState {
   const HabitLoaded({
-    this.message,
     required this.habitStream,
+    this.message,
   });
 
-  final Stream<QuerySnapshot<Map<String,dynamic>>> habitStream;
+  final Stream<QuerySnapshot<Map<String, dynamic>>> habitStream;
   final String? message;
 
   @override
-  List<Object> get props => [habitStream];
+  List<Object> get props => [
+        habitStream,
+        message ?? '',
+      ];
 }
 
 final class HabitError extends HabitState {

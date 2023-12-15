@@ -25,10 +25,10 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
     this._getHabitStreamUC,
     this._addHabitInstanceUC,
   ) : super(HabitInitial()) {
-    on<HabitStartedEvent>(_onStarted);
-    on<HabitAddEvent>(_onAddHabitEvent);
-    on<HabitAddInstanceEvent>(_onAddHabitInstanceEvent);
-    on<HabitUpdateEvent>(_onUpdateHabitEvent);
+    on<HabitEventInitial>(_onStarted);
+    on<HabitEventAdd>(_onAddHabitEvent);
+    on<HabitEventAddInstance>(_onAddHabitInstanceEvent);
+    on<HabitEventUpdate>(_onUpdateHabitEvent);
     on<HabitDeleteEvent>(_onDeleteHabitEvent);
   }
 
@@ -41,7 +41,7 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
 
   SQuerySnapshot? currentSteam;
 
-  void _onStarted(HabitStartedEvent event, Emitter<HabitState> emit) {
+  void _onStarted(HabitEventInitial event, Emitter<HabitState> emit) {
     emit(HabitLoading());
     try {
       var user = _getCurrentUserUC();
@@ -57,9 +57,9 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
     }
   }
 
-  void _onAddHabitEvent(HabitAddEvent event, Emitter<HabitState> emit) async {
+  void _onAddHabitEvent(HabitEventAdd event, Emitter<HabitState> emit) async {
     try {
-      final HabitEntity habit = event.habit.copyWith(creator: _getCurrentUserUC());
+      final HabitEntity habit = event.habit;
       final result = await _addHabitUC(habit);
 
       result.fold(
@@ -73,7 +73,7 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
     }
   }
 
-  void _onAddHabitInstanceEvent(HabitAddInstanceEvent event, Emitter<HabitState> emit) async {
+  void _onAddHabitInstanceEvent(HabitEventAddInstance event, Emitter<HabitState> emit) async {
     try {
       await _addHabitInstanceUC(
         AddHabitInstanceParams(
@@ -87,7 +87,7 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
   }
 
   void _onUpdateHabitEvent(
-    HabitUpdateEvent event,
+    HabitEventUpdate event,
     Emitter<HabitState> emit,
   ) async {
     try {

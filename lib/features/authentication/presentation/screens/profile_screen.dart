@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:memo_planner/features/authentication/domain/entities/user_entity.dart';
+import 'package:memo_planner/core/components/widgets.dart';
 
-import '../bloc/authentication/authentication_bloc.dart';
-import '../widgets/profile_menu.dart';
+import '../../domain/entities/user_entity.dart';
+import '../components/profile_menu.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -18,16 +17,14 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  String x = 'test';
   @override
   Widget build(BuildContext context) {
     // var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 24,
-              left: 24,
-              right: 24),
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 24, left: 24, right: 24),
           child: Column(
             children: [
               // IMAGE
@@ -74,8 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              Text(widget.user.displayName ?? widget.user.email!.split('@')[0],
-                  style: const TextStyle(fontSize: 32, color: Colors.black)),
+              Text(widget.user.displayName ?? widget.user.email!.split('@')[0], style: const TextStyle(fontSize: 32, color: Colors.black)),
               const SizedBox(height: 20),
 
               // Email
@@ -115,15 +111,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // ProfileMenuWidget(
               //     title: 'Information', icon: Icons.info, onPress: () {}),
               ProfileMenuWidget(
-                  title: 'Logout',
-                  icon: Icons.logout,
-                  textColor: Colors.red,
-                  endIcon: false,
-                  onPress: () {
-                    BlocProvider.of<AuthenticationBloc>(context).add(
-                      SignOutEvent(),
-                    );
-                  }),
+                title: 'Sign Out',
+                icon: Icons.logout,
+                textColor: Colors.red,
+                endIcon: false,
+                onPress: () {
+                  // show dialog to confirm sign out
+                  showMyDialogConfirmSignOut(context);
+                },
+              ),
+              // ProfileMenuWidget(
+              //   title: 'Test',
+              //   icon: Icons.looks,
+              //   textColor: Colors.green,
+              //   endIcon: false,
+              //   onPress: () {
+              //     // test add reminder
+              //     final reminder = ReminderEntity(
+              //       useDefault: true,
+              //       overrides: [
+              //         OverrideReminder(rid: 123, method: 'popup', minutes: 5),
+              //         OverrideReminder(rid: 321, method: 'email', minutes: 10),
+              //       ]
+              //     );
+
+              //     FirebaseFirestore.instance
+              //         .collection('test')
+              //         .add(
+              //           reminder.toMap(),
+              //         )
+              //         .then((value) => log('OK'));
+              //   },
+              // ),
+              // ProfileMenuWidget(
+              //   title: 'Test Read',
+              //   icon: Icons.looks,
+              //   textColor: Colors.green,
+              //   endIcon: false,
+              //   onPress: () {
+              //     // test add reminder
+              //     // final reminder = ReminderEntity(useDefault: true);
+
+              //     // FirebaseFirestore.instance.collection('test').doc('').get().then((value) {
+              //     //   final reminder = ReminderEntity.fromMap(value.data()!);
+              //     //   log('OK ${reminder.useDefault}');
+              //     // });
+              //     // FirebaseFirestore.instance
+              //     //   .collection('test')
+              //     //   .doc('')
+              //     //   .get()
+              //     //   .then((value) {
+              //     //     final reminder = ReminderEntity.fromMap(value.data()!);
+              //     //     log('OK ${reminder}');
+              //     //   });
+              //   },
+              // ),
             ],
           ),
         ),

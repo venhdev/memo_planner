@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/goal/domain/entities/task_entity.dart';
 
+import '../../core/components/widgets.dart';
 import '../../core/constants/enum.dart';
+import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../features/authentication/presentation/screens/screens.dart';
-import '../../features/goal/presentation/screens/goal_page.dart';
-import '../../features/goal/presentation/screens/target_screen/target_screen.dart';
-import '../../features/goal/presentation/screens/task_screen/task_screen.dart';
+import '../../features/habit/domain/entities/habit_entity.dart';
 import '../../features/habit/presentation/screens/screens.dart';
+import '../../features/task/presentation/screens/screens.dart';
 
 part 'app_scaffold_navigation_bar.dart';
 
@@ -43,7 +44,8 @@ class AppRouters {
           // The route branch for the second tab
           StatefulShellBranch(
             routes: <RouteBase>[
-              goalRoutes(),
+              // goalRoutes(),
+              taskRoute(),
             ],
           ),
           // The route branch for the third tab
@@ -61,7 +63,7 @@ class AppRouters {
 GoRoute habitRoutes() {
   return GoRoute(
     path: '/habit',
-    builder: (context, state) => const HabitPage(),
+    builder: (context, state) => const HabitScreen(),
     routes: [
       GoRoute(
         path: 'add',
@@ -69,11 +71,17 @@ GoRoute habitRoutes() {
         // builder: (context, state) => const AddHabitScreen(),
       ),
       GoRoute(
-          path: 'detail/:hid',
+          path: 'detail',
           builder: (context, state) {
-            final hid = state.pathParameters['hid']!;
-            return HabitDetailScreen(hid: hid);
+            final habit = GoRouterState.of(context).extra! as HabitEntity;
+            return HabitDetailScreenV2(habit: habit);
           }),
+      // GoRoute(
+      //     path: 'detail/:hid',
+      //     builder: (context, state) {
+      //       final hid = state.pathParameters['hid']!;
+      //       return HabitDetailScreen(hid: hid);
+      //     }),
       GoRoute(
           path: 'edit-habit/:id',
           builder: (context, state) {
@@ -90,48 +98,65 @@ GoRoute habitRoutes() {
   );
 }
 
-GoRoute goalRoutes() {
+// GoRoute goalRoutes() {
+//   return GoRoute(
+//     path: '/goal',
+//     builder: (context, state) => const GoalScreen(),
+//     routes: [
+//       // task routes
+//       GoRoute(
+//         path: 'task',
+//         builder: (context, state) => const GoalScreen(),
+//         routes: [
+//           GoRoute(
+//             path: 'add',
+//             builder: (context, state) {
+//               return const TaskEditScreen(type: EditType.add);
+//             },
+//           ),
+//           GoRoute(
+//             path: 'edit/:id',
+//             builder: (context, state) {
+//               final taskId = state.pathParameters['id']!;
+//               return TaskEditScreen(id: taskId, type: EditType.edit);
+//             },
+//           ),
+//           GoRoute(
+//             path: 'detail',
+//             builder: (context, state) {
+//               final task = GoRouterState.of(context).extra! as TaskEntity;
+//               return TaskDetailScreen(task: task);
+//             },
+//           ),
+//         ],
+//       ),
+//       // target routes
+//       GoRoute(
+//         path: 'target',
+//         builder: (context, state) => const GoalScreen(initialIndex: 1),
+//       ),
+//     ],
+//   );
+// }
+GoRoute taskRoute() {
   return GoRoute(
-    path: '/goal',
-    builder: (context, state) => const GoalPage(),
+    path: '/task-list',
+    builder: (context, state) => const TaskHomeScreen(),
     routes: [
-      // task routes
       GoRoute(
-        path: 'task',
-        builder: (context, state) => const GoalPage(),
-        routes: [
-          GoRoute(
-            path: 'add',
-            builder: (context, state) {
-              return const TaskEditScreen(type: EditType.add);
-            },
-          ),
-          GoRoute(
-            path: 'edit/:id',
-            builder: (context, state) {
-              final taskId = state.pathParameters['id']!;
-              return TaskEditScreen(id: taskId, type: EditType.edit);
-            },
-          ),
-          GoRoute(
-            path: 'detail',
-            builder: (context, state) {
-              final task = GoRouterState.of(context).extra! as TaskEntity;
-              return TaskDetailScreen(task: task);
-            },
-          ),
-        ],
+        path: 'single-list/:lid',
+        builder: (context, state) {
+          final String lid = state.pathParameters['lid']!;
+          return SingleTaskListScreen(lid);
+        },
       ),
-      // target routes
       GoRoute(
-        path: 'target',
-        builder: (context, state) => const GoalPage(initialIndex: 1),
-        routes: [
-          GoRoute(
-            path: 'add',
-            builder: (context, state) => const TargetEditScreen(),
-          ),
-        ],
+        path: 'multi-list',
+        builder: (context, state) {
+          final GroupType type = GoRouterState.of(context).extra! as GroupType;
+
+          return MultiTaskListScreen(type: type);
+        },
       ),
     ],
   );
@@ -140,7 +165,7 @@ GoRoute goalRoutes() {
 GoRoute authenticationRoutes() {
   return GoRoute(
     path: '/authentication',
-    builder: (context, state) => const AuthenticationPage(),
+    builder: (context, state) => const AuthenticationScreen(),
     routes: [
       GoRoute(
         path: 'sign-in',
@@ -153,5 +178,7 @@ GoRoute authenticationRoutes() {
     ],
   );
 }
+
+
 
 // https://pub.dev/documentation/go_router/latest/go_router/StatefulShellRoute-class.html

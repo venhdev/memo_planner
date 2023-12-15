@@ -15,19 +15,19 @@ class AuthenticationState extends Equatable {
   });
 
   const AuthenticationState.unknown() : this._();
-  const AuthenticationState.authenticating() : this._();
+  const AuthenticationState.authenticating()
+      : this._(
+          status: AuthenticationStatus.authenticating,
+        );
 
-  const AuthenticationState.authenticated(UserEntity user)
+  const AuthenticationState.authenticated(UserEntity user, {String? message})
       : this._(
           status: AuthenticationStatus.authenticated,
           user: user,
-        );
-
-  const AuthenticationState.unauthenticated({String? message})
-      : this._(
-          status: AuthenticationStatus.unauthenticated,
           message: message,
         );
+
+  const AuthenticationState.unauthenticated({String? message}) : this._(status: AuthenticationStatus.unauthenticated, message: message, user: null);
 
   final AuthenticationStatus status;
   final UserEntity? user; // this is the user credential from firebase

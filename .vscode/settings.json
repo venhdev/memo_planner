@@ -3,6 +3,7 @@
     "java.configuration.updateBuildConfiguration": "automatic",
     "cSpell.words": [
         "datepicker",
+        "Reorderable",
         "syncfusion"
     ],
     // "dart.flutterHotReloadOnSave": "all"

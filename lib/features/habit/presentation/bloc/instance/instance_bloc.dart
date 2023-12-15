@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/features/habit/domain/entities/habit_instance_entity.dart';
-import 'package:memo_planner/features/habit/domain/usecase/usecases.dart';
+import '../../../domain/entities/habit_instance_entity.dart';
+import '../../../domain/usecase/usecases.dart';
 
 import '../../../domain/entities/habit_entity.dart';
 

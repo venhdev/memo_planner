@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 
-import '../../../../core/widgets/widgets.dart';
+import '../../../../core/components/widgets.dart';
+import '../bloc/authentication/authentication_bloc.dart';
+import 'sign_up_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -28,11 +28,8 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar.goalAppBar(
-        context: context,
-        title: 'Sign In',
-      ),
-      drawer: const AppNavigationDrawer(),
+      appBar: AppBar(title: const Text('Sign In'), centerTitle: true),
+      // drawer: const AppNavigationDrawer(),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -71,18 +68,31 @@ class _SignInScreenState extends State<SignInScreen> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       BlocProvider.of<AuthenticationBloc>(context).add(
-                        SignInWithEmailAndPasswordEvent(
+                        AuthenticationEventSignIn(
                           email: _emailController.text,
                           password: _passwordController.text,
                         ),
                       );
                     }
                   },
-                  child: const Text(
-                    'Sign In',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                    ),
+                  child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+                    builder: (context, state) {
+                      if (state.status == AuthenticationStatus.authenticating) {
+                        return const SizedBox(
+                          height: 16.0,
+                          width: 16.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                          ),
+                        );
+                      }
+                      return const Text(
+                        'Sign In',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 16.0),
@@ -91,7 +101,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 GestureDetector(
                   onTap: () async {
                     BlocProvider.of<AuthenticationBloc>(context).add(
-                      SignInWithGoogleEvent(),
+                      AuthenticationEventSignInWithGoogle(),
                     );
                   },
                   child: Container(
@@ -112,7 +122,12 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 16.0),
                 TextButton(
                   onPressed: () {
-                    context.go('/authentication/sign-up');
+                    // context.go('/authentication/sign-up');
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpScreen(),
+                        ));
                   },
                   child: const Text(
                     'Don\'t have an account? Register now',

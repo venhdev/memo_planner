@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/features/authentication/data/data_sources/authentication_data_source.dart';
+import 'package:memo_planner/features/authentication/data/models/user_model.dart';
+import '../../../authentication/data/data_sources/authentication_data_source.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/utils/helpers.dart';
+import '../../../../core/utils/converter.dart';
 import '../../domain/entities/habit_entity.dart';
 import '../../domain/entities/habit_instance_entity.dart';
 import '../models/habit_instance_model.dart';
@@ -37,37 +38,43 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
 
   @override
   Future<HabitInstanceEntity> initNewHabitInstance(
-      HabitEntity habit, DateTime date, bool completed) async {
+    HabitEntity habit,
+    DateTime date,
+    bool completed,
+  ) async {
+    // date is the focusDate pass from ui
     try {
+      final currentUser = _authenticationDataSource.currentUser!;
       final habitICollRef = _firestore
-          .collection(pathToUsers)
-          .doc(habit.creator!.email)
+          // .collection(pathToUsers)
+          // .doc(habit.creator!.email)
           .collection(pathToHabits)
           .doc(habit.hid)
-          .collection(pathToHabitInstances);
+          .collection(currentUser.email!);
 
+      // create instance id with format: hid_yyyyMMdd
       final iid = '${habit.hid}_${convertDateTimeToyyyyMMdd(date)}';
 
-      // already handle in ui
-      //// remove the time part * because the first run app will have time part
+      // * already handle in ui
+      // // remove the time part * because the first run app will have time part
       // // if (date.microsecond != 0) {
       // //   date = DateTime(date.year, date.month, date.day);
       // // }
 
-      // the habit like parent of the habit instance
+      // the [habit] like parent of the [habit instance]
       // habit.start/end : hold the start/end time (hour, minute) of the habit
-      // -> change the day, month, year of the habit.start/end to date (focusDate)
+      // -> change the day, month, year of the habit.start/end to focusDate
 
       HabitInstanceModel habitInstanceModel = HabitInstanceModel(
         iid: iid,
         hid: habit.hid,
         summary: habit.summary,
         description: habit.description,
-        start: habit.start!.copyWith(day: date.day, month: date.month, year: date.year),
-        end: habit.end!.copyWith(day: date.day, month: date.month, year: date.year),
+        start: habit.start!.copyWith(day: date.day, month: date.month, year: date.year), // same at focusDate
+        end: habit.end!.copyWith(day: date.day, month: date.month, year: date.year), // same at focusDate
         date: date,
         updated: DateTime.now(),
-        creator: habit.creator,
+        creator: UserModel.fromUserCredential(currentUser),
         completed: completed,
         edited: false, // because this is new habit instance -- not edited yet
       );
@@ -84,26 +91,26 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
 
   @override
   SQuerySnapshot getHabitInstanceStream(HabitEntity habit, DateTime focusDate) {
+    final currentUser = _authenticationDataSource.currentUser!;
     final habitICollRef = _firestore
-        .collection(pathToUsers)
-        .doc(habit.creator!.email)
+        // .collection(pathToUsers)
+        // .doc(habit.creator!.email)
         .collection(pathToHabits)
         .doc(habit.hid)
-        .collection(pathToHabitInstances);
+        .collection(currentUser.email!);
 
     final iid = getIid(habit.hid!, focusDate);
     return habitICollRef.where('iid', isEqualTo: iid).snapshots();
   }
 
   @override
-  Future<void> changeHabitInstanceStatus(
-      HabitInstanceEntity instance, bool completed) async {
+  Future<void> changeHabitInstanceStatus(HabitInstanceEntity instance, bool completed) async {
     final habitIDocRef = _firestore
-        .collection(pathToUsers)
-        .doc(instance.creator!.email)
+        // .collection(pathToUsers)
+        // .doc(instance.creator!.email)
         .collection(pathToHabits)
         .doc(instance.hid)
-        .collection(pathToHabitInstances)
+        .collection(instance.creator!.email!)
         .doc(instance.iid);
 
     habitIDocRef.update({
@@ -118,11 +125,11 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
 
     if (user != null) {
       final habitIDocRef = _firestore
-          .collection(pathToUsers)
-          .doc(user.email)
+          // .collection(pathToUsers)
+          // .doc(user.email)
           .collection(pathToHabits)
           .doc(iid.split('_').first)
-          .collection(pathToHabitInstances)
+          .collection(user.email!)
           .doc(iid);
 
       return habitIDocRef.get().then((value) {
@@ -140,11 +147,11 @@ class HabitInstanceDataSourceImpl extends HabitInstanceDataSource {
   @override
   Future<void> updateHabitInstance(HabitInstanceEntity instance) async {
     final habitIDocRef = _firestore
-        .collection(pathToUsers)
-        .doc(instance.creator!.email)
+        // .collection(pathToUsers)
+        // .doc(instance.creator!.email)
         .collection(pathToHabits)
         .doc(instance.hid)
-        .collection(pathToHabitInstances)
+        .collection(instance.creator!.email!)
         .doc(instance.iid);
 
     habitIDocRef.update({

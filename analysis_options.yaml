@@ -30,7 +30,8 @@ linter:
     prefer_const_constructors: true
     prefer_const_declarations: true
     sort_child_properties_last: true
-    sort_constructors_first: true
+    sort_constructors_first: false
+    depend_on_referenced_packages: true
 
 
 # Additional information about this file can be found at

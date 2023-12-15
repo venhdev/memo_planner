@@ -29,6 +29,7 @@ class AppTheme {
       ThemeData.light().textTheme,
     ),
     visualDensity: VisualDensity.adaptivePlatformDensity,
+    
     useMaterial3: true,
   );
 }
