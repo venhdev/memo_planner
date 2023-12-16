@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-
 import 'package:memo_planner/core/constants/typedef.dart';
 import 'package:memo_planner/features/task/domain/entities/task_entity.dart';
 
@@ -20,7 +19,9 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid addTask(TaskEntity task) async {
     try {
-      return Right(_dataSource.addTask(task));
+      await _dataSource.addTask(task);
+
+      return const Right(null);
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(Failure(message: e.toString()));
@@ -34,9 +35,13 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  ResultVoid deleteTask(String tid, String lid) {
-    // TODO: implement deleteTask
-    throw UnimplementedError();
+  ResultVoid deleteTask(String tid, String lid) async {
+    try {
+      return Right(await _dataSource.deleteTask(tid, lid));
+    } catch (e) {
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(Failure(message: e.toString()));
+    }
   }
 
   @override

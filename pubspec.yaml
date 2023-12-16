@@ -39,6 +39,7 @@ dependencies:
   cupertino_icons: ^1.0.2 # Use with the CupertinoIcons class for iOS style icons.
   flutter_native_splash: ^2.3.5 # cmd:dart run flutter_native_splash:create
   flutter_launcher_icons: ^0.13.1 # cmd:flutter pub run flutter_launcher_icons
+  flutter_iconpicker: ^3.2.4
   flutter_slidable: ^3.0.1 # swipe
   easy_date_timeline: ^1.0.2 # timeline
   clean_calendar: ^1.1.0 # calendar

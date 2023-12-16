@@ -78,21 +78,22 @@ class LocalNotificationManager {
   /// Display a notification with a fixed date and time in the future
   Future<void> setScheduleNotification({
     required int id,
-    String? title,
+    required String? title,
     String? body,
     String? payload,
-    required DateTime scheduledDate,
+    required DateTime scheduledTime,
   }) async {
     await _flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
       body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
+      tz.TZDateTime.from(scheduledTime, tz.local),
       scheduleNotificationDetails,
       payload: payload,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
     );
+    //! matchDateTimeComponents: DateTimeComponents.time, >> not recurring
   }
 
   /// Display a notification with a daily schedule

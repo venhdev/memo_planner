@@ -6,18 +6,28 @@ import 'package:memo_planner/core/constants/typedef.dart';
 import 'package:memo_planner/core/error/failures.dart';
 import 'package:memo_planner/features/task/domain/entities/task_list_entity.dart';
 
+import '../../../authentication/data/data_sources/authentication_data_source.dart';
 import '../../domain/repository/task_list_repository.dart';
 import '../data_sources/firestore_task_data_source.dart';
 
 @Singleton(as: TaskListRepository)
 class TaskListRepositoryImpl implements TaskListRepository {
-  TaskListRepositoryImpl(this._dataSource);
+  TaskListRepositoryImpl(this._dataSource, this._authDataSource);
 
   final FireStoreTaskDataSource _dataSource;
+  final AuthenticationDataSource _authDataSource;
 
   @override
-  ResultVoid addMember(String tid, String email) {
-    throw UnimplementedError();
+  ResultVoid addMember(String tid, String email) async {
+    try {
+      final user = await _authDataSource.getUserByEmail(email);
+      if (user == null) {
+        return const Left(Failure(message: 'User not found'));
+      }
+      return Right(_dataSource.addMember(tid, email));
+    } catch (e) {
+      return Left(Failure(message: e.toString()));
+    }
   }
 
   @override
@@ -60,8 +70,12 @@ class TaskListRepositoryImpl implements TaskListRepository {
   }
 
   @override
-  ResultVoid removeMember(String tid, String email) {
-    throw UnimplementedError();
+  ResultVoid removeMember(String tid, String email) async {
+    try {
+      return Right(_dataSource.removeMember(tid, email));
+    } catch (e) {
+      return Left(Failure(message: e.toString()));
+    }
   }
 
   @override

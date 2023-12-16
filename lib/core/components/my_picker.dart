@@ -88,8 +88,8 @@ class MyDateTimePicker extends StatelessWidget {
       onTap: onTap,
       leading: date != null
           ? SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
+              scrollDirection: Axis.vertical,
+              child: Column(
                 children: [
                   const Icon(Icons.calendar_today),
                   // get remaining time
@@ -99,12 +99,12 @@ class MyDateTimePicker extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 12,
-                        color: date!.isBefore(DateTime.now()) ? Colors.red : Colors.black, 
+                        color: date!.isBefore(DateTime.now()) ? Colors.red : Colors.black,
                       ),
                     ),
                 ],
               ),
-          )
+            )
           : const Icon(Icons.calendar_today),
       trailing: date != null ? IconButton(onPressed: onPressedClose, icon: const Icon(Icons.close)) : null,
       title: Text(date == null ? 'Set due date' : 'Due Date: ${convertDateTimeToString(date!)}'), //show date
@@ -128,4 +128,5 @@ class MyDateTimePicker extends StatelessWidget {
 }
 
 /// Return the same [date] with the [time] set
-DateTime copyTimeOfDay(DateTime date, TimeOfDay time) => DateTime(date.year, date.month, date.day, time.hour, time.minute);
+DateTime copyTimeOfDay(DateTime date, TimeOfDay time) =>
+    DateTime(date.year, date.month, date.day, time.hour, time.minute);

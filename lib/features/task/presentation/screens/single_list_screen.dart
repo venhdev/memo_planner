@@ -7,10 +7,11 @@ import 'package:memo_planner/features/task/domain/repository/task_repository.dar
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/widgets.dart';
+import '../../../habit/presentation/components/detail/member_item.dart';
 import '../../data/models/task_model.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/entities/task_list_entity.dart';
-import '../components/dialogs.dart';
+import '../components/dialog.dart';
 import '../components/form_add_task.dart';
 
 enum MenuItem { rename, delete, itemThree }
@@ -74,16 +75,32 @@ class SingleTaskListScreen extends StatelessWidget {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, TaskListEntity taskList) => AppBar(
-        title: Text(taskList.listName!),
+  AppBar _buildAppBar(
+    BuildContext context,
+    TaskListEntity taskList,
+  ) =>
+      AppBar(
+        title: ListTile(
+          onTap: () => handleRename(context, taskList),
+          title: Text(taskList.listName!),
+          leading: Icon(taskList.iconData),
+        ),
+        // title: GestureDetector(
+        //   child: Text(taskList.listName!),
+        //   onTap: () {
+        //     handleRename(context, taskList);
+        //   },
+        // ),
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.person_add),
+            onPressed: () {
+              openMemberModal(context, taskList.lid!, TextEditingController());
+            },
+            icon: const Icon(Icons.group),
           ),
 
           // PopupMenu
@@ -114,27 +131,6 @@ class SingleTaskListScreen extends StatelessWidget {
         ],
       );
 
-  Future<void> handleDelete(BuildContext context, TaskListEntity taskList) {
-    return showMyDialogToConfirm(
-      context,
-      title: 'Delete List',
-      content: 'This list will be deleted permanently!',
-      onConfirm: () {
-        Navigator.pop(context); // back to previous screen: TaskHomeScreen
-        di<TaskListRepository>().deleteTaskList(taskList.lid!);
-      },
-    );
-  }
-
-  Future<void> handleRename(BuildContext context, TaskListEntity taskList) {
-    return showDialogForAddOrEditTaskList(
-      context,
-      controller: TextEditingController(text: taskList.listName!),
-      isAdd: false,
-      taskList: taskList,
-    );
-  }
-
   Widget _build(BuildContext context, List<TaskEntity> tasks) => ListView.builder(
         itemCount: tasks.length,
         itemBuilder: (context, index) {
@@ -149,7 +145,107 @@ class SingleTaskListScreen extends StatelessWidget {
           );
         },
       );
+
+  Future<void> openMemberModal(BuildContext context, String lid, TextEditingController controller) {
+    return showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return StreamBuilder(
+          stream: di<TaskListRepository>().getOneTaskListStream(lid),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.active && snapshot.hasData) {
+              final map = snapshot.data!.data();
+
+              // > To avoid error when the list has been deleted -> ! on null value
+              // > Notify user that the list has been deleted if they are still in this screen
+              if (map == null) {
+                Navigator.of(context).pop(); // pop to task-lists screen
+                return const MessageScreen(message: 'This list has been permanently deleted');
+              }
+              final taskList = TaskListModel.fromMap(map);
+
+              return SizedBox(
+                height: MediaQuery.of(context).size.height * 0.5,
+                child: Center(
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            const Text('List Members', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
+                            ElevatedButton(
+                              onPressed: () {
+                                showMyDialogToAddMember(
+                                  context,
+                                  controller: controller,
+                                  onConfirm: () async {
+                                    // NOTE: need refactor
+                                    di<TaskListRepository>().addMember(taskList.lid!, controller.text.trim());
+                                  },
+                                );
+                              },
+                              child: const Text('Add Member'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (taskList.members != null)
+                        Expanded(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: taskList.members?.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return MemberItem(
+                                lid: taskList.lid!,
+                                memberEmail: taskList.members![index],
+                                ownerEmail: taskList.creator!.email!,
+                              );
+                            },
+                          ),
+                        )
+                      else
+                        const Text('No Member'),
+                    ],
+                  ),
+                ),
+              );
+            } else if (snapshot.hasError) {
+              return MessageScreen.error(snapshot.error.toString());
+            } else {
+              return MessageScreen.error(snapshot.connectionState.toString());
+            }
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> handleDelete(BuildContext context, TaskListEntity taskList) {
+    return showMyDialogToConfirm(
+      context,
+      title: 'Delete List',
+      content: 'This list will be deleted permanently!',
+      onConfirm: () {
+        Navigator.pop(context); // back to previous screen: TaskHomeScreen
+        di<TaskListRepository>().deleteTaskList(taskList.lid!);
+      },
+    );
+  }
+
+  Future<void> handleRename(BuildContext context, TaskListEntity taskList) {
+    return showAddOrEditForm(
+      context,
+      controller: TextEditingController(text: taskList.listName!),
+      isAdd: false,
+      taskList: taskList,
+    );
+  }
 }
+
+
 
 // Future<void> showSheetForAddTask(BuildContext context) async => showModalBottomSheet(
 //       context: context,

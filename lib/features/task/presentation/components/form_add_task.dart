@@ -27,9 +27,12 @@ class _AddTaskModalState extends State<AddTaskModal> {
   bool isQuickAdd = false;
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _controller = TextEditingController();
-  String label = 'Set Due Date';
-  Color labelColor = Colors.black;
+  String dueDateLabel = 'Set Due Date';
+  Color dueDateColor = Colors.black;
   DateTime? dueDate;
+
+  String reminderLabel = 'Set Reminder';
+  DateTime? reminderTime;
 
   String? _errorText;
   // int? _value; //? Priority level
@@ -61,65 +64,12 @@ class _AddTaskModalState extends State<AddTaskModal> {
       child: ListView(
         shrinkWrap: true,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton.icon(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Switch(
-                  thumbIcon: thumbIcon,
-                  value: isQuickAdd,
-                  onChanged: (bool value) {
-                    setState(() {
-                      isQuickAdd = value;
-                    });
-                  },
-                ),
-                label: const Text('Quick Add'),
-              ),
-              TextButton.icon(
-                onPressed: () {
-                  if (_controller.text.isNotEmpty) {
-                    if (isSetPriority) {
-                      final priority = calculatePriority(isImportant, isUrgent);
-                      if (priority == -1) {
-                        showMySnackbar(context, message: 'Please set priority');
-                        return;
-                      }
-                      handleAdd(context, _controller.text, priority: priority);
-                    } else {
-                      handleAdd(context, _controller.text);
-                    }
-                  } else {
-                    setState(() {
-                      _errorText = '*Please enter task name';
-                    });
-                  }
-                },
-                label: const Text('Create Task'),
-                icon: const Icon(Icons.add_task_sharp),
-              ),
-            ],
-          ),
-          TextField(
-            controller: _controller,
-            focusNode: _focusNode,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: 'Add New Task',
-              prefixIcon: const Icon(Icons.title),
-              errorText: _errorText,
-            ),
-            onSubmitted: (value) {
-              // unfocus text field
-              _focusNode.unfocus();
-            },
-          ),
+          // QuickAdd & Create Task
+          buildModalHeader(context),
+          // Task Name
+          buildTextField(),
           // Priority level
           const SizedBox(height: 8.0),
-          // buildPriorityTable(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -146,46 +96,152 @@ class _AddTaskModalState extends State<AddTaskModal> {
 
           // Due Date
           const SizedBox(height: 8.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ActionChip(
-                avatar: Icon(Icons.calendar_today, color: labelColor),
-                label: Text(label, style: TextStyle(color: labelColor)),
-                onPressed: () async {
-                  final pickedDate = await showMyDatePicker(context, initDate: DateTime.now());
-                  if (pickedDate != null) {
-                    // > change color to red if date is in the past
-                    if (pickedDate.isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
-                      labelColor = Colors.red;
-                    } else {
-                      labelColor = Colors.blue;
-                    }
-                    setState(() {
-                      label = convertDateTimeToString(pickedDate, pattern: 'dd/MM');
-                    });
-                  }
-                },
-                tooltip: 'Set Due Date',
-              ),
-
-              // Button Clear
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    label = 'Set Due Date';
-                    labelColor = Colors.black;
-                    _controller.clear();
-                    _errorText = null;
-                  });
-                  _focusNode.requestFocus();
-                },
-                child: const Text('Clear'),
-              ),
-            ],
-          ),
+          buildToolBar(context),
         ],
       ),
+    );
+  }
+
+  Row buildModalHeader(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        TextButton.icon(
+          onPressed: () {},
+          icon: Switch(
+            thumbIcon: thumbIcon,
+            value: isQuickAdd,
+            onChanged: (bool value) {
+              setState(() {
+                isQuickAdd = value;
+              });
+            },
+          ),
+          label: const Text('Quick Add'),
+        ),
+        TextButton.icon(
+          onPressed: () {
+            if (_controller.text.isNotEmpty) {
+              if (isSetPriority) {
+                final priority = calculatePriority(isImportant, isUrgent);
+                if (priority == -1) {
+                  showSnackBar(message: 'Please set priority');
+                  return;
+                }
+                handleAdd(context, _controller.text, priority: priority);
+              } else {
+                handleAdd(context, _controller.text);
+              }
+            } else {
+              setState(() {
+                _errorText = '*Please enter task name';
+              });
+            }
+          },
+          label: const Text('Create Task'),
+          icon: const Icon(Icons.add_task_sharp),
+        ),
+      ],
+    );
+  }
+
+  TextField buildTextField() {
+    return TextField(
+      controller: _controller,
+      focusNode: _focusNode,
+      autofocus: true,
+      decoration: InputDecoration(
+        hintText: 'Add New Task',
+        prefixIcon: const Icon(Icons.title),
+        errorText: _errorText,
+      ),
+      onSubmitted: (value) {
+        // unfocus text field
+        _focusNode.unfocus();
+      },
+    );
+  }
+
+  Wrap buildToolBar(BuildContext context) {
+    return Wrap(
+      spacing: 12.0,
+      children: [
+        // Button Set Due Date
+        ActionChip(
+          avatar: Icon(Icons.calendar_today, color: dueDateColor),
+          label: Text(dueDateLabel, style: TextStyle(color: dueDateColor)),
+          onPressed: () async {
+            final pickedDate = await showMyDatePicker(context, initDate: DateTime.now());
+            if (pickedDate != null) {
+              // > change color to red if date is in the past
+              if (pickedDate.isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
+                dueDateColor = Colors.red;
+              } else {
+                dueDateColor = Colors.blue;
+              }
+              setState(() {
+                dueDateLabel = convertDateTimeToString(pickedDate, pattern: 'dd/MM');
+                dueDate = pickedDate;
+              });
+            }
+          },
+          tooltip: 'Set Due Date',
+        ), // Button Set Due Date
+        // Button Set Reminder
+        ActionChip(
+          avatar: const Icon(Icons.lock_clock, color: Colors.black),
+          label: Text(reminderLabel, style: const TextStyle(color: Colors.black)),
+          onPressed: () async {
+            final date = await pickDate();
+            if (date == null) return;
+
+            final time = await pickTime();
+            if (time == null) return;
+
+            final pickedReminder = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              time.hour,
+              time.minute,
+            );
+
+            // > the reminder date time must be in the future
+            if (pickedReminder.isBefore(DateTime.now())) {
+              showSnackBar(message: 'Reminder must be in the future', backgroundColor: Colors.red);
+            } else {
+              setState(() {
+                reminderLabel = convertDateTimeToString(pickedReminder, pattern: 'dd/MM - HH:mm');
+                reminderTime = pickedReminder;
+              });
+            }
+
+            // // > change color to red if date is in the past
+            // if (pickedDate.isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
+            //   dueDateColor = Colors.red;
+            // } else {
+            //   dueDateColor = Colors.blue;
+            // }
+            // setState(() {
+            //   dueDateLabel = convertDateTimeToString(pickedDate, pattern: 'dd/MM');
+            // });
+          },
+          tooltip: 'Set Reminder',
+        ),
+        // Clear All
+        IconButton(
+            tooltip: 'Clear All',
+            onPressed: () {
+              setState(() {
+                dueDateLabel = 'Set Due Date';
+                reminderLabel = 'Set Reminder';
+                dueDateColor = Colors.black;
+                _controller.clear();
+                _errorText = null;
+              });
+            },
+            icon: const Icon(Icons.delete_forever)),
+      ],
     );
   }
 
@@ -324,10 +380,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
       );
 
   void handleAdd(BuildContext context, String value, {int? priority}) {
-    // > add task to list
-
     final currentUser = context.read<AuthenticationBloc>().state.user;
-
     di<TaskRepository>().addTask(TaskEntity(
       tid: null,
       lid: widget.lid,
@@ -336,7 +389,12 @@ class _AddTaskModalState extends State<AddTaskModal> {
       priority: priority,
       completed: false,
       dueDate: dueDate,
-      reminders: dueDate != null ? Reminder(rid: generateNotificationId(dueDate!)) : null,
+      reminders: reminderTime != null
+          ? Reminder(
+              rid: generateNotificationId(reminderTime!),
+              scheduledTime: reminderTime,
+            )
+          : null,
       creator: currentUser,
       assignedMembers: null,
       created: DateTime.now(),
@@ -346,8 +404,8 @@ class _AddTaskModalState extends State<AddTaskModal> {
     _controller.clear();
     // > reset due date
     setState(() {
-      label = 'Set Due Date';
-      labelColor = Colors.black;
+      dueDateLabel = 'Set Due Date';
+      dueDateColor = Colors.black;
       dueDate = null;
       _errorText = null;
     });
@@ -368,5 +426,40 @@ class _AddTaskModalState extends State<AddTaskModal> {
             : isImportant == true && isUrgent == false
                 ? 1
                 : 0;
+  }
+
+  Future<TimeOfDay?> pickTime() => showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+
+  Future<DateTime?> pickDate() => showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2020),
+        lastDate: DateTime(2030),
+      );
+
+  void showSnackBar({
+    required String message,
+    bool closeable = true,
+    Duration? duration,
+    Color? backgroundColor,
+  }) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+      action: closeable
+          ? SnackBarAction(
+              label: 'OK',
+              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+            )
+          : null,
+      backgroundColor: backgroundColor,
+    );
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
   }
 }

@@ -10,7 +10,7 @@ import 'package:memo_planner/features/task/presentation/components/task_group_it
 
 import '../../domain/entities/task_list_entity.dart';
 import '../bloc/task_bloc.dart';
-import '../components/dialogs.dart';
+import '../components/dialog.dart';
 
 // show all list of tasks
 class TaskHomeScreen extends StatelessWidget {
@@ -68,7 +68,7 @@ class TaskHomeScreen extends StatelessWidget {
           padding: const EdgeInsets.only(right: 8.0),
           child: IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () async => showDialogForAddOrEditTaskList(
+            onPressed: () async => showAddOrEditForm(
               context,
               controller: TextEditingController(),
             ),

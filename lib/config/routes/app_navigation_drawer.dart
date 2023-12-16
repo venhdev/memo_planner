@@ -149,7 +149,7 @@ class AppNavigationDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.cast),
-            title: const Text('pending & activate notification'),
+            title: const Text('log pending & activate notification'),
             onTap: () async {
               final pending = await di<LocalNotificationManager>().I.pendingNotificationRequests();
               final activate = await di<LocalNotificationManager>().I.getActiveNotifications();

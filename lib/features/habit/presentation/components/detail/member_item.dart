@@ -7,16 +7,19 @@ import 'package:memo_planner/features/authentication/presentation/bloc/authentic
 import '../../../../../config/dependency_injection.dart';
 import '../../../../../core/components/widgets.dart';
 import '../../../../authentication/domain/repository/authentication_repository.dart';
+import '../../../../task/domain/repository/task_list_repository.dart';
 import '../../../data/data_sources/habit_data_source.dart';
 
 class MemberItem extends StatelessWidget {
   const MemberItem({
-    required this.hid,
+    this.hid,
+    this.lid,
     required this.memberEmail,
     required this.ownerEmail,
     super.key,
   });
-  final String hid;
+  final String? hid; // Habit ID
+  final String? lid; // List Task ID
   final String memberEmail;
   final String ownerEmail;
 
@@ -83,7 +86,7 @@ class MemberItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                member.displayName!,
+                member.displayName?? member.email!,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -110,23 +113,51 @@ class MemberItem extends StatelessWidget {
 
             //         di<HabitDataSource>().removeMember(hid, member.email!);
             //       },
-            onPressed: ownerEmail == currentUser.email // if owner
-                ? memberEmail == currentUser.email //> current render member is owner
-                    ? null // cannot remove self
-                    : () {
-                        di<HabitDataSource>().removeMember(hid, member.email!); // remove other member
-                      }
-                : memberEmail == currentUser.email //> current render member is member
-                    ? () {
-                        di<HabitDataSource>().removeMember(hid, member.email!); // remove self
-                        // redirect to home
-                        context.go('/habit');
-                      }
-                    : null, // cannot remove other member
+            onPressed: getHandleFunction(
+              currentUser: currentUser,
+              member: member,
+              context: context,
+            ),
             icon: const Icon(Icons.remove_circle),
           )
         ],
       ),
     );
+  }
+
+  VoidCallback? getHandleFunction({
+    required UserEntity currentUser,
+    required UserEntity member,
+    required BuildContext context,
+  }) {
+    if (hid != null) {
+      return ownerEmail == currentUser.email // if owner
+          ? memberEmail == currentUser.email //> current render member is owner
+              ? null // cannot remove self
+              : () {
+                  di<HabitDataSource>().removeMember(hid!, member.email!); // remove other member
+                }
+          : memberEmail == currentUser.email //> current render member is member
+              ? () {
+                  di<HabitDataSource>().removeMember(hid!, member.email!); // remove self
+                  // redirect to home
+                  context.go('/habit');
+                }
+              : null; // cannot remove other member
+    } else {
+      return ownerEmail == currentUser.email // if owner
+          ? memberEmail == currentUser.email //> current render member is owner
+              ? null // cannot remove self
+              : () {
+                  di<TaskListRepository>().removeMember(lid!, member.email!); // remove other member
+                }
+          : memberEmail == currentUser.email //> current render member is member
+              ? () {
+                  di<TaskListRepository>().removeMember(lid!, member.email!); // remove self
+                  // redirect to home
+                  context.go('/task-list');
+                }
+              : null; // cannot remove other member
+    }
   }
 }

@@ -4,6 +4,7 @@ import 'package:memo_planner/core/constants/typedef.dart';
 import 'package:memo_planner/features/task/data/models/task_model.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/notification/local_notification_manager.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/entities/task_list_entity.dart';
 import '../models/task_list_model.dart';
@@ -23,16 +24,18 @@ abstract class FireStoreTaskDataSource {
   //! Task
   SQuerySnapshot getAllTaskStream(String lid);
 
+  Future<TaskEntity> getTask(String lid, String tid);
   Future<void> addTask(TaskEntity task);
   Future<void> editTask(TaskEntity updatedTask);
-  Future<void> deleteTask(String tid);
+  Future<void> deleteTask(String lid, String tid);
 }
 
 @Singleton(as: FireStoreTaskDataSource)
 class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
-  FireStoreTaskDataSourceImpl(this._firestore);
+  FireStoreTaskDataSourceImpl(this._firestore, this._localNotification);
 
   final FirebaseFirestore _firestore;
+  final LocalNotificationManager _localNotification;
 
   @override
   SQuerySnapshot getAllTaskListStreamOfUser(String email) {
@@ -40,7 +43,7 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
         .collection(pathToTaskLists)
         .where(Filter.or(
           Filter('creator.email', isEqualTo: email),
-          Filter('assignedMembers', arrayContains: email),
+          Filter('members', arrayContains: email),
         ))
         .snapshots();
   }
@@ -68,10 +71,16 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
     final docRef = _firestore.collection(pathToTaskLists).doc(lid);
     await docRef.delete();
 
+    //? can call the deleteTask method but it will do some extra work
     //remove all tasks in: /task-lists/ {lid} /tasks/ {tid}
     final tasks = await docRef.collection(pathToTasks).get();
     for (final task in tasks.docs) {
-      // TODO: remove notification -> call deleteTask(tid)
+      // cancel notification
+      final model = TaskModel.fromMap(task.data());
+      if (model.reminders?.useDefault == true) {
+        await _localNotification.I.cancel(model.reminders!.rid!);
+      }
+      // delete task reference
       await task.reference.delete();
     }
   }
@@ -88,6 +97,22 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
     _firestore.collection(pathToTaskLists).doc(lid).update({
       'members': FieldValue.arrayRemove([email])
     });
+
+    // remove member from every task that assigned to him/her
+    final tasks = await _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).get();
+    for (final task in tasks.docs) {
+      final model = TaskModel.fromMap(task.data());
+      // if (model.assignedMembers == null ) continue;
+
+      if (model.assignedMembers == null) continue;
+      if (model.assignedMembers!.isEmpty) continue;
+
+      if (model.assignedMembers!.contains(email)) {
+        // remove member (string email) from assignedMembers
+        model.assignedMembers!.remove(email);
+        await task.reference.update(model.toMap());
+      }
+    }
   }
 
   @override
@@ -106,18 +131,39 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
     final tid = collRef.doc().id;
     task = task.copyWith(tid: tid);
 
-    return collRef.doc(tid).set(TaskModel.fromEntity(task).toMap());
+    await collRef.doc(tid).set(TaskModel.fromEntity(task).toMap()).then(
+      (_) {
+        // set schedule notification for task
+        if (task.reminders?.useDefault == true) {
+          _localNotification.setScheduleNotification(
+            id: task.reminders!.rid!,
+            title: task.taskName,
+            scheduledTime: task.reminders!.scheduledTime!,
+          );
+        }
+      },
+    );
   }
 
   @override
-  Future<void> deleteTask(String tid) {
-    // TODO: implement deleteTask
-    throw UnimplementedError();
+  Future<void> deleteTask(String lid, String tid) async {
+    final task = await getTask(lid, tid);
+    if (task.reminders?.useDefault == true) {
+      await _localNotification.I.cancel(task.reminders!.rid!);
+    }
+    await _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).doc(tid).delete();
   }
 
   @override
   Future<void> editTask(TaskEntity updatedTask) {
     // TODO: implement editTask
     throw UnimplementedError();
+  }
+
+  @override
+  Future<TaskEntity> getTask(String lid, String tid) async {
+    final docRef = _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).doc(tid);
+    final doc = await docRef.get();
+    return TaskModel.fromMap(doc.data()!);
   }
 }
