@@ -39,11 +39,12 @@ int compareTimeOfDay(TimeOfDay time1, TimeOfDay time2) {
 }
 
 // get remaining time from now to [dateTime]
-String getRemainingTime(DateTime? dateTime) {
+String getRemainingTime(DateTime? dateTime, {String defaultText = 'No due date', String? prefixString}) {
   if (dateTime != null) {
     Duration duration = dateTime.difference(DateTime.now());
     if (duration > Duration.zero) {
-      return '${duration.inDays}d '
+      return  '${prefixString ?? ''}'
+          '${duration.inDays}d '
           '${duration.inHours.remainder(24)}h '
           '${duration.inMinutes.remainder(60)}m';
     } else {
@@ -53,7 +54,7 @@ String getRemainingTime(DateTime? dateTime) {
           '${duration.inMinutes.remainder(60).abs()}m';
     }
   } else {
-    return 'No due date';
+    return defaultText;
   }
 }
 

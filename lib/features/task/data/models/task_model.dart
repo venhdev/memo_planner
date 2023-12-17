@@ -67,7 +67,9 @@ class TaskModel extends TaskEntity {
       dueDate: map['dueDate'] != null ? DateTime.fromMillisecondsSinceEpoch(map['dueDate'] as int) : null,
       reminders: map['reminders'] != null ? Reminder.fromMap(map['reminders'] as Map<String, dynamic>) : null,
       creator: map['creator'] != null ? UserModel.fromMap(map['creator'] as Map<String, dynamic>) : null,
-      assignedMembers: map['assignedMembers'] != null ? List<String>.from((map['assignedMembers'] as List<String>)) : null,
+      assignedMembers: map['assignedMembers'] != null
+          ? (map['assignedMembers'] as List<dynamic>).map((assigner) => assigner.toString()).toList()
+          : null,
       created: map['created'] != null ? convertTimestampToDateTime(map['created'] as Timestamp) : null,
       updated: map['updated'] != null ? convertTimestampToDateTime(map['updated'] as Timestamp) : null,
     );

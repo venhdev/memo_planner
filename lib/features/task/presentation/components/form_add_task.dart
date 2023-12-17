@@ -25,20 +25,22 @@ class AddTaskModal extends StatefulWidget {
 
 class _AddTaskModalState extends State<AddTaskModal> {
   bool isQuickAdd = false;
-  final FocusNode _focusNode = FocusNode();
+  final FocusNode focusNode = FocusNode();
   final TextEditingController _controller = TextEditingController();
+
   String dueDateLabel = 'Set Due Date';
   Color dueDateColor = Colors.black;
-  DateTime? dueDate;
+  DateTime? _dueDate;
 
   String reminderLabel = 'Set Reminder';
-  DateTime? reminderTime;
+  DateTime? _reminderDateTime;
 
-  String? _errorText;
-  // int? _value; //? Priority level
+  String? errorText;
+  int? _priority; //? Priority level
   bool isSetPriority = false;
-  bool? isImportant;
-  bool? isUrgent;
+
+  // bool? isImportant;
+  // bool? isUrgent;
 
   final MaterialStateProperty<Icon?> thumbIcon = MaterialStateProperty.resolveWith<Icon?>(
     (Set<MaterialState> states) {
@@ -51,7 +53,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    focusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -65,9 +67,10 @@ class _AddTaskModalState extends State<AddTaskModal> {
         shrinkWrap: true,
         children: [
           // QuickAdd & Create Task
-          buildModalHeader(context),
+          _buildHeaderBar(context),
           // Task Name
-          buildTextField(),
+          _buildTextField(),
+
           // Priority level
           const SizedBox(height: 8.0),
           Row(
@@ -86,28 +89,33 @@ class _AddTaskModalState extends State<AddTaskModal> {
             ],
           ),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 300),
             transitionBuilder: (child, animation) => FadeTransition(
               opacity: animation,
               child: child,
             ),
-            child: isSetPriority ? buildPriorityCard() : const SizedBox.shrink(),
+            child: isSetPriority ? _buildPriorityTable() : const SizedBox.shrink(),
           ),
 
           // Due Date
           const SizedBox(height: 8.0),
-          buildToolBar(context),
+          _buildBottomToolBar(context),
         ],
       ),
     );
   }
 
-  Row buildModalHeader(BuildContext context) {
+  Row _buildHeaderBar(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // Switch Quick Add
         TextButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            setState(() {
+              isQuickAdd = !isQuickAdd;
+            });
+          },
           icon: Switch(
             thumbIcon: thumbIcon,
             value: isQuickAdd,
@@ -119,22 +127,14 @@ class _AddTaskModalState extends State<AddTaskModal> {
           ),
           label: const Text('Quick Add'),
         ),
+        // Create Task
         TextButton.icon(
           onPressed: () {
             if (_controller.text.isNotEmpty) {
-              if (isSetPriority) {
-                final priority = calculatePriority(isImportant, isUrgent);
-                if (priority == -1) {
-                  showSnackBar(message: 'Please set priority');
-                  return;
-                }
-                handleAdd(context, _controller.text, priority: priority);
-              } else {
-                handleAdd(context, _controller.text);
-              }
+              handleAdd(context, _controller.text, _priority);
             } else {
               setState(() {
-                _errorText = '*Please enter task name';
+                errorText = '*Please enter task name';
               });
             }
           },
@@ -145,24 +145,24 @@ class _AddTaskModalState extends State<AddTaskModal> {
     );
   }
 
-  TextField buildTextField() {
+  TextField _buildTextField() {
     return TextField(
       controller: _controller,
-      focusNode: _focusNode,
+      focusNode: focusNode,
       autofocus: true,
       decoration: InputDecoration(
         hintText: 'Add New Task',
         prefixIcon: const Icon(Icons.title),
-        errorText: _errorText,
+        errorText: errorText,
       ),
       onSubmitted: (value) {
         // unfocus text field
-        _focusNode.unfocus();
+        focusNode.unfocus();
       },
     );
   }
 
-  Wrap buildToolBar(BuildContext context) {
+  Wrap _buildBottomToolBar(BuildContext context) {
     return Wrap(
       spacing: 12.0,
       children: [
@@ -181,7 +181,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
               }
               setState(() {
                 dueDateLabel = convertDateTimeToString(pickedDate, pattern: 'dd/MM');
-                dueDate = pickedDate;
+                _dueDate = pickedDate;
               });
             }
           },
@@ -198,7 +198,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
             final time = await pickTime();
             if (time == null) return;
 
-            final pickedReminder = DateTime(
+            final pickedDateTime = DateTime(
               date.year,
               date.month,
               date.day,
@@ -207,12 +207,13 @@ class _AddTaskModalState extends State<AddTaskModal> {
             );
 
             // > the reminder date time must be in the future
-            if (pickedReminder.isBefore(DateTime.now())) {
+            if (pickedDateTime.isBefore(DateTime.now())) {
               showSnackBar(message: 'Reminder must be in the future', backgroundColor: Colors.red);
             } else {
               setState(() {
-                reminderLabel = convertDateTimeToString(pickedReminder, pattern: 'dd/MM - HH:mm');
-                reminderTime = pickedReminder;
+                reminderLabel = convertDateTimeToString(pickedDateTime, pattern: 'dd/MM - HH:mm');
+                _reminderDateTime = pickedDateTime;
+                log('object _reminderDateTime: ${_reminderDateTime.toString()}');
               });
             }
 
@@ -228,193 +229,183 @@ class _AddTaskModalState extends State<AddTaskModal> {
           },
           tooltip: 'Set Reminder',
         ),
-        // Clear All
-        IconButton(
-            tooltip: 'Clear All',
-            onPressed: () {
-              setState(() {
-                dueDateLabel = 'Set Due Date';
-                reminderLabel = 'Set Reminder';
-                dueDateColor = Colors.black;
-                _controller.clear();
-                _errorText = null;
-              });
-            },
-            icon: const Icon(Icons.delete_forever)),
+        // Button Reset
+        IconButton(tooltip: 'Clear All Fields', onPressed: handleReset, icon: const Icon(Icons.delete_forever)),
       ],
     );
   }
 
-  // Widget buildPriorityTable() => Table(
-  //       columnWidths: const {
-  //         1: FlexColumnWidth(1),
-  //         2: FlexColumnWidth(1),
-  //       },
-  //       border: TableBorder.all(color: Colors.grey),
-  //       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-  //       children: [
-  //         TableRow(
-  //           children: [
-  //             // const Text('Important'),
-  //             ChoiceChip(
-  //               label: const Text('(+)Urgent (+)Important'),
-  //               selected: _value == 3,
-  //               onSelected: (bool selected) {
-  //                 log('object: ${selected.toString()}');
-  //                 setState(() {
-  //                   _value = selected ? 3 : null;
-  //                 });
-  //               },
-  //             ),
-  //             ChoiceChip(
-  //               label: const Text('(-)Urgent (+)Important'),
-  //               selected: _value == 2,
-  //               onSelected: (bool selected) {
-  //                 log('object: ${selected.toString()}');
-  //                 setState(() {
-  //                   _value = selected ? 2 : null;
-  //                 });
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //         TableRow(
-  //           children: [
-  //             // const Text('Not Important'),
-  //             ChoiceChip(
-  //               label: const Text('(+)Urgent (-)Important'),
-  //               selected: _value == 1,
-  //               onSelected: (bool selected) {
-  //                 log('object: ${selected.toString()}');
-  //                 setState(() {
-  //                   _value = selected ? 1 : null;
-  //                 });
-  //               },
-  //             ),
-  //             ChoiceChip(
-  //               label: const Text('(-)Urgent (-)Important'),
-  //               selected: _value == 0,
-  //               onSelected: (bool selected) {
-  //                 log('object: ${selected.toString()}');
-  //                 setState(() {
-  //                   _value = selected ? 0 : null;
-  //                 });
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     );
-
-  Widget buildPriorityCard() => Column(
-        key: ValueKey<bool>(isSetPriority),
-        mainAxisSize: MainAxisSize.min,
+  Table _buildPriorityTable() => Table(
+        columnWidths: const {
+          0: FlexColumnWidth(0.2),
+          1: FlexColumnWidth(1),
+          2: FlexColumnWidth(1),
+        },
+        border: TableBorder.all(color: Colors.grey),
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const TableRow(
             children: [
-              Text('Is Important?', style: MyTextStyle.blackBold87),
-              Wrap(
-                spacing: 12.0,
-                children: [
-                  ChoiceChip(
-                    label: const Text('Yes'), // (+) Important
-                    selected: isImportant == true,
-                    selectedColor: Colors.green,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        // _value = selected ? 0 : null;
-                        isImportant = selected ? true : null;
-                      });
-                    },
-                  ),
-                  ChoiceChip(
-                    label: const Text('No'), // (-) Important
-                    selected: isImportant == false,
-                    selectedColor: Colors.red,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        // _value = selected ? 1 : null;
-                        isImportant = selected ? false : null;
-                      });
-                    },
-                  ),
-                ],
+              SizedBox.shrink(),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Center(child: Text('Urgent')),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Center(child: Text('Not Urgent')),
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Important Line
+          TableRow(
             children: [
-              Text('Is Urgent?', style: MyTextStyle.blackBold87),
-              Wrap(
-                spacing: 12.0,
-                children: [
-                  ChoiceChip(
-                    label: const Text('Yes'), // (+) Urgent
-                    selected: isUrgent == true,
-                    selectedColor: Colors.green,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        // _value = selected ? 3 : null;
-                        isUrgent = selected ? true : null;
-                      });
-                    },
-                  ),
-                  ChoiceChip(
-                    label: const Text('No'), // (-) Urgent
-                    selected: isUrgent == false,
-                    selectedColor: Colors.red,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        // _value = selected ? 4 : null;
-                        isUrgent = selected ? false : null;
-                      });
-                    },
-                  ),
-                ],
+              RotatedBox(
+                quarterTurns: 3,
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  alignment: Alignment.center,
+                  child: const Text('Important'),
+                ),
+              ),
+              // Important & Urgent
+              ChoiceChip(
+                label: const Text('Do It Now'),
+                selected: _priority == 3,
+                selectedColor: Colors.green,
+                onSelected: (bool selected) {
+                  log('object: ${selected.toString()}');
+                  setState(() {
+                    _priority = selected ? 3 : null;
+                  });
+                },
+              ),
+              // Important & Not Urgent
+              ChoiceChip(
+                label: const Text('Schedule It'),
+                selected: _priority == 2,
+                selectedColor: Colors.blue,
+                onSelected: (bool selected) {
+                  log('object: ${selected.toString()}');
+                  setState(() {
+                    _priority = selected ? 2 : null;
+                  });
+                },
+              ),
+            ],
+          ),
+          // Not Important Line
+          TableRow(
+            children: [
+              RotatedBox(
+                quarterTurns: 3,
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  alignment: Alignment.center,
+                  child: const Text('Not Urgent'),
+                ),
+              ),
+              // Not Important & Urgent
+              ChoiceChip(
+                label: const Text('Delegate It'),
+                selected: _priority == 1,
+                selectedColor: Colors.orange,
+                onSelected: (bool selected) {
+                  log('object: ${selected.toString()}');
+                  setState(() {
+                    _priority = selected ? 1 : null;
+                  });
+                },
+              ),
+              // Not Important & Not Urgent
+              ChoiceChip(
+                label: const Text('Eliminate It'),
+                selected: _priority == 0,
+                selectedColor: Colors.grey,
+                onSelected: (bool selected) {
+                  log('object: ${selected.toString()}');
+                  setState(() {
+                    _priority = selected ? 0 : null;
+                  });
+                },
               ),
             ],
           ),
         ],
       );
 
-  void handleAdd(BuildContext context, String value, {int? priority}) {
-    final currentUser = context.read<AuthenticationBloc>().state.user;
-    di<TaskRepository>().addTask(TaskEntity(
-      tid: null,
-      lid: widget.lid,
-      taskName: value,
-      description: null,
-      priority: priority,
-      completed: false,
-      dueDate: dueDate,
-      reminders: reminderTime != null
-          ? Reminder(
-              rid: generateNotificationId(reminderTime!),
-              scheduledTime: reminderTime,
-            )
-          : null,
-      creator: currentUser,
-      assignedMembers: null,
-      created: DateTime.now(),
-      updated: DateTime.now(),
-    ));
-    // > clear text field
-    _controller.clear();
-    // > reset due date
-    setState(() {
-      dueDateLabel = 'Set Due Date';
-      dueDateColor = Colors.black;
-      dueDate = null;
-      _errorText = null;
-    });
-    // > set focus to text field
-    _focusNode.requestFocus();
-
-    // > close modal if quick add is false
-    if (!isQuickAdd) Navigator.pop(context);
-  }
+  // Widget buildPriorityCard() => Column(
+  //       key: ValueKey<bool>(isSetPriority),
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             Text('Is Important?', style: MyTextStyle.blackBold87),
+  //             Wrap(
+  //               spacing: 12.0,
+  //               children: [
+  //                 ChoiceChip(
+  //                   label: const Text('Yes'), // (+) Important
+  //                   selected: isImportant == true,
+  //                   selectedColor: Colors.green,
+  //                   onSelected: (bool selected) {
+  //                     setState(() {
+  //                       // _value = selected ? 0 : null;
+  //                       isImportant = selected ? true : null;
+  //                     });
+  //                   },
+  //                 ),
+  //                 ChoiceChip(
+  //                   label: const Text('No'), // (-) Important
+  //                   selected: isImportant == false,
+  //                   selectedColor: Colors.red,
+  //                   onSelected: (bool selected) {
+  //                     setState(() {
+  //                       // _value = selected ? 1 : null;
+  //                       isImportant = selected ? false : null;
+  //                     });
+  //                   },
+  //                 ),
+  //               ],
+  //             ),
+  //           ],
+  //         ),
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             Text('Is Urgent?', style: MyTextStyle.blackBold87),
+  //             Wrap(
+  //               spacing: 12.0,
+  //               children: [
+  //                 ChoiceChip(
+  //                   label: const Text('Yes'), // (+) Urgent
+  //                   selected: isUrgent == true,
+  //                   selectedColor: Colors.green,
+  //                   onSelected: (bool selected) {
+  //                     setState(() {
+  //                       // _value = selected ? 3 : null;
+  //                       isUrgent = selected ? true : null;
+  //                     });
+  //                   },
+  //                 ),
+  //                 ChoiceChip(
+  //                   label: const Text('No'), // (-) Urgent
+  //                   selected: isUrgent == false,
+  //                   selectedColor: Colors.red,
+  //                   onSelected: (bool selected) {
+  //                     setState(() {
+  //                       // _value = selected ? 4 : null;
+  //                       isUrgent = selected ? false : null;
+  //                     });
+  //                   },
+  //                 ),
+  //               ],
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     );
 
   int calculatePriority(bool? isImportant, bool? isUrgent) {
     if (isImportant == null || isUrgent == null) return -1;
@@ -461,5 +452,53 @@ class _AddTaskModalState extends State<AddTaskModal> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(snackBar);
+  }
+
+  void handleAdd(BuildContext context, String value, int? priority) {
+    final currentUser = context.read<AuthenticationBloc>().state.user;
+    di<TaskRepository>().addTask(TaskEntity(
+      tid: null,
+      lid: widget.lid,
+      taskName: value,
+      description: null,
+      priority: priority,
+      completed: false,
+      dueDate: _dueDate,
+      reminders: _reminderDateTime != null
+          ? Reminder(
+              rid: generateNotificationId(_reminderDateTime!),
+              scheduledTime: _reminderDateTime,
+            )
+          : null,
+      creator: currentUser,
+      assignedMembers: const [],
+      created: DateTime.now(),
+      updated: DateTime.now(),
+    ));
+    
+    // > reset all fields
+    handleReset();
+
+    // > set focus to text field again
+    focusNode.requestFocus();
+
+    // > close modal if quick add is false
+    if (!isQuickAdd) Navigator.pop(context);
+  }
+
+  void handleReset() {
+    setState(() {
+      _controller.clear();
+      errorText = null;
+
+      _priority = null;
+
+      dueDateLabel = 'Set Due Date';
+      dueDateColor = Colors.black;
+      _dueDate = null;
+
+      reminderLabel = 'Set Reminder';
+      _reminderDateTime = null;
+    });
   }
 }

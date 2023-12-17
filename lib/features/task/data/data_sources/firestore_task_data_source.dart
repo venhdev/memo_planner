@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 import 'package:memo_planner/core/constants/typedef.dart';
@@ -23,11 +25,16 @@ abstract class FireStoreTaskDataSource {
 
   //! Task
   SQuerySnapshot getAllTaskStream(String lid);
+  SDocumentSnapshot getOneTaskStream(String lid, String tid);
 
   Future<TaskEntity> getTask(String lid, String tid);
   Future<void> addTask(TaskEntity task);
-  Future<void> editTask(TaskEntity updatedTask);
-  Future<void> deleteTask(String lid, String tid);
+  Future<void> editTask(TaskEntity updatedTask, TaskEntity oldTask);
+  Future<void> deleteTask(TaskEntity task);
+  Future<void> toggleTask(String tid, String lid, bool value);
+
+  Future<void> assignTask(String lid, String tid, String email);
+  Future<void> unassignTask(String lid, String tid, String email);
 }
 
 @Singleton(as: FireStoreTaskDataSource)
@@ -122,7 +129,7 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
 
   @override
   SQuerySnapshot getAllTaskStream(String lid) {
-    return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).snapshots();
+    return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).orderBy('taskName').snapshots();
   }
 
   @override
@@ -146,18 +153,55 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   }
 
   @override
-  Future<void> deleteTask(String lid, String tid) async {
-    final task = await getTask(lid, tid);
+  Future<void> deleteTask(TaskEntity task) async {
     if (task.reminders?.useDefault == true) {
       await _localNotification.I.cancel(task.reminders!.rid!);
     }
-    await _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).doc(tid).delete();
+    await _firestore.collection(pathToTaskLists).doc(task.lid).collection(pathToTasks).doc(task.tid).delete();
   }
 
   @override
-  Future<void> editTask(TaskEntity updatedTask) {
-    // TODO: implement editTask
-    throw UnimplementedError();
+  Future<void> editTask(TaskEntity updatedTask, TaskEntity oldTask) async {
+    final docRef =
+        _firestore.collection(pathToTaskLists).doc(updatedTask.lid).collection(pathToTasks).doc(updatedTask.tid);
+
+    await docRef.update(TaskModel.fromEntity(updatedTask).toMap()).then(
+      (_) async {
+        if (updatedTask.reminders?.useDefault == true) {
+          log('have reminder');
+        } else {
+          log('no reminder');
+        }
+        // -- new: have reminder, old?
+        if (updatedTask.reminders?.useDefault == true) {
+          // > oldTask have the same reminder time with updatedTask >> ignore
+
+          // -- old: have reminder, new: have reminder >> update schedule notification with same rid
+          if (oldTask.reminders?.useDefault == true) {
+            // > oldTask have the same reminder time with updatedTask >> ignore
+            if (oldTask.reminders!.scheduledTime!.isAtSameMomentAs(updatedTask.reminders!.scheduledTime!)) return;
+
+            await _localNotification.setScheduleNotification(
+              id: updatedTask.reminders!.rid!,
+              title: updatedTask.taskName,
+              body: 'remember to do this task',
+              scheduledTime: updatedTask.reminders!.scheduledTime!,
+            );
+            // old: no reminder, new: have reminder >> set new schedule notification
+          } else {
+            await _localNotification.setScheduleNotification(
+              id: updatedTask.reminders!.rid!,
+              title: updatedTask.taskName,
+              body: 'remember to do this task',
+              scheduledTime: updatedTask.reminders!.scheduledTime!,
+            );
+          }
+        } else {
+          // new: no reminder, old: have reminder >> cancel old schedule notification
+          if (oldTask.reminders?.rid != null) await _localNotification.I.cancel(oldTask.reminders!.rid!);
+        }
+      },
+    );
   }
 
   @override
@@ -165,5 +209,32 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
     final docRef = _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).doc(tid);
     final doc = await docRef.get();
     return TaskModel.fromMap(doc.data()!);
+  }
+
+  @override
+  Future<void> toggleTask(String tid, String lid, bool value) async {
+    final docRef = _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).doc(tid);
+    await docRef.update({'completed': value});
+  }
+
+  @override
+  SDocumentSnapshot getOneTaskStream(String lid, String tid) {
+    return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).doc(tid).snapshots();
+  }
+
+  @override
+  Future<void> assignTask(String lid, String tid, String email) async {
+    final docRef = _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).doc(tid);
+    return await docRef.update({
+      'assignedMembers': FieldValue.arrayUnion([email])
+    });
+  }
+
+  @override
+  Future<void> unassignTask(String lid, String tid, String email) async {
+    final docRef = _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).doc(tid);
+    return await docRef.update({
+      'assignedMembers': FieldValue.arrayRemove([email])
+    });
   }
 }

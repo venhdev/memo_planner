@@ -154,6 +154,31 @@ class AppNavigationDrawer extends StatelessWidget {
               final pending = await di<LocalNotificationManager>().I.pendingNotificationRequests();
               final activate = await di<LocalNotificationManager>().I.getActiveNotifications();
 
+              // ignore: use_build_context_synchronously
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return SimpleDialog(
+                    children: [
+                      Text('pending: ${pending.length}'),
+                      for (int i = 0; i < pending.length; i++)
+                        Text(
+                          '${pending[i].id} - ${pending[i].title} - ${pending[i].body}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      Text('activate: ${activate.length}'),
+                      for (int i = 0; i < activate.length; i++)
+                        Text(
+                          '${activate[i].id} - ${activate[i].title} - ${activate[i].body}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  );
+                },
+              );
+
               for (var item in pending) {
                 log('pending notification: ${item.id} - ${item.title} - ${item.body}');
               }
@@ -173,7 +198,8 @@ class AppNavigationDrawer extends StatelessWidget {
             leading: const Icon(Icons.cast),
             title: const Text('show notification'),
             onTap: () async {
-              await di<LocalNotificationManager>().showNotification(id: 1, title: 'Time to run 2', body: 'body', payload: 'payload');
+              await di<LocalNotificationManager>()
+                  .showNotification(id: 1, title: 'Time to run 2', body: 'body', payload: 'payload');
             },
           ),
         ],

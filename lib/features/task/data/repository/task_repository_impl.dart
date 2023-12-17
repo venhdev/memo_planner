@@ -19,8 +19,10 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid addTask(TaskEntity task) async {
     try {
+      log('addTask object: ${task.toString()}');
+      log('reminders object: ${task.reminders.toString()}');
+      log('priority object: ${task.priority.toString()}');
       await _dataSource.addTask(task);
-
       return const Right(null);
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
@@ -29,15 +31,9 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  ResultVoid assignTask(String tid, String lid, String email) {
-    // TODO: implement assignTask
-    throw UnimplementedError();
-  }
-
-  @override
-  ResultVoid deleteTask(String tid, String lid) async {
+  ResultVoid deleteTask(TaskEntity task) async {
     try {
-      return Right(await _dataSource.deleteTask(tid, lid));
+      return Right(await _dataSource.deleteTask(task));
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(Failure(message: e.toString()));
@@ -45,21 +41,23 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  ResultVoid editTask(TaskEntity updatedTask) {
-    // TODO: implement editTask
-    throw UnimplementedError();
+  ResultVoid editTask(TaskEntity updatedTask, TaskEntity oldTask) async {
+    try {
+      return Right(await _dataSource.editTask(updatedTask, oldTask));
+    } catch (e) {
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(Failure(message: e.toString()));
+    }
   }
 
   @override
-  SDocumentSnapshot getOneTaskStream(String tid, String lid) {
-    // TODO: implement getOneTaskStream
-    throw UnimplementedError();
-  }
-
-  @override
-  ResultVoid unassignTask(String tid, String lid, String email) {
-    // TODO: implement unassignTask
-    throw UnimplementedError();
+  SDocumentSnapshot getOneTaskStream(String lid, String tid) {
+    try {
+      return _dataSource.getOneTaskStream(lid, tid);
+    } catch (e) {
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return const Stream.empty();
+    }
   }
 
   @override
@@ -69,6 +67,38 @@ class TaskRepositoryImpl implements TaskRepository {
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
+    }
+  }
+
+  @override
+  ResultVoid toggleTask(String tid, String lid, bool value) async {
+    try {
+      return Right(_dataSource.toggleTask(tid, lid, value));
+    } catch (e) {
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(Failure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultVoid assignTask(String lid, String tid, String email) async {
+    try {
+      await _dataSource.assignTask(lid, tid, email);
+      return const Right(null);
+    } catch (e) {
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(Failure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultVoid unassignTask(String lid, String tid, String email) async {
+    try {
+      await _dataSource.unassignTask(lid, tid, email);
+      return const Right(null);
+    } catch (e) {
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(Failure(message: e.toString()));
     }
   }
 }

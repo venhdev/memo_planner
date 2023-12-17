@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:memo_planner/core/utils/helpers.dart';
 import 'package:memo_planner/features/task/data/models/task_list_model.dart';
 import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart';
 import 'package:memo_planner/features/task/domain/repository/task_repository.dart';
@@ -13,6 +14,7 @@ import '../../domain/entities/task_entity.dart';
 import '../../domain/entities/task_list_entity.dart';
 import '../components/dialog.dart';
 import '../components/form_add_task.dart';
+import 'task_detail_screen.dart';
 
 enum MenuItem { rename, delete, itemThree }
 
@@ -43,10 +45,7 @@ class SingleTaskListScreen extends StatelessWidget {
             appBar: _buildAppBar(context, taskList),
             floatingActionButton: FloatingActionButton(
               // handleAdd
-              onPressed: () => showModalBottomSheet(
-                context: context,
-                builder: (context) => AddTaskModal(lid),
-              ),
+              onPressed: () => openAddForm(context),
               child: const Icon(Icons.add),
             ),
             body: StreamBuilder(
@@ -135,16 +134,87 @@ class SingleTaskListScreen extends StatelessWidget {
         itemCount: tasks.length,
         itemBuilder: (context, index) {
           final task = tasks[index];
-          return ListTile(
-            title: Text(task.taskName!),
-            subtitle: task.description != null ? Text(task.description!) : null,
-            trailing: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.more_vert),
+          // Task List Item
+          return Dismissible(
+            key: Key(task.tid!),
+            background: Container(
+              color: Colors.blue,
+              alignment: Alignment.centerLeft,
+              child: const ListTile(
+                title: Text(
+                  'Add To MyDay',
+                  style: TextStyle(color: Colors.white),
+                ),
+                leading: Icon(Icons.wb_sunny_outlined, color: Colors.white),
+              ),
             ),
-          );
+            secondaryBackground: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(
+                      'Delete',
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: Icon(Icons.delete, color: Colors.white),
+                  )),
+            ),
+            onDismissed: (direction) {
+              if (direction == DismissDirection.startToEnd) {
+                // Add to MyDay
+                // di<TaskRepository>().addToMyDay(task.tid!, task.lid!);
+              } else if (direction == DismissDirection.endToStart) {
+                // Delete Task
+                di<TaskRepository>().deleteTask(task).then((value) => {
+                      value.fold(
+                        (l) => showMySnackbar(context, message: l.message),
+                        (r) => showMySnackbar(context, message: 'Task Deleted'),
+                      )
+                    });
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ),
+              ),
+              child: ListTile(
+                onTap: () => openTaskDetailScreen(context, task),
+                leading: Checkbox(
+                  value: task.completed,
+                  onChanged: (value) => handleToggleTask(task, value!),
+                ),
+                title: Text(task.taskName!),
+                subtitle: Text(task.description ?? ''),
+                trailing: Text(convertDateTimeToString(task.dueDate)),
+              ),
+            ),
+          ); // Task List Item End
         },
       );
+
+  Future<void> openAddForm(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      builder: (context) => AddTaskModal(lid),
+    );
+  }
+
+  void openTaskDetailScreen(BuildContext context, TaskEntity task) {
+    // open Modal Bottom Sheet
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => TaskDetailScreen(lid: task.lid!, tid: task.tid!),
+    );
+  }
 
   Future<void> openMemberModal(BuildContext context, String lid, TextEditingController controller) {
     return showModalBottomSheet<void>(
@@ -242,6 +312,10 @@ class SingleTaskListScreen extends StatelessWidget {
       isAdd: false,
       taskList: taskList,
     );
+  }
+
+  void handleToggleTask(TaskEntity task, bool value) async {
+    di<TaskRepository>().toggleTask(task.tid!, task.lid!, value);
   }
 }
 

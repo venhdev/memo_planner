@@ -41,9 +41,13 @@ DateTime convertStringToDateTime(
 ///
 /// Change [pattern] to change the format
 String convertDateTimeToString(
-  DateTime date, {
+  DateTime? date, {
   String pattern = 'dd-MM-yyyy',
+  String defaultValue = '',
 }) {
+  if (date == null) {
+    return defaultValue;
+  }
   return DateFormat(pattern).format(date);
 }
 

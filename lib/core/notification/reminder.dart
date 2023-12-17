@@ -36,7 +36,7 @@ class Reminder {
     return <String, dynamic>{
       'rid': rid,
       'useDefault': useDefault,
-      'dateTime': scheduledTime?.millisecondsSinceEpoch,
+      'scheduledTime': scheduledTime?.millisecondsSinceEpoch,
       'overrides': overrides?.map((x) => x.toMap()).toList(),
     };
   }

@@ -26,22 +26,23 @@ class MemberItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: di<AuthenticationRepository>().getUserByEmail(memberEmail),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData) {
-              final member = snapshot.data;
-              final currentUser = context.read<AuthenticationBloc>().state.user;
-              return _build(member!, currentUser!, context);
-            } else {
-              return Text(memberEmail);
-            }
-          } else if (snapshot.hasError) {
-            return MessageScreen.error(snapshot.error.toString());
+      future: di<AuthenticationRepository>().getUserByEmail(memberEmail),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            final member = snapshot.data;
+            final currentUser = context.read<AuthenticationBloc>().state.user;
+            return _build(member!, currentUser!, context);
           } else {
-            return const LoadingScreen();
+            return Text(memberEmail);
           }
-        });
+        } else if (snapshot.hasError) {
+          return MessageScreen.error(snapshot.error.toString());
+        } else {
+          return const LoadingScreen();
+        }
+      },
+    );
   }
 
   Widget _build(UserEntity member, UserEntity currentUser, BuildContext context) {
@@ -56,37 +57,39 @@ class MemberItem extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Builder(builder: (context) {
-              if (member.photoURL != null) {
-                return CircleAvatar(
-                  radius: 24.0,
-                  backgroundColor: Colors.green.shade100,
-                  backgroundImage: NetworkImage(member.photoURL!),
-                );
-              } else {
-                // random image <assets/images/avatars> in case of no image --> no use for now
-                // use the first letter of email instead
-                return CircleAvatar(
-                  radius: 24.0,
-                  backgroundColor: Colors.green.shade100,
-                  child: Text(
-                    member.email!.substring(0, 1),
-                    style: const TextStyle(
-                      fontSize: 32.0,
-                      color: Colors.white,
+            child: Builder(
+              builder: (context) {
+                if (member.photoURL != null) {
+                  return CircleAvatar(
+                    radius: 24.0,
+                    backgroundColor: Colors.green.shade100,
+                    backgroundImage: NetworkImage(member.photoURL!),
+                  );
+                } else {
+                  // random image <assets/images/avatars> in case of no image --> no use for now
+                  // use the first letter of email instead
+                  return CircleAvatar(
+                    radius: 24.0,
+                    backgroundColor: Colors.green.shade100,
+                    child: Text(
+                      member.email!.substring(0, 1),
+                      style: const TextStyle(
+                        fontSize: 32.0,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                );
-                // return getRandomAvatar();
-              }
-            }),
+                  );
+                  // return getRandomAvatar();
+                }
+              },
+            ),
           ),
           const SizedBox(width: 8.0),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                member.displayName?? member.email!,
+                member.displayName ?? member.email!,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

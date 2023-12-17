@@ -6,6 +6,7 @@
 - PopupMenuButton <https://api.flutter.dev/flutter/material/PopupMenuButton-class.html>
 <!-- - ReorderableListView <https://api.flutter.dev/flutter/material/ReorderableListView-class.html> -->
 - ChoiceChip <https://api.flutter.dev/flutter/material/ChoiceChip-class.html>
+- Dismissible <https://api.flutter.dev/flutter/widgets/Dismissible-class.html>
 
 ## Notification
 
