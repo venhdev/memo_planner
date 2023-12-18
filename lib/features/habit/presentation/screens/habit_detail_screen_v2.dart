@@ -25,8 +25,6 @@ class HabitDetailScreenV2 extends StatefulWidget {
 }
 
 class _HabitDetailScreenState extends State<HabitDetailScreenV2> {
-  final _emailController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,10 +208,10 @@ class _HabitDetailScreenState extends State<HabitDetailScreenV2> {
                               onPressed: () {
                                 showMyDialogToAddMember(
                                   context,
-                                  controller: _emailController,
-                                  onConfirm: () async {
+                                  controller: TextEditingController()..text = '',
+                                  onSubmitted: (email) async {
                                     // NOTE: need refactor
-                                    di<HabitDataSource>().addMember(habit.hid!, _emailController.text.trim());
+                                    di<HabitDataSource>().addMember(habit.hid!, email!);
                                   },
                                 );
                               },

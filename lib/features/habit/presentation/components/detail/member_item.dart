@@ -11,15 +11,19 @@ import '../../../../task/domain/repository/task_list_repository.dart';
 import '../../../data/data_sources/habit_data_source.dart';
 
 class MemberItem extends StatelessWidget {
+  /// only pass hid or lid, not both
   const MemberItem({
     this.hid,
     this.lid,
     required this.memberEmail,
     required this.ownerEmail,
     super.key,
-  });
-  final String? hid; // Habit ID
-  final String? lid; // List Task ID
+  })
+  // assert that cannot pass both hid and lid 
+  : assert(hid == null || lid == null, 'Cannot pass both hid and lid'); // nice
+
+  final String? hid; // Habit ID (for habit detail)
+  final String? lid; // List Task ID (for list task detail)
   final String memberEmail;
   final String ownerEmail;
 

@@ -66,28 +66,33 @@ class TaskDetailBody extends StatefulWidget {
 class _TaskDetailBodyState extends State<TaskDetailBody> {
   final taskNameFocusNode = FocusNode();
   final taskNameController = TextEditingController();
+  final taskDescriptionController = TextEditingController();
 
-  bool unSavedChanges() => unSavedTaskName || unSavedPriority || unSavedReminder || unSavedDueDate;
+  bool unSavedChanges() =>
+      unSavedTaskName || unSavedPriority || unSavedReminder || unSavedDueDate || unSavedDescription;
 
   bool unSavedTaskName = false;
   bool unSavedPriority = false;
   bool unSavedReminder = false;
   bool unSavedDueDate = false;
+  bool unSavedDescription = false;
 
   late String _taskName;
   int? _priority;
   Reminder? _reminder;
   DateTime? _dueDate;
+  String? _description;
 
   @override
   void initState() {
     super.initState();
     taskNameController.text = widget.task.taskName!;
+    taskDescriptionController.text = widget.task.description!;
     _taskName = widget.task.taskName!;
     _priority = widget.task.priority;
     _reminder = widget.task.reminders;
-    log('object: $_reminder');
     _dueDate = widget.task.dueDate;
+    _description = widget.task.description;
   }
 
   @override
@@ -124,7 +129,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
           _buildTaskName(),
 
           // Priority table
-          const SizedBox(height: 16),
+          const SizedBox(height: 16.0),
           PriorityTable(
             priority: _priority,
             callBack: (value) {
@@ -143,25 +148,45 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
           ),
 
           // Add to MyDay button
-          const SizedBox(height: 16),
+          const SizedBox(height: 16.0),
           _buildAddToMyDayButton(),
 
           // Reminder
-          const SizedBox(height: 16),
+          const SizedBox(height: 16.0),
           Text('$_reminder'),
           _buildReminderButton(),
 
           // Due date
-          const SizedBox(height: 16),
+          const SizedBox(height: 16.0),
           _buildDueDateButton(),
 
           // Assign To
-          const SizedBox(height: 16),
+          const SizedBox(height: 16.0),
           _buildAssignToButton(),
 
           // Task description
-          const SizedBox(height: 16),
+          const SizedBox(height: 16.0),
           _buildTaskDescription(),
+
+          // Created At and Created By
+          const SizedBox(height: 16.0),
+          Text(
+            'createdAt: ${convertDateTimeToString(
+              widget.task.created,
+              pattern: 'dd/MM/yyyy - HH:mm',
+            )} by ${widget.task.creator?.displayName ?? 'unknown'}',
+            style: const TextStyle(color: Colors.grey),
+          ),
+
+          // Last updated
+          const SizedBox(height: 16.0),
+          Text(
+            'updatedAt: ${convertDateTimeToString(
+              widget.task.updated,
+              pattern: 'dd/MM/yyyy - HH:mm',
+            )}',
+            style: const TextStyle(color: Colors.grey),
+          ),
         ],
       ),
     );
@@ -381,16 +406,33 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
   }
 
   TextField _buildTaskDescription() {
-    return const TextField(
-      style: TextStyle(
-        fontSize: 14.0,
-      ),
-      decoration: InputDecoration(
-        hintText: 'Task description',
-        border: OutlineInputBorder(),
-      ),
-      maxLines: 6,
-    );
+    return TextField(
+        controller: taskDescriptionController,
+        style: const TextStyle(
+          fontSize: 14.0,
+        ),
+        decoration: const InputDecoration(
+          hintText: 'Task description',
+          border: OutlineInputBorder(),
+        ),
+        maxLines: 6,
+        onChanged: (value) {
+          if (value.trim() != widget.task.description) {
+            log('object: $value');
+            log('before _description object: $_description');
+            setState(() {
+              _description = value;
+              unSavedDescription = true;
+            });
+          } else if (value.trim() == widget.task.description && _description != value) {
+            // after trim, the value is the same as the original
+            log('test 2');
+            setState(() {
+              _description = value;
+              unSavedDescription = false;
+            });
+          }
+        });
   }
 
   AnimatedSwitcher _buildSaveOrCloseButton() {
@@ -410,6 +452,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                     unSavedPriority = false;
                     unSavedReminder = false;
                     unSavedDueDate = false;
+                    unSavedDescription = false;
                   },
                 );
               },
@@ -483,15 +526,17 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
 
   void saveChanges() {
     if (unSavedChanges()) {
-      log('object _dueDate: $_dueDate');
+      log('object _description: $_description');
       final updatedTask = widget.task.copyWith(
         taskName: _taskName,
         priority: _priority,
         reminders: _reminder,
         dueDate: _dueDate,
+        description: _description,
         allowDueDateNull: true,
         allowRemindersNull: true,
         allowPriorityNull: true,
+        updated: DateTime.now(),
       );
       di<TaskRepository>().editTask(updatedTask, widget.task);
     }

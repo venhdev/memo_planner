@@ -1,17 +1,21 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memo_planner/core/utils/helpers.dart';
+import 'package:memo_planner/features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import 'package:memo_planner/features/task/data/models/task_list_model.dart';
 import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart';
 import 'package:memo_planner/features/task/domain/repository/task_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/widgets.dart';
+import '../../../../core/constants/colors.dart';
 import '../../../habit/presentation/components/detail/member_item.dart';
 import '../../data/models/task_model.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/entities/task_list_entity.dart';
+import '../components/assigned_members.dart';
 import '../components/dialog.dart';
 import '../components/form_add_task.dart';
 import 'task_detail_screen.dart';
@@ -39,7 +43,12 @@ class SingleTaskListScreen extends StatelessWidget {
           if (map == null) {
             return const MessageScreen(message: 'This list has been permanently deleted');
           }
+          // check if user is member of this list
+          //? because user may be deleted from this list by the owner while they are still in this screen
           final taskList = TaskListModel.fromMap(map);
+          if (!taskList.members!.contains(context.read<AuthenticationBloc>().state.user?.email!)) {
+            return const MessageScreen(message: 'You are not a member of this list');
+          }
           return Scaffold(
             drawer: const AppNavigationDrawer(),
             appBar: _buildAppBar(context, taskList),
@@ -55,7 +64,7 @@ class SingleTaskListScreen extends StatelessWidget {
                   if (snapshot.hasData) {
                     final docs = snapshot.data!.docs;
                     final tasks = docs.map((doc) => TaskModel.fromMap(doc.data())).toList();
-                    return _build(context, tasks);
+                    return _buildTaskListItem(context, tasks);
                   } else if (snapshot.hasError) {
                     return MessageScreen.error(snapshot.error.toString());
                   } else {
@@ -97,7 +106,7 @@ class SingleTaskListScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              openMemberModal(context, taskList.lid!, TextEditingController());
+              openMemberModal(context, taskList.lid!);
             },
             icon: const Icon(Icons.group),
           ),
@@ -130,7 +139,7 @@ class SingleTaskListScreen extends StatelessWidget {
         ],
       );
 
-  Widget _build(BuildContext context, List<TaskEntity> tasks) => ListView.builder(
+  Widget _buildTaskListItem(BuildContext context, List<TaskEntity> tasks) => ListView.builder(
         itemCount: tasks.length,
         itemBuilder: (context, index) {
           final task = tasks[index];
@@ -151,16 +160,14 @@ class SingleTaskListScreen extends StatelessWidget {
             secondaryBackground: Container(
               color: Colors.red,
               alignment: Alignment.centerRight,
-              child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: ListTile(
-                    title: Text(
-                      'Delete',
-                      textDirection: TextDirection.rtl,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    trailing: Icon(Icons.delete, color: Colors.white),
-                  )),
+              child: const ListTile(
+                title: Text(
+                  'Delete',
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(color: Colors.white),
+                ),
+                trailing: Icon(Icons.delete, color: Colors.white),
+              ),
             ),
             onDismissed: (direction) {
               if (direction == DismissDirection.startToEnd) {
@@ -178,11 +185,7 @@ class SingleTaskListScreen extends StatelessWidget {
             },
             child: Container(
               decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                ),
+                border: Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.5))),
               ),
               child: ListTile(
                 onTap: () => openTaskDetailScreen(context, task),
@@ -190,14 +193,76 @@ class SingleTaskListScreen extends StatelessWidget {
                   value: task.completed,
                   onChanged: (value) => handleToggleTask(task, value!),
                 ),
-                title: Text(task.taskName!),
-                subtitle: Text(task.description ?? ''),
-                trailing: Text(convertDateTimeToString(task.dueDate)),
+                title: Text(
+                  task.taskName!,
+                  style: TextStyle(
+                    decoration: task.completed! ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+                subtitle: moreTaskInfo(task),
+                trailing: assignedInfo(task),
               ),
             ),
           ); // Task List Item End
         },
       );
+
+  Widget? assignedInfo(TaskEntity task) => (task.assignedMembers != null)
+      ? SizedBox(
+          width: 64.0,
+          height: 28.0,
+          child: ListView(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            children: [
+              // How many members are assigned to this task
+              if (task.assignedMembers!.isNotEmpty) Text('${task.assignedMembers!.length}'),
+              AssignedMembers(task: task, height: 28.0),
+            ],
+          ),
+        )
+      : null;
+
+  Widget? moreTaskInfo(TaskEntity task) {
+    if (task.dueDate == null && task.reminders == null && task.description == null) return null;
+    return Wrap(
+      children: [
+        // Priority Label
+        if (task.priority != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            decoration: BoxDecoration(
+              color: MyColors.priorityColor(task.priority!),
+              borderRadius: BorderRadius.circular(4.0),
+            ),
+            child: Text(
+              MyColors.priorityLabel(task.priority!),
+              style: const TextStyle(color: Colors.white, fontSize: 12.0),
+            ),
+          ),
+
+        // Due Date
+        if (task.dueDate != null) ...[
+          const SizedBox(width: 8.0),
+          Text(
+            'Due: ${convertDateTimeToString(task.dueDate!, pattern: 'dd-MM')}',
+            style: TextStyle(
+              color: task.dueDate!.isBefore(DateTime.now()) ? Colors.red : Colors.black,
+            ),
+          ),
+        ],
+        // Has Reminder
+        if (task.reminders != null)
+          if (task.reminders!.scheduledTime!.isAfter(DateTime.now())) ...[
+            const SizedBox(width: 8.0),
+            const Icon(
+              Icons.alarm,
+              size: 16.0,
+            ),
+          ],
+      ],
+    );
+  }
 
   Future<void> openAddForm(BuildContext context) {
     return showModalBottomSheet(
@@ -216,7 +281,7 @@ class SingleTaskListScreen extends StatelessWidget {
     );
   }
 
-  Future<void> openMemberModal(BuildContext context, String lid, TextEditingController controller) {
+  Future<void> openMemberModal(BuildContext context, String lid) {
     return showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) {
@@ -229,7 +294,7 @@ class SingleTaskListScreen extends StatelessWidget {
               // > To avoid error when the list has been deleted -> ! on null value
               // > Notify user that the list has been deleted if they are still in this screen
               if (map == null) {
-                Navigator.of(context).pop(); // pop to task-lists screen
+                Navigator.of(context).pop(); // [SingleListScreen] is open this modal > close this modal
                 return const MessageScreen(message: 'This list has been permanently deleted');
               }
               final taskList = TaskListModel.fromMap(map);
@@ -246,18 +311,22 @@ class SingleTaskListScreen extends StatelessWidget {
                           mainAxisSize: MainAxisSize.max,
                           children: [
                             const Text('List Members', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
-                            ElevatedButton(
+                            ElevatedButton.icon(
+                              label: const Text('Add Member'),
+                              icon: const Icon(Icons.add),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange.shade100,
+                              ),
                               onPressed: () {
                                 showMyDialogToAddMember(
                                   context,
-                                  controller: controller,
-                                  onConfirm: () async {
+                                  controller: TextEditingController(),
+                                  onSubmitted: (value) async {
                                     // NOTE: need refactor
-                                    di<TaskListRepository>().addMember(taskList.lid!, controller.text.trim());
+                                    di<TaskListRepository>().addMember(taskList.lid!, value!.trim());
                                   },
                                 );
                               },
-                              child: const Text('Add Member'),
                             ),
                           ],
                         ),
@@ -318,64 +387,6 @@ class SingleTaskListScreen extends StatelessWidget {
     di<TaskRepository>().toggleTask(task.tid!, task.lid!, value);
   }
 }
-
-
-
-// Future<void> showSheetForAddTask(BuildContext context) async => showModalBottomSheet(
-//       context: context,
-//       shape: const RoundedRectangleBorder(
-//         borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
-//       ),
-//       builder: (context) => Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           children: [
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 TextButton(
-//                   onPressed: () => Navigator.pop(context),
-//                   child: const Text('Cancel'),
-//                 ),
-//                 TextButton(
-//                   onPressed: () {},
-//                   child: const Text('Add'),
-//                 ),
-//               ],
-//             ),
-//             TextField(
-//               autofocus: true,
-//               onTap: () {},
-//               decoration: const InputDecoration(
-//                 hintText: 'Add New Task',
-//                 suffixIcon: Icon(Icons.task),
-//               ),
-//             ),
-//             const SizedBox(height: 8.0),
-//             Row(
-//               children: [
-//                 _buildDueDateDropdown(context),
-//                 TextButton.icon(
-//                   onPressed: () {
-//                     // show a drop down menu
-//                     // _buildDueDateDropdown();
-//                     _buildDueDateDropdown(context);
-//                   },
-//                   icon: const Icon(Icons.calendar_today),
-//                   label: const Text('Set Due Date'),
-//                 ),
-//                 const SizedBox(width: 8.0),
-//                 TextButton(
-//                   onPressed: () {},
-//                   child: const Text('Tomorrow'),
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
 
 // enum SampleItem { itemOne, itemTwo, itemThree }
 

@@ -61,7 +61,7 @@ Future<void> showMyDialogToConfirm(
 
 void showMyDialogToAddMember(
   BuildContext context, {
-  required VoidCallback onConfirm,
+  required void Function(String? value) onSubmitted, // callback to return value (String email)
   required TextEditingController controller,
 }) {
   showDialog(
@@ -72,23 +72,26 @@ void showMyDialogToAddMember(
         content: // text field
             TextField(
           controller: controller,
+          autofocus: true,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Email',
           ),
+          onSubmitted: (value) {
+            onSubmitted(value);
+            Navigator.of(context).pop();
+          },
         ),
         actions: [
           TextButton(
             onPressed: () {
-              controller.clear();
               Navigator.of(context).pop();
             },
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
-              onConfirm();
-              controller.clear();
+              onSubmitted(controller.text);
               Navigator.of(context).pop();
             },
             child: const Text('Add'),

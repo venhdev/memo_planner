@@ -9,13 +9,15 @@ class AssignedMembers extends StatelessWidget {
   const AssignedMembers({
     super.key,
     required this.task,
+    this.height = 48.0,
   });
   final TaskEntity task;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 40,
+      height: height,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
@@ -31,14 +33,14 @@ class AssignedMembers extends StatelessWidget {
                   builder: (context) {
                     if (member.photoURL != null) {
                       return CircleAvatar(
-                        maxRadius: 24.0,
+                        maxRadius: height / 2,
                         backgroundColor: Colors.green.shade100,
                         backgroundImage: NetworkImage(member.photoURL!),
                       );
                     } else {
                       // use the first letter of email instead
                       return CircleAvatar(
-                        maxRadius: 24.0,
+                        maxRadius: height / 2,
                         backgroundColor: Colors.green.shade100,
                         child: const Icon(Icons.person),
                       );

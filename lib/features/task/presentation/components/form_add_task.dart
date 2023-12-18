@@ -460,7 +460,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
       tid: null,
       lid: widget.lid,
       taskName: value,
-      description: null,
+      description: '',
       priority: priority,
       completed: false,
       dueDate: _dueDate,
