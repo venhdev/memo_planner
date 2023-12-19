@@ -202,6 +202,13 @@ class AppNavigationDrawer extends StatelessWidget {
                   .showNotification(id: 1, title: 'Time to run 2', body: 'body', payload: 'payload');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.cast),
+            title: const Text('navigate test'),
+            onTap: () async {
+              context.go('/task-list/single-list/ySJ6AzcAKsjaF0Seih7s');
+            },
+          ),
         ],
       ),
     );

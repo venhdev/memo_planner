@@ -50,14 +50,6 @@ class _HabitScreenState extends State<HabitScreen> {
             ),
           ),
         ),
-        leading: Builder(builder: (context) {
-          return IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          );
-        }),
         title: TextField(
           controller: _searchController,
           onChanged: (value) {
@@ -180,7 +172,6 @@ class _HabitScreenState extends State<HabitScreen> {
           // ),
         ],
       ),
-      drawer: const AppNavigationDrawer(),
       // floatingActionButton: FloatingActionButton(
       //   heroTag: 'fab_habit',
       //   onPressed: () {
@@ -314,7 +305,8 @@ class _HabitScreenState extends State<HabitScreen> {
                 final List<PendingNotificationRequest> pendingNotificationRequests =
                     await flutterLocalNotificationsPlugin.pendingNotificationRequests();
 
-                final List<ActiveNotification> activeNotifications = await flutterLocalNotificationsPlugin.getActiveNotifications();
+                final List<ActiveNotification> activeNotifications =
+                    await flutterLocalNotificationsPlugin.getActiveNotifications();
 
                 for (var pendingNotificationRequest in pendingNotificationRequests) {
                   debugPrint('pending: ${pendingNotificationRequest.id.toString()}');

@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/constants/constants.dart';
-import '../../../../core/utils/converter.dart';
 import '../../../../core/notification/reminder.dart';
+import '../../../../core/utils/helpers.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 
 // The entity design to sync with Google Calendar
@@ -19,7 +19,6 @@ class HabitEntity extends Equatable {
     this.updated,
     this.creator,
     this.members, //v1.1
-
   });
 
   final String? hid;

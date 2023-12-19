@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/colors.dart';
-import '../../../../../core/utils/converter.dart';
+import '../../../../../core/utils/helpers.dart';
 import '../../../domain/entities/streak_instance_entity.dart';
 
 class BestStreak extends StatelessWidget {
@@ -34,9 +34,7 @@ Widget buildTopStreakItem(StreakInstanceEntity streak, Color color) {
         flex: 1,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(
-              convertDateTimeToString(streak.start, pattern: 'dd/MM'),
-              textAlign: TextAlign.center),
+          child: Text(convertDateTimeToString(streak.start, pattern: 'dd/MM'), textAlign: TextAlign.center),
         ),
       ),
       Expanded(

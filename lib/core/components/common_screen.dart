@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 class LoadingScreen extends StatelessWidget {
@@ -28,7 +30,7 @@ class MessageScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(message),
+          GestureDetector(child: Text(message), onTap: () => log(message)),
           Visibility(
             visible: enableBack,
             child: ElevatedButton(
@@ -67,7 +69,7 @@ class MessageScreenWithAction extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(message?? 'Something went wrong'),
+          Text(message ?? 'Something went wrong'),
           ElevatedButton(
             onPressed: () {
               onPressed();

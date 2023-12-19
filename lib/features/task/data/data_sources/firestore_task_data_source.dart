@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:googleapis/tasks/v1.dart';
 import 'package:injectable/injectable.dart';
 import 'package:memo_planner/core/constants/typedef.dart';
 import 'package:memo_planner/features/task/data/models/task_model.dart';
@@ -22,6 +23,9 @@ abstract class FireStoreTaskDataSource {
 
   Future<void> addMember(String lid, String email);
   Future<void> removeMember(String lid, String email);
+
+  // other function
+  Future<int> countTaskList(String lid);
 
   //! Task
   SQuerySnapshot getAllTaskStream(String lid);
@@ -52,6 +56,7 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
           Filter('creator.email', isEqualTo: email),
           Filter('members', arrayContains: email),
         ))
+        .orderBy('listName')
         .snapshots();
   }
 
@@ -236,5 +241,11 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
     return await docRef.update({
       'assignedMembers': FieldValue.arrayRemove([email])
     });
+  }
+
+  @override
+  Future<int> countTaskList(String lid) async {
+    final result =  await _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).count().get();
+    return result.count;
   }
 }

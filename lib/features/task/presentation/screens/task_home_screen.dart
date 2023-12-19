@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:memo_planner/core/components/widgets.dart';
 import 'package:memo_planner/core/constants/enum.dart';
 import 'package:memo_planner/features/task/data/models/task_list_model.dart';
-import 'package:memo_planner/features/task/presentation/components/task_group_item.dart';
+import 'package:memo_planner/features/task/presentation/components/task_list_item.dart';
 
 import '../../domain/entities/task_list_entity.dart';
 import '../bloc/task_bloc.dart';
@@ -20,7 +20,6 @@ class TaskHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     log('render TaskHomeScreen');
     return Scaffold(
-      drawer: const AppNavigationDrawer(),
       appBar: _buildAppBar(context),
       body: BlocBuilder<TaskBloc, TaskState>(
         builder: (context, state) {
@@ -66,8 +65,10 @@ class TaskHomeScreen extends StatelessWidget {
         // ),
         Padding(
           padding: const EdgeInsets.only(right: 8.0),
-          child: IconButton(
-            icon: const Icon(Icons.add),
+          child: TextButton.icon(
+            label: const Text('New List', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+            icon: const Icon(Icons.add, color: Colors.black87),
+            style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.greenAccent.shade100)),
             onPressed: () async => showAddOrEditForm(
               context,
               controller: TextEditingController(),
@@ -96,7 +97,12 @@ class TaskHomeScreen extends StatelessWidget {
         // TaskGroupItem.scheduled(),
         // TaskGroupItem.done(),
         Column(
-          children: TaskGroupItem.defaultItems(context),
+          children: [
+            TaskListItem.allTasks(context),
+            TaskListItem.today(context),
+            TaskListItem.scheduled(context),
+            TaskListItem.done(context),
+          ],
         ),
 
         const Divider(),
@@ -106,7 +112,7 @@ class TaskHomeScreen extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: taskLists.length,
           itemBuilder: (context, index) {
-            return TaskGroupItem(
+            return TaskListItem(
               false,
               taskList: taskLists[index],
               onTap: () {

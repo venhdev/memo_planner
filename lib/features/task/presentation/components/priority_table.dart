@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/constants.dart';
+
 class PriorityTable extends StatelessWidget {
   const PriorityTable({super.key, required this.callBack, required this.priority});
 
@@ -43,9 +45,9 @@ class PriorityTable extends StatelessWidget {
             ),
             // Important & Urgent
             ChoiceChip(
-              label: const Text('Do It Now'),
+              label: Text(AppConstant.priorityLabel(3)),
               selected: priority == 3,
-              selectedColor: Colors.green,
+              selectedColor: AppColors.kLevel3Color,
               onSelected: (value) {
                 if (value) {
                   callBack(3);
@@ -56,9 +58,9 @@ class PriorityTable extends StatelessWidget {
             ),
             // Important & Not Urgent
             ChoiceChip(
-              label: const Text('Schedule It'),
+              label: Text(AppConstant.priorityLabel(2)),
               selected: priority == 2,
-              selectedColor: Colors.blue,
+              selectedColor: AppColors.kLevel2Color,
               onSelected: (value) {
                 if (value) {
                   callBack(2);
@@ -82,9 +84,9 @@ class PriorityTable extends StatelessWidget {
             ),
             // Not Important & Urgent
             ChoiceChip(
-              label: const Text('Delegate It'),
+              label: Text(AppConstant.priorityLabel(1)),
               selected: priority == 1,
-              selectedColor: Colors.orange,
+              selectedColor: AppColors.kLevel1Color,
               onSelected: (value) {
                 if (value) {
                   callBack(1);
@@ -95,9 +97,9 @@ class PriorityTable extends StatelessWidget {
             ),
             // Not Important & Not Urgent
             ChoiceChip(
-              label: const Text('Eliminate It'),
+              label: Text(AppConstant.priorityLabel(0)),
               selected: priority == 0,
-              selectedColor: Colors.grey,
+              selectedColor: AppColors.kLevel0Color,
               onSelected: (value) {
                 if (value) {
                   callBack(0);

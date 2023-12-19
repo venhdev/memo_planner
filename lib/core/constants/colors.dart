@@ -6,7 +6,12 @@ final List<Color> topStreakColors = [
   Colors.green.shade200,
 ];
 
-class MyColors {
+class AppColors {
+  static const kDefaultTextColor = Colors.black;
+
+  static const kRemainingTextColor = Colors.green;
+  static const kOverdueTextColor = Colors.red;
+
   static const kActiveTextColor = Color(0xFF40BB4D);
   static const kDeactivateTextColor = Color(0xFFC4C4C4);
 
@@ -15,7 +20,20 @@ class MyColors {
   static const kLevel1Color = Colors.amber; // Delegate It - Urgent & Not Important
   static const kLevel0Color = Colors.grey; // Eliminate It - Not Important & Not Urgent
 
-  static priorityColor(int priority) {
+  static Color? dueDateColor(DateTime? dateTime) {
+    if (dateTime != null) {
+      Duration duration = dateTime.difference(DateTime.now());
+      if (duration > Duration.zero) {
+        return kRemainingTextColor;
+      } else {
+        return kOverdueTextColor;
+      }
+    } else {
+      return kDefaultTextColor;
+    }
+  }
+
+  static Color? priorityColor(int priority) {
     switch (priority) {
       case 0:
         return kLevel0Color;
@@ -30,18 +48,5 @@ class MyColors {
     }
   }
 
-  static priorityLabel(int priority) {
-    switch (priority) {
-      case 0:
-        return 'Eliminate';
-      case 1:
-        return 'Delegate';
-      case 2:
-        return 'Schedule';
-      case 3:
-        return 'Do It';
-      default:
-        return 'Unknown';
-    }
-  }
+  
 }

@@ -87,4 +87,14 @@ class TaskListRepositoryImpl implements TaskListRepository {
       return const Stream.empty();
     }
   }
+
+  @override
+  Future<int?> countTaskList(String lid) async {
+    try {
+      return await _dataSource.countTaskList(lid);
+    } catch (e) {
+      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return null;
+    }
+  }
 }

@@ -7,7 +7,9 @@ import '../../core/constants/enum.dart';
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../features/authentication/presentation/screens/screens.dart';
 import '../../features/habit/domain/entities/habit_entity.dart';
+import '../../features/habit/presentation/bloc/habit/habit_bloc.dart';
 import '../../features/habit/presentation/screens/screens.dart';
+import '../../features/task/presentation/bloc/task_bloc.dart';
 import '../../features/task/presentation/screens/screens.dart';
 
 part 'app_scaffold_navigation_bar.dart';

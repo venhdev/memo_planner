@@ -25,7 +25,7 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
     this._getHabitStreamUC,
     this._addHabitInstanceUC,
   ) : super(HabitInitial()) {
-    on<HabitEventInitial>(_onStarted);
+    on<HabitEventInitial>(_onInitial);
     on<HabitEventAdd>(_onAddHabitEvent);
     on<HabitEventAddInstance>(_onAddHabitInstanceEvent);
     on<HabitEventUpdate>(_onUpdateHabitEvent);
@@ -41,7 +41,7 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
 
   SQuerySnapshot? currentSteam;
 
-  void _onStarted(HabitEventInitial event, Emitter<HabitState> emit) {
+  void _onInitial(HabitEventInitial event, Emitter<HabitState> emit) {
     emit(HabitLoading());
     try {
       var user = _getCurrentUserUC();

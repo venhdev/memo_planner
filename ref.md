@@ -19,6 +19,7 @@
 
 ## Firebase Firestore
 
+- timestamp <https://firebase.google.com/docs/reference/unity/struct/firebase/firestore/timestamp>
 - query <https://firebase.google.com/docs/firestore/query-data/queries>
 
 ## Firebase Auth

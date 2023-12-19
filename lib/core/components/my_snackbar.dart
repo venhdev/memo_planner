@@ -34,11 +34,13 @@ void showMySnackbar(
   required String message,
   Duration? duration,
   Color? backgroundColor,
+  SnackBarAction? action,
 }) {
   final snackBar = SnackBar(
     content: Text(message),
     duration: const Duration(seconds: 1),
     backgroundColor: backgroundColor,
+    action: action,
   );
 
   ScaffoldMessenger.of(context)

@@ -1,4 +1,21 @@
-part 'habit_constants.dart';
+export 'colors.dart';
+
+class AppConstant {
+  static priorityLabel(int priority) {
+    switch (priority) {
+      case 0:
+        return 'Eliminate';
+      case 1:
+        return 'Delegate';
+      case 2:
+        return 'Schedule';
+      case 3:
+        return 'Do It';
+      default:
+        return 'Unknown';
+    }
+  }
+}
 
 //! Object type
 const String kHabit = 'habit#summary';

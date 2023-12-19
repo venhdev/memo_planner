@@ -76,7 +76,6 @@ class _AddTaskListDialogState extends State<AddTaskListDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            widget.controller.clear();
             Navigator.of(context).pop();
           },
           child: Text(
@@ -102,12 +101,21 @@ class _AddTaskListDialogState extends State<AddTaskListDialog> {
                       ),
                     )
                       .then((value) {
-                      showMySnackbar(
-                        context,
-                        message: 'You have created a new list',
-                        backgroundColor: Colors.green,
+                      value.fold(
+                        (l) => showMySnackbar(
+                          context,
+                          message: l.message,
+                          backgroundColor: Colors.red,
+                        ),
+                        (r) {
+                          Navigator.of(context).pop();
+                          showMySnackbar(
+                            context,
+                            message: 'You have created a new list',
+                            backgroundColor: Colors.green,
+                          );
+                        },
                       );
-                      Navigator.of(context).pop();
                     })
                   //! handle Edit
                   : await di<TaskListRepository>()
@@ -119,12 +127,21 @@ class _AddTaskListDialogState extends State<AddTaskListDialog> {
                     )
                       .then(
                       (value) {
-                        showMySnackbar(
-                          context,
-                          message: 'You have renamed the list',
-                          backgroundColor: Colors.green,
+                        value.fold(
+                          (l) => showMySnackbar(
+                            context,
+                            message: l.message,
+                            backgroundColor: Colors.red,
+                          ),
+                          (r) {
+                            Navigator.of(context).pop();
+                            showMySnackbar(
+                              context,
+                              message: 'You have renamed the list',
+                              backgroundColor: Colors.green,
+                            );
+                          },
                         );
-                        Navigator.of(context).pop();
                       },
                     );
 

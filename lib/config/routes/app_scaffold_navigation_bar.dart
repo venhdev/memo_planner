@@ -14,19 +14,24 @@ class ScaffoldWithNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // handle authentication
     return BlocConsumer<AuthenticationBloc, AuthenticationState>(
       listenWhen: (previous, current) => previous.status != current.status,
       listener: (context, state) {
         if (state.status == AuthenticationStatus.authenticated) {
-          showMyAlertDialogMessage(
-            context: context,
-            message: state.message ?? 'Hi ${state.user!.displayName}',
-            icon: const Icon(Icons.check),
-          );
-          
-          //? because when user sign out, maybe not in the habit screen
-          context.go('/habit');
+          if (state.message != null) {
+            showMyAlertDialogMessage(
+              context: context,
+              message: state.message!,
+              icon: const Icon(Icons.check),
+            );
+          }
+
+          // call initial event on each branch to load data according to user
+          context.read<HabitBloc>().add(HabitEventInitial());
+          context.read<TaskBloc>().add(const TaskEventInitial());
+
+          //? because when user sign out, maybe in user branch
+          context.go('/task-list');
         } else if (state.status == AuthenticationStatus.unauthenticated) {
           showMyAlertDialogMessage(
             context: context,
@@ -39,6 +44,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
       builder: (context, state) {
         if (state.status == AuthenticationStatus.authenticated) {
           return Scaffold(
+            drawer: const AppNavigationDrawer(),
             body: navigationShell,
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[

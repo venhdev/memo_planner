@@ -1,11 +1,18 @@
 import 'dart:developer' as dev;
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-import 'converter.dart';
+import '../constants/constants.dart';
 
-export 'converter.dart';
+part 'converter.dart';
+
+DateTime getToday() {
+  DateTime now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+}
 
 /// Use to compare time {hour, minute} of two DateTime
 /// This function will return:
@@ -39,19 +46,49 @@ int compareTimeOfDay(TimeOfDay time1, TimeOfDay time2) {
 }
 
 // get remaining time from now to [dateTime]
-String getRemainingTime(DateTime? dateTime, {String defaultText = 'No due date', String? prefixString}) {
+/// {defaultText} will return if [dateTime] is null
+String getRemainingTime(
+  DateTime? dateTime, {
+  String defaultText = '',
+  String prefixRemaining = 'Remaining: ',
+  String prefixOverdue = 'Overdue: ',
+  bool showOverdue = false,
+  String defaultOverdueText = 'Set new time',
+}) {
   if (dateTime != null) {
     Duration duration = dateTime.difference(DateTime.now());
     if (duration > Duration.zero) {
-      return  '${prefixString ?? ''}'
-          '${duration.inDays}d '
-          '${duration.inHours.remainder(24)}h '
-          '${duration.inMinutes.remainder(60)}m';
+      if (duration.inSeconds < 60) {
+        return '$prefixRemaining${duration.inSeconds}s';
+      } else if (duration.inMinutes < 60) {
+        return '$prefixRemaining${duration.inMinutes}m';
+      } else if (duration.inHours < 24) {
+        return '$prefixRemaining${duration.inHours}h ${duration.inMinutes.remainder(60)}m';
+      } else if (duration.inDays < 30) {
+        return '$prefixRemaining${duration.inDays}d ${duration.inHours.remainder(24)}h';
+      } else if (duration.inDays < 365) {
+        return '$prefixRemaining${duration.inDays ~/ 30}month ${duration.inDays.remainder(30)}d';
+      } else {
+        return '$prefixRemaining${duration.inDays ~/ 365}y'; // so far =))
+      }
     } else {
-      return 'Overdue\n'
-          '${duration.inDays.abs()}d '
-          '${duration.inHours.remainder(24).abs()}h '
-          '${duration.inMinutes.remainder(60).abs()}m';
+      if (!showOverdue) {
+        return defaultOverdueText;
+      }
+      duration = DateTime.now().difference(dateTime); // get negative duration
+      if (duration.inSeconds < 60) {
+        return '$prefixOverdue${duration.inSeconds}s';
+      } else if (duration.inMinutes < 60) {
+        return '$prefixOverdue${duration.inMinutes}m';
+      } else if (duration.inHours < 24) {
+        return '$prefixOverdue${duration.inHours}h ${duration.inMinutes.remainder(60)}m';
+      } else if (duration.inDays < 30) {
+        return '$prefixOverdue${duration.inDays}d ${duration.inHours.remainder(24)}h';
+      } else if (duration.inDays < 365) {
+        return '$prefixOverdue${duration.inDays ~/ 30}month ${duration.inDays.remainder(30)}d';
+      } else {
+        return '$prefixOverdue${duration.inDays ~/ 365}y'; // so far =))
+      }
     }
   } else {
     return defaultText;

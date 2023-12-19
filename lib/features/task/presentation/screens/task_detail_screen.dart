@@ -153,7 +153,6 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
 
           // Reminder
           const SizedBox(height: 16.0),
-          Text('$_reminder'),
           _buildReminderButton(),
 
           // Due date
@@ -202,9 +201,17 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         },
         child: Row(
           children: [
-            const Icon(Icons.person_outline, color: MyColors.kActiveTextColor),
+            Icon(
+              Icons.person_outline,
+              color: widget.task.assignedMembers!.isNotEmpty ? AppColors.kActiveTextColor : Colors.black,
+            ),
             const SizedBox(width: 8),
-            const Text('Assign to ', style: TextStyle(color: MyColors.kActiveTextColor)),
+            Text(
+              'Assign to ',
+              style: TextStyle(
+                color: widget.task.assignedMembers!.isNotEmpty ? AppColors.kActiveTextColor : Colors.black,
+              ),
+            ),
             widget.task.assignedMembers != null
                 ? AssignedMembers(
                     task: widget.task,
@@ -239,11 +246,11 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
       },
       child: Row(
         children: [
-          const Icon(Icons.calendar_today, color: MyColors.kActiveTextColor),
+          Icon(Icons.calendar_today, color: AppColors.dueDateColor(_dueDate)),
           const SizedBox(width: 8),
           Text(
             convertDateTimeToString(_dueDate, defaultValue: 'Set due date'),
-            style: const TextStyle(color: MyColors.kActiveTextColor),
+            style: TextStyle(color: AppColors.dueDateColor(_dueDate)),
           ),
           const Spacer(), //> to push the icon to the right
           _dueDate != null
@@ -265,41 +272,6 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         ],
       ),
     );
-  }
-
-  Future<TimeOfDay?> pickTime() => showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-      );
-
-  Future<DateTime?> pickDate() => showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2020),
-        lastDate: DateTime(2030),
-      );
-
-  void showSnackBar({
-    required String message,
-    bool closeable = true,
-    Duration? duration,
-    Color? backgroundColor,
-  }) {
-    final snackBar = SnackBar(
-      content: Text(message),
-      duration: const Duration(seconds: 2),
-      action: closeable
-          ? SnackBarAction(
-              label: 'OK',
-              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-            )
-          : null,
-      backgroundColor: backgroundColor,
-    );
-
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(snackBar);
   }
 
   TextButton _buildReminderButton() {
@@ -325,25 +297,27 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         } else {
           // > if the picked reminder is different from the current reminder
           if (pickedDateTime != _reminder?.scheduledTime) {
-            setState(() {
-              // > if the current reminder is null > create new reminder
-              if (widget.task.reminders == null) {
-                final newReminder = Reminder(
-                  rid: generateNotificationId(pickedDateTime),
-                  scheduledTime: pickedDateTime,
-                );
-                setState(() {
-                  _reminder = newReminder;
-                  unSavedReminder = true;
-                });
-              } else {
-                // the current reminder is different from the picked reminder
-                setState(() {
-                  _reminder = _reminder?.copyWith(scheduledTime: pickedDateTime);
-                  unSavedReminder = true;
-                });
-              }
-            });
+            setState(
+              () {
+                // > if the current reminder is null > create new reminder
+                if (widget.task.reminders == null) {
+                  final newReminder = Reminder(
+                    rid: generateNotificationId(pickedDateTime),
+                    scheduledTime: pickedDateTime,
+                  );
+                  setState(() {
+                    _reminder = newReminder;
+                    unSavedReminder = true;
+                  });
+                } else {
+                  // the current reminder is different from the picked reminder
+                  setState(() {
+                    _reminder = _reminder?.copyWith(scheduledTime: pickedDateTime);
+                    unSavedReminder = true;
+                  });
+                }
+              },
+            );
           } else {
             setState(() {
               _reminder = _reminder?.copyWith(scheduledTime: pickedDateTime);
@@ -354,19 +328,25 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
       },
       child: Row(
         children: [
-          const Icon(Icons.notifications, color: MyColors.kActiveTextColor),
+          Icon(Icons.notifications, color: AppColors.dueDateColor(_reminder?.scheduledTime)),
           const SizedBox(width: 8),
-          Text(
-            '${convertDateTimeToString(
-              _reminder?.scheduledTime,
-              defaultValue: 'Set reminder',
-              pattern: 'dd/MM - HH:mm',
-            )} ${getRemainingTime(
-              _reminder?.scheduledTime,
-              prefixString: '| Remaining time: ',
-              defaultText: '',
-            )}',
-            style: const TextStyle(color: MyColors.kActiveTextColor),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                convertDateTimeToString(
+                  _reminder?.scheduledTime,
+                  defaultValue: 'Set reminder',
+                  pattern: 'dd/MM - HH:mm',
+                ),
+                style: const TextStyle(color: Colors.black),
+              ),
+              if (_reminder != null)
+                Text(
+                  getRemainingTime(_reminder?.scheduledTime, defaultOverdueText: 'Set new reminder'),
+                  style: TextStyle(color: AppColors.dueDateColor(_reminder?.scheduledTime)),
+                ),
+            ],
           ),
           const Spacer(), //> to push the icon to the right
           _reminder != null
@@ -396,9 +376,9 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
       onPressed: () {},
       child: const Row(
         children: [
-          Icon(Icons.wb_sunny_outlined, color: MyColors.kActiveTextColor),
+          Icon(Icons.wb_sunny_outlined, color: AppColors.kActiveTextColor),
           SizedBox(width: 8),
-          Text('Add to My Day', style: TextStyle(color: MyColors.kActiveTextColor)),
+          Text('Add to My Day', style: TextStyle(color: AppColors.kActiveTextColor)),
           Spacer(), //> to push the icon to the right
         ],
       ),
@@ -517,11 +497,46 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
     );
   }
 
+  Future<TimeOfDay?> pickTime() => showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+
+  Future<DateTime?> pickDate() => showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2020),
+        lastDate: DateTime(2030),
+      );
+
   Future<dynamic> showMemberToAddAssign() {
     return showDialog(
       context: context,
       builder: (context) => DialogAssignMember(lid: widget.task.lid!, tid: widget.task.tid!),
     );
+  }
+
+  void showSnackBar({
+    required String message,
+    bool closeable = true,
+    Duration? duration,
+    Color? backgroundColor,
+  }) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+      action: closeable
+          ? SnackBarAction(
+              label: 'OK',
+              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+            )
+          : null,
+      backgroundColor: backgroundColor,
+    );
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
   }
 
   void saveChanges() {

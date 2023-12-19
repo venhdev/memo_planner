@@ -11,4 +11,7 @@ abstract class TaskListRepository {
 
   ResultVoid addMember (String lid, String email);
   ResultVoid removeMember (String lid, String email);
+
+  // other function
+  Future<int?> countTaskList(String lid);
 }

@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-import '../constants/constants.dart';
+part of 'helpers.dart';
 
 String getIid(String hid, DateTime date) {
   return '${hid}_${convertDateTimeToyyyyMMdd(date)}';
@@ -48,6 +46,19 @@ String convertDateTimeToString(
   if (date == null) {
     return defaultValue;
   }
+
+  DateTime today = getToday();
+  DateTime tomorrow = today.add(const Duration(days: 1));
+  DateTime yesterday = today.subtract(const Duration(days: 1));
+
+  if (date == today) {
+    return 'Today';
+  } else if (date == tomorrow) {
+    return 'Tomorrow';
+  } else if (date == yesterday) {
+    return 'Yesterday';
+  }
+
   return DateFormat(pattern).format(date);
 }
 
