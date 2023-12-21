@@ -96,7 +96,8 @@ class _HabitFormState extends State<HabitForm> {
                   fontWeight: FontWeight.bold,
                 ),
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Habit Title', hintText: 'What is your habit?', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                    labelText: 'Habit Title', hintText: 'What is your habit?', border: OutlineInputBorder()),
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
                     return '*Please enter your habit name';
@@ -109,7 +110,8 @@ class _HabitFormState extends State<HabitForm> {
               TextFormField(
                 textAlign: TextAlign.center,
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description', hintText: 'Describe your habit (optional)', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                    labelText: 'Description', hintText: 'Describe your habit (optional)', border: OutlineInputBorder()),
               ),
 
               const SizedBox(height: 16.0),
@@ -248,7 +250,6 @@ class _HabitFormState extends State<HabitForm> {
                       },
                     )
                   : null;
-
             },
             child: Container(
               padding: const EdgeInsets.all(12.0),
@@ -263,6 +264,7 @@ class _HabitFormState extends State<HabitForm> {
                     convertDateTimeToString(
                       _start,
                       pattern: kTimeFormatPattern,
+                      useTextValue: false,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -317,6 +319,7 @@ class _HabitFormState extends State<HabitForm> {
                     convertDateTimeToString(
                       _end,
                       pattern: kTimeFormatPattern,
+                      useTextValue: false,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -377,7 +380,7 @@ class _HabitFormState extends State<HabitForm> {
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: Text(
-                convertDateTimeToString(_start),
+                convertDateTimeToString(_start, useTextValue: false),
                 style: const TextStyle(fontSize: 16.0),
               ),
             ),
@@ -433,7 +436,12 @@ class _HabitFormState extends State<HabitForm> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Text(
-                  _endOfHabit != null ? convertDateTimeToString(_endOfHabit!) : 'No end date',
+                  _endOfHabit != null
+                      ? convertDateTimeToString(
+                          _endOfHabit!,
+                          useTextValue: false,
+                        )
+                      : 'No end date',
                   style: const TextStyle(fontSize: 16.0),
                 ),
               ),
@@ -444,7 +452,11 @@ class _HabitFormState extends State<HabitForm> {
     );
   }
 
-  String getUntil() => convertDateTimeToString(_endOfHabit!, pattern: kDateFormatPattern);
+  String getUntil() => convertDateTimeToString(
+        _endOfHabit!,
+        pattern: kDateFormatPattern,
+        useTextValue: false,
+      );
 
   String getRecurrenceRuleString() => _freq == FREQ.daily.name //daily
       ? _hasEndDate

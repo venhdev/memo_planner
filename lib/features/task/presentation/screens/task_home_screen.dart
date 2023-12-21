@@ -56,6 +56,7 @@ class TaskHomeScreen extends StatelessWidget {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
+      title: const Text('Your Task', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
       actions: [
         // IconButton(
         //   onPressed: () {
@@ -98,10 +99,12 @@ class TaskHomeScreen extends StatelessWidget {
         // TaskGroupItem.done(),
         Column(
           children: [
+            TaskListItem.myday(context),
             TaskListItem.allTasks(context),
             TaskListItem.today(context),
             TaskListItem.scheduled(context),
             TaskListItem.done(context),
+            TaskListItem.assignToMe(context),
           ],
         ),
 

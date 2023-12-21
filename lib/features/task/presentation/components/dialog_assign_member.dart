@@ -4,7 +4,6 @@ import 'package:memo_planner/features/task/domain/repository/task_repository.dar
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/common_screen.dart';
-import '../../../authentication/domain/repository/authentication_repository.dart';
 import '../../data/models/task_list_model.dart';
 import '../../data/models/task_model.dart';
 import '../../domain/entities/task_entity.dart';

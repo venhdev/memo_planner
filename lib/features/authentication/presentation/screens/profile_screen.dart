@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:memo_planner/core/components/widgets.dart';
 
+import '../../../../config/dependency_injection.dart';
+import '../../../../core/notification/local_notification_manager.dart';
 import '../../domain/entities/user_entity.dart';
 import '../components/profile_menu.dart';
 
@@ -71,13 +73,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              Text(widget.user.displayName ?? widget.user.email!.split('@')[0], style: const TextStyle(fontSize: 32, color: Colors.black)),
+              Text(widget.user.displayName ?? widget.user.email!.split('@')[0],
+                  style: const TextStyle(fontSize: 32, color: Colors.black)),
               const SizedBox(height: 20),
 
               // Email
-              Text(
-                widget.user.email!,
-                style: const TextStyle(fontSize: 16, color: Colors.black),
+              GestureDetector(
+                onLongPress: () async {
+                  final pending = await di<LocalNotificationManager>().I.pendingNotificationRequests();
+                  final activate = await di<LocalNotificationManager>().I.getActiveNotifications();
+
+                  // ignore: use_build_context_synchronously
+                  await showDialog(
+                    context: context,
+                    builder: (_) {
+                      return SimpleDialog(
+                        children: [
+                          Text('pending: ${pending.length}'),
+                          for (int i = 0; i < pending.length; i++)
+                            Text(
+                              '${pending[i].id} - ${pending[i].title} - ${pending[i].body}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          Text('activate: ${activate.length}'),
+                          for (int i = 0; i < activate.length; i++)
+                            Text(
+                              '${activate[i].id} - ${activate[i].title} - ${activate[i].body}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: Text(
+                  widget.user.email!,
+                  style: const TextStyle(fontSize: 16, color: Colors.black),
+                ),
               ),
 
               // -- BUTTON EDIT

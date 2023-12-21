@@ -42,6 +42,7 @@ String convertDateTimeToString(
   DateTime? date, {
   String pattern = 'dd-MM-yyyy',
   String defaultValue = '',
+  bool useTextValue = true,
 }) {
   if (date == null) {
     return defaultValue;
@@ -51,12 +52,14 @@ String convertDateTimeToString(
   DateTime tomorrow = today.add(const Duration(days: 1));
   DateTime yesterday = today.subtract(const Duration(days: 1));
 
-  if (date == today) {
-    return 'Today';
-  } else if (date == tomorrow) {
-    return 'Tomorrow';
-  } else if (date == yesterday) {
-    return 'Yesterday';
+  if (useTextValue) {
+    if (date == today) {
+      return 'Today';
+    } else if (date == tomorrow) {
+      return 'Tomorrow';
+    } else if (date == yesterday) {
+      return 'Yesterday';
+    }
   }
 
   return DateFormat(pattern).format(date);

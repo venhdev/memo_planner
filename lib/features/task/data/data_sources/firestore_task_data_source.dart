@@ -1,13 +1,14 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:googleapis/tasks/v1.dart';
 import 'package:injectable/injectable.dart';
 import 'package:memo_planner/core/constants/typedef.dart';
+import 'package:memo_planner/features/task/data/models/myday_model.dart';
 import 'package:memo_planner/features/task/data/models/task_model.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/notification/local_notification_manager.dart';
+import '../../domain/entities/myday_entity.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/entities/task_list_entity.dart';
 import '../models/task_list_model.dart';
@@ -27,6 +28,11 @@ abstract class FireStoreTaskDataSource {
   // other function
   Future<int> countTaskList(String lid);
 
+  //! MyDay
+  SDocumentSnapshot getOneMyDayStream(String email, String tid);
+  Future<void> removeMismatchInMyDay(String email, DateTime date);
+  SQuerySnapshot getAllMyDayStream(String email); // >> [getOneTaskStream]
+
   //! Task
   SQuerySnapshot getAllTaskStream(String lid);
   SDocumentSnapshot getOneTaskStream(String lid, String tid);
@@ -39,6 +45,12 @@ abstract class FireStoreTaskDataSource {
 
   Future<void> assignTask(String lid, String tid, String email);
   Future<void> unassignTask(String lid, String tid, String email);
+
+  Future<void> addToMyDay(String email, MyDayEntity myDay);
+  Future<void> toggleKeepInMyDay(String email, String tid, bool isKeep);
+  Future<void> removeFromMyDay(String email, MyDayEntity myDay);
+
+  Future<MyDayEntity?> findOneMyDay(String email, String tid);
 }
 
 @Singleton(as: FireStoreTaskDataSource)
@@ -172,32 +184,27 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
 
     await docRef.update(TaskModel.fromEntity(updatedTask).toMap()).then(
       (_) async {
-        if (updatedTask.reminders?.useDefault == true) {
-          log('have reminder');
-        } else {
-          log('no reminder');
-        }
-        // -- new: have reminder, old?
+        // -- new: have reminder, old?...
         if (updatedTask.reminders?.useDefault == true) {
           // > oldTask have the same reminder time with updatedTask >> ignore
 
-          // -- old: have reminder, new: have reminder >> update schedule notification with same rid
           if (oldTask.reminders?.useDefault == true) {
+            // -- old: have reminder, new: have reminder >> update schedule notification with same rid
             // > oldTask have the same reminder time with updatedTask >> ignore
             if (oldTask.reminders!.scheduledTime!.isAtSameMomentAs(updatedTask.reminders!.scheduledTime!)) return;
-
+            // > update with same rid but different time
             await _localNotification.setScheduleNotification(
               id: updatedTask.reminders!.rid!,
               title: updatedTask.taskName,
-              body: 'remember to do this task',
+              body: 'Remember to do this task',
               scheduledTime: updatedTask.reminders!.scheduledTime!,
             );
-            // old: no reminder, new: have reminder >> set new schedule notification
           } else {
+            // new: have reminder, old: no reminder >> set new schedule notification
             await _localNotification.setScheduleNotification(
               id: updatedTask.reminders!.rid!,
               title: updatedTask.taskName,
-              body: 'remember to do this task',
+              body: 'Remember to do this task',
               scheduledTime: updatedTask.reminders!.scheduledTime!,
             );
           }
@@ -245,7 +252,58 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
 
   @override
   Future<int> countTaskList(String lid) async {
-    final result =  await _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).count().get();
+    final result = await _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).count().get();
     return result.count;
+  }
+
+  @override
+  Future<void> addToMyDay(String email, MyDayEntity myDay) async {
+    final collRef = _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay);
+    await collRef.doc(myDay.tid).set(MyDayModel.fromEntity(myDay).toMap());
+  }
+
+  @override
+  Future<void> removeFromMyDay(String email, MyDayEntity myDay) async {
+    return await _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay).doc(myDay.tid).delete();
+  }
+
+  @override
+  SDocumentSnapshot getOneMyDayStream(String email, String tid) {
+    return _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay).doc(tid).snapshots();
+  }
+
+  @override
+  Future<void> toggleKeepInMyDay(String email, String tid, bool isKeep) async {
+    return await _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay).doc(tid).update({
+      'keep': isKeep,
+    });
+  }
+
+  @override
+  Future<MyDayEntity?> findOneMyDay(String email, String tid) async {
+    return await _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay).doc(tid).get().then(
+      (value) {
+        if (value.data() == null) return null;
+        return MyDayModel.fromMap(value.data()!);
+      },
+    );
+  }
+
+  @override
+  Future<void> removeMismatchInMyDay(String email, DateTime date) async {
+    final collRef = _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay);
+    collRef.get().then((querySnapshot) {
+      for (var docSnapshot in querySnapshot.docs) {
+        final map = docSnapshot.data();
+        if (map['keep'] == true || map['created'] == Timestamp.fromDate(date)) continue;
+        docSnapshot.reference.delete();
+      }
+    }, onError: (e) => log('getAllMyDayStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}'));
+  }
+
+  @override
+  SQuerySnapshot getAllMyDayStream(String email) {
+    final collRef = _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay);
+    return collRef.snapshots();
   }
 }

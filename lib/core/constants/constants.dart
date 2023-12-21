@@ -10,7 +10,7 @@ class AppConstant {
       case 2:
         return 'Schedule';
       case 3:
-        return 'Do It';
+        return 'Do Now';
       default:
         return 'Unknown';
     }
@@ -37,6 +37,7 @@ const String pathToHabits = 'habits'; //* /habits/{hid}
 const String pathToGroups = 'groups'; //* /groups/{gid}
 const String pathToTaskLists = 'task-lists'; //* /tasks/{tid}
 const String pathToTasks = 'tasks'; //* /tasks/{tid}/instances/{iid}
+const String pathToMyDay = 'myday'; //* /users/{email}/myday/{tid}
 
 // this is pattern use to store date in firestore RRule
 const String kDateFormatPattern = 'yyyyMMdd';

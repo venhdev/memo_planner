@@ -229,7 +229,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreenV2> {
 
                               return MemberItem(
                                 hid: habit.hid!,
-                                memberEmail: habit.members![index],
+                                renderEmail: habit.members![index],
                                 ownerEmail: habit.creator!.email!,
                               );
                             },

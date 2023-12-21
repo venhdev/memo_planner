@@ -2,9 +2,10 @@
     package="vn.io.memo.planner">
 
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:label="memo_planner"
+        android:label="Memo Planner"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         

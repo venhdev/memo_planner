@@ -31,7 +31,7 @@ Future<void> showMyDialogToConfirm(
   BuildContext context, {
   required String title,
   required String content,
-  required VoidCallback onConfirm,
+  required VoidCallback? onConfirm,
 }) async {
   showDialog(
     context: context,
@@ -42,14 +42,14 @@ Future<void> showMyDialogToConfirm(
         actions: [
           TextButton(
             onPressed: () async {
-              onConfirm();
-              Navigator.of(context).pop();
+              onConfirm?.call();
+              Navigator.of(context).pop(true);
             },
             child: Text('Yes', style: MyTextStyle.redTextDialog),
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(false);
             },
             child: Text('No', style: MyTextStyle.blueTextDialog),
           ),

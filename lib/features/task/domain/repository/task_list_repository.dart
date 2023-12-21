@@ -9,8 +9,8 @@ abstract class TaskListRepository {
   ResultVoid editTaskList(TaskListEntity updatedTaskList);
   ResultVoid deleteTaskList(String lid);
 
-  ResultVoid addMember (String lid, String email);
-  ResultVoid removeMember (String lid, String email);
+  ResultVoid addMember(String lid, String email);
+  ResultVoid removeMember(String lid, String email);
 
   // other function
   Future<int?> countTaskList(String lid);

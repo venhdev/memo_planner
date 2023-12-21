@@ -1,13 +1,9 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:memo_planner/core/components/widgets.dart';
 
-import '../../core/notification/local_notification_manager.dart';
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
-import '../dependency_injection.dart';
 
 class AppNavigationDrawer extends StatelessWidget {
   const AppNavigationDrawer({
@@ -133,7 +129,7 @@ class AppNavigationDrawer extends StatelessWidget {
             title: const Text('Task'),
             onTap: () {
               Navigator.pop(context);
-              context.go('/task-group');
+              context.go('/task-list');
             },
           ),
           const Divider(),
@@ -146,69 +142,61 @@ class AppNavigationDrawer extends StatelessWidget {
             },
           ),
           // ~test bloc
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.cast),
-            title: const Text('log pending & activate notification'),
-            onTap: () async {
-              final pending = await di<LocalNotificationManager>().I.pendingNotificationRequests();
-              final activate = await di<LocalNotificationManager>().I.getActiveNotifications();
+          // const Divider(),
+          // ListTile(
+          //   leading: const Icon(Icons.cast),
+          //   title: const Text('(dev) show pending & activate notification'),
+          //   onTap: () async {
+          //     final pending = await di<LocalNotificationManager>().I.pendingNotificationRequests();
+          //     final activate = await di<LocalNotificationManager>().I.getActiveNotifications();
 
-              // ignore: use_build_context_synchronously
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return SimpleDialog(
-                    children: [
-                      Text('pending: ${pending.length}'),
-                      for (int i = 0; i < pending.length; i++)
-                        Text(
-                          '${pending[i].id} - ${pending[i].title} - ${pending[i].body}',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      Text('activate: ${activate.length}'),
-                      for (int i = 0; i < activate.length; i++)
-                        Text(
-                          '${activate[i].id} - ${activate[i].title} - ${activate[i].body}',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    ],
-                  );
-                },
-              );
-
-              for (var item in pending) {
-                log('pending notification: ${item.id} - ${item.title} - ${item.body}');
-              }
-              for (var item in activate) {
-                log('activate notification: ${item.id} - ${item.title} - ${item.body}');
-              }
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.cast),
-            title: const Text('remove all notification'),
-            onTap: () async {
-              await di<LocalNotificationManager>().I.cancelAll().then((value) => log('remove all notification'));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.cast),
-            title: const Text('show notification'),
-            onTap: () async {
-              await di<LocalNotificationManager>()
-                  .showNotification(id: 1, title: 'Time to run 2', body: 'body', payload: 'payload');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.cast),
-            title: const Text('navigate test'),
-            onTap: () async {
-              context.go('/task-list/single-list/ySJ6AzcAKsjaF0Seih7s');
-            },
-          ),
+          //     // ignore: use_build_context_synchronously
+          //     await showDialog(
+          //       context: context,
+          //       builder: (_) {
+          //         return SimpleDialog(
+          //           children: [
+          //             Text('pending: ${pending.length}'),
+          //             for (int i = 0; i < pending.length; i++)
+          //               Text(
+          //                 '${pending[i].id} - ${pending[i].title} - ${pending[i].body}',
+          //                 maxLines: 2,
+          //                 overflow: TextOverflow.ellipsis,
+          //               ),
+          //             Text('activate: ${activate.length}'),
+          //             for (int i = 0; i < activate.length; i++)
+          //               Text(
+          //                 '${activate[i].id} - ${activate[i].title} - ${activate[i].body}',
+          //                 maxLines: 2,
+          //                 overflow: TextOverflow.ellipsis,
+          //               ),
+          //           ],
+          //         );
+          //       },
+          //     );
+          //     // for (var item in pending) {
+          //     //   log('pending notification: ${item.id} - ${item.title} - ${item.body}');
+          //     // }
+          //     // for (var item in activate) {
+          //     //   log('activate notification: ${item.id} - ${item.title} - ${item.body}');
+          //     // }
+          //   },
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.cast),
+          //   title: const Text('remove all notification'),
+          //   onTap: () async {
+          //     await di<LocalNotificationManager>().I.cancelAll().then((value) => log('remove all notification'));
+          //   },
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.cast),
+          //   title: const Text('show notification'),
+          //   onTap: () async {
+          //     await di<LocalNotificationManager>()
+          //         .showNotification(id: 1, title: 'Time to run 2', body: 'body', payload: 'payload');
+          //   },
+          // ),
         ],
       ),
     );

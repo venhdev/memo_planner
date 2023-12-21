@@ -156,8 +156,14 @@ GoRoute taskRoute() {
         path: 'multi-list',
         builder: (context, state) {
           final GroupType type = GoRouterState.of(context).extra! as GroupType;
-
           return MultiTaskListScreen(type: type);
+        },
+      ),
+      GoRoute(
+        path: 'myday',
+        builder: (context, state) {
+          final String email = GoRouterState.of(context).extra! as String;
+          return MyDayScreen(currentUserEmail: email);
         },
       ),
     ],

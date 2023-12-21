@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart';
+import 'package:memo_planner/core/components/widgets.dart';
+import 'package:memo_planner/features/task/domain/repository/task_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/constants/enum.dart';
+import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../domain/entities/task_list_entity.dart';
 
 // Every [TaskGroupItem] item is [TaskListEntity]
@@ -21,7 +24,8 @@ class TaskListItem extends StatelessWidget {
     this.showCount = true,
     this.margin = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
     this.suffixIcon = const Icon(Icons.arrow_forward_ios),
-    this.onSuffixIconPressed,
+    this.onSuffixIconTap,
+    this.onTextTap,
   });
   // if (false) -> use taskList to show
   final bool isDefault;
@@ -38,7 +42,19 @@ class TaskListItem extends StatelessWidget {
   final bool showCount;
 
   final VoidCallback onTap;
-  final VoidCallback? onSuffixIconPressed;
+  final VoidCallback? onSuffixIconTap;
+  final VoidCallback? onTextTap;
+
+  factory TaskListItem.myday(BuildContext context) => TaskListItem(
+        true,
+        listName: 'MyDay',
+        codePoint: Icons.today.codePoint,
+        iconColor: Colors.amber,
+        onTap: () {
+          final currentUserEmail = context.read<AuthenticationBloc>().state.user!.email!;
+          context.go('/task-list/myday', extra: currentUserEmail);
+        },
+      );
 
   factory TaskListItem.today(BuildContext context) => TaskListItem(
         true,
@@ -79,6 +95,16 @@ class TaskListItem extends StatelessWidget {
         },
       );
 
+  factory TaskListItem.assignToMe(BuildContext context) => TaskListItem(
+        true,
+        listName: 'Assign To Me',
+        codePoint: Icons.person.codePoint,
+        iconColor: Colors.blue,
+        onTap: () {
+          context.go('/task-list/multi-list', extra: GroupType.assign);
+        },
+      );
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -103,35 +129,39 @@ class TaskListItem extends StatelessWidget {
                   : taskList!.iconData!,
             ),
             const SizedBox(width: 8.0),
-            Text(
-              isDefault ? listName! : taskList!.listName!,
-              style: const TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
+            GestureDetector(
+              onTap: onTextTap,
+              child: Text(
+                isDefault ? listName! : taskList!.listName!,
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const Spacer(),
 
             // count item
             if (!isDefault && showCount)
-              FutureBuilder(
-                future: di<TaskListRepository>().countTaskList(taskList!.lid!),
+              StreamBuilder(
+                stream: taskList != null ? di<TaskRepository>().getAllTaskStream(taskList!.lid!) : null,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasData) {
+                    final docsLength = snapshot.data!.docs.length;
                     return Text(
-                      snapshot.data.toString(),
+                      docsLength.toString(),
                       style: const TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.bold,
                       ),
                     );
                   } else {
-                    return const SizedBox.shrink();
+                    return const LoadingScreen();
                   }
                 },
               ),
 
-            if (showSuffixIcon) IconButton(onPressed: onSuffixIconPressed, icon: suffixIcon),
+            if (showSuffixIcon) IconButton(onPressed: onSuffixIconTap, icon: suffixIcon),
           ],
         ),
       ),

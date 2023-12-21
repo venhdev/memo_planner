@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/authentication/domain/entities/user_entity.dart';
-import 'package:memo_planner/features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 
 import '../../../../../config/dependency_injection.dart';
-import '../../../../../core/components/widgets.dart';
+import '../../../../authentication/domain/entities/user_entity.dart';
 import '../../../../authentication/domain/repository/authentication_repository.dart';
+import '../../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../../../task/domain/repository/task_list_repository.dart';
 import '../../../data/data_sources/habit_data_source.dart';
 
@@ -15,36 +14,36 @@ class MemberItem extends StatelessWidget {
   const MemberItem({
     this.hid,
     this.lid,
-    required this.memberEmail,
+    required this.renderEmail,
     required this.ownerEmail,
     super.key,
   })
-  // assert that cannot pass both hid and lid 
+  // assert that cannot pass both hid and lid
   : assert(hid == null || lid == null, 'Cannot pass both hid and lid'); // nice
 
   final String? hid; // Habit ID (for habit detail)
   final String? lid; // List Task ID (for list task detail)
-  final String memberEmail;
+  final String renderEmail;
   final String ownerEmail;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: di<AuthenticationRepository>().getUserByEmail(memberEmail),
+      future: di<AuthenticationRepository>().getUserByEmail(renderEmail),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasData) {
-            final member = snapshot.data;
-            final currentUser = context.read<AuthenticationBloc>().state.user;
-            return _build(member!, currentUser!, context);
-          } else {
-            return Text(memberEmail);
-          }
-        } else if (snapshot.hasError) {
-          return MessageScreen.error(snapshot.error.toString());
+        // if (snapshot.connectionState == ConnectionState.done) {
+        if (snapshot.hasData) {
+          final member = snapshot.data;
+          final currentUser = context.read<AuthenticationBloc>().state.user;
+          return _build(member!, currentUser!, context);
         } else {
-          return const LoadingScreen();
+          return Text(renderEmail);
         }
+        // } else if (snapshot.hasError) {
+        //   return MessageScreen.error(snapshot.error.toString());
+        // } else {
+        //   return const LoadingScreen();
+        // }
       },
     );
   }
@@ -59,6 +58,7 @@ class MemberItem extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          //* Avatar
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Builder(
@@ -88,7 +88,7 @@ class MemberItem extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(width: 8.0),
+          //* Name + Email
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -108,18 +108,9 @@ class MemberItem extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(width: 8.0),
-          IconButton(
-            // ? cannot remove owner member
-            // onPressed: member.uid == currentUser.uid
-            //     ? null
-            //     : () {
-            //         log('test');
-            //         log('object: ${member.email!}');
-            //         log('object: ${hid}');
-
-            //         di<HabitDataSource>().removeMember(hid, member.email!);
-            //       },
+          //* Remove button
+          TextButton.icon(
+            label: Text((renderEmail == ownerEmail) ? 'Owner' : 'Remove'),
             onPressed: getHandleFunction(
               currentUser: currentUser,
               member: member,
@@ -139,12 +130,12 @@ class MemberItem extends StatelessWidget {
   }) {
     if (hid != null) {
       return ownerEmail == currentUser.email // if owner
-          ? memberEmail == currentUser.email //> current render member is owner
+          ? renderEmail == currentUser.email //> current render member is owner
               ? null // cannot remove self
               : () {
                   di<HabitDataSource>().removeMember(hid!, member.email!); // remove other member
                 }
-          : memberEmail == currentUser.email //> current render member is member
+          : renderEmail == currentUser.email //> current render member is member
               ? () {
                   di<HabitDataSource>().removeMember(hid!, member.email!); // remove self
                   // redirect to home
@@ -153,12 +144,12 @@ class MemberItem extends StatelessWidget {
               : null; // cannot remove other member
     } else {
       return ownerEmail == currentUser.email // if owner
-          ? memberEmail == currentUser.email //> current render member is owner
+          ? renderEmail == currentUser.email //> current render member is owner
               ? null // cannot remove self
               : () {
                   di<TaskListRepository>().removeMember(lid!, member.email!); // remove other member
                 }
-          : memberEmail == currentUser.email //> current render member is member
+          : renderEmail == currentUser.email //> current render member is member
               ? () {
                   di<TaskListRepository>().removeMember(lid!, member.email!); // remove self
                   // redirect to home

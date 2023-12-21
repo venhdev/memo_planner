@@ -14,7 +14,12 @@ class LoadingScreen extends StatelessWidget {
 }
 
 class MessageScreen extends StatelessWidget {
-  const MessageScreen({super.key, required this.message, this.enableBack = true});
+  const MessageScreen({
+    super.key,
+    required this.message,
+    this.enableBack = true,
+    this.textStyle,
+  });
   factory MessageScreen.error([String? message]) => MessageScreen(
         message: message ?? 'Unknown error',
         enableBack: false,
@@ -22,6 +27,7 @@ class MessageScreen extends StatelessWidget {
 
   final String message;
   final bool enableBack;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +36,12 @@ class MessageScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          GestureDetector(child: Text(message), onTap: () => log(message)),
+          GestureDetector(
+              child: Text(
+                message,
+                style: textStyle,
+              ),
+              onTap: () => log(message)),
           Visibility(
             visible: enableBack,
             child: ElevatedButton(

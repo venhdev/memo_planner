@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:memo_planner/core/utils/helpers.dart';
 
 import '../../../../config/dependency_injection.dart';
@@ -8,7 +9,10 @@ import '../../../../core/components/common_screen.dart';
 import '../../../../core/components/my_picker.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/notification/reminder.dart';
+import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
+import '../../data/models/myday_model.dart';
 import '../../data/models/task_model.dart';
+import '../../domain/entities/myday_entity.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/repository/task_repository.dart';
 import '../components/assigned_members.dart';
@@ -16,10 +20,16 @@ import '../components/dialog_assign_member.dart';
 import '../components/priority_table.dart';
 
 class TaskDetailScreen extends StatelessWidget {
-  const TaskDetailScreen({super.key, required this.lid, required this.tid});
+  const TaskDetailScreen({
+    super.key,
+    required this.lid,
+    required this.tid,
+    required this.currentUserEmail,
+  });
 
   final String lid;
   final String tid;
+  final String currentUserEmail;
 
   @override
   Widget build(BuildContext context) => DraggableScrollableSheet(
@@ -32,10 +42,25 @@ class TaskDetailScreen extends StatelessWidget {
             log('render TaskDetailScreen with ${snapshot.connectionState}');
             if (snapshot.connectionState == ConnectionState.active) {
               if (snapshot.hasData) {
-                final map = snapshot.data?.data()!;
-                if (map == null) return const MessageScreen(message: 'No data');
+                final map = snapshot.data?.data();
+                if (map == null) {
+                  return Container(
+                    color: Colors.white,
+                    child: const MessageScreen(message: 'Not found'),
+                  );
+                }
+                if (map.isEmpty) {
+                  return Container(
+                    color: Colors.white,
+                    child: const MessageScreen(message: 'Empty'),
+                  );
+                }
                 final TaskEntity task = TaskModel.fromMap(map);
-                return TaskDetailBody(scrollController: scrollController, task: task);
+                return TaskDetailBody(
+                  scrollController: scrollController,
+                  task: task,
+                  currentUserEmail: currentUserEmail,
+                );
               } else if (snapshot.hasError) {
                 return MessageScreen(message: snapshot.error.toString());
               } else {
@@ -54,10 +79,15 @@ class TaskDetailBody extends StatefulWidget {
     super.key,
     required this.scrollController,
     required this.task,
+    required this.currentUserEmail,
+    this.prevMyDay,
   });
 
   final ScrollController scrollController;
+
   final TaskEntity task;
+  final String currentUserEmail;
+  final MyDayEntity? prevMyDay;
 
   @override
   State<TaskDetailBody> createState() => _TaskDetailBodyState();
@@ -69,13 +99,19 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
   final taskDescriptionController = TextEditingController();
 
   bool unSavedChanges() =>
-      unSavedTaskName || unSavedPriority || unSavedReminder || unSavedDueDate || unSavedDescription;
+      unSavedTaskName ||
+      unSavedPriority ||
+      unSavedReminder ||
+      unSavedDueDate ||
+      unSavedDescription ||
+      unSavedAddToMyDay;
 
   bool unSavedTaskName = false;
   bool unSavedPriority = false;
   bool unSavedReminder = false;
   bool unSavedDueDate = false;
   bool unSavedDescription = false;
+  bool unSavedAddToMyDay = false;
 
   late String _taskName;
   int? _priority;
@@ -105,6 +141,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
 
   @override
   Widget build(BuildContext context) {
+    log('render TaskDetailBody');
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
@@ -149,7 +186,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
 
           // Add to MyDay button
           const SizedBox(height: 16.0),
-          _buildAddToMyDayButton(),
+          _buildMyDayButton(),
 
           // Reminder
           const SizedBox(height: 16.0),
@@ -371,17 +408,119 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
     );
   }
 
-  TextButton _buildAddToMyDayButton() {
-    return TextButton(
-      onPressed: () {},
-      child: const Row(
-        children: [
-          Icon(Icons.wb_sunny_outlined, color: AppColors.kActiveTextColor),
-          SizedBox(width: 8),
-          Text('Add to My Day', style: TextStyle(color: AppColors.kActiveTextColor)),
-          Spacer(), //> to push the icon to the right
-        ],
-      ),
+  // Widget _buildMyDayButton() {
+  //   return TextButton(
+  //     onPressed: () {
+  //       setState(() {
+  //         if (_myDay == null) {
+  //           _myDay = MyDayEntity(
+  //             lid: widget.task.lid!,
+  //             tid: widget.task.tid!,
+  //             created: getToday(),
+  //           );
+  //         } else {
+  //           _myDay = null;
+  //         }
+  //       });
+  //     },
+  //     child: Row(
+  //       children: [
+  //         if (_myDay == null) ...[
+  //           const Icon(Icons.wb_sunny_outlined, color: AppColors.kDeactivateTextColor),
+  //           const SizedBox(width: 8),
+  //           const Text('Add to My Day', style: TextStyle(color: AppColors.kDeactivateTextColor)),
+  //           const Spacer(),
+  //         ] else ...[
+  //           const Icon(Icons.wb_sunny, color: AppColors.kActiveTextColor),
+  //           const SizedBox(width: 8),
+  //           const Text('Remove from My Day', style: TextStyle(color: AppColors.kActiveTextColor)),
+  //           const Spacer(), //> to push the icon to the right
+  //           TextButton(
+  //             onPressed: () {
+  //               setState(() {
+  //                 _myDay = _myDay!.copyWith(keep: !_myDay!.keep);
+  //               });
+  //             },
+  //             child: Row(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 const Text(
+  //                   'Keep in My Day',
+  //                   style: TextStyle(color: AppColors.kDeactivateTextColor),
+  //                 ),
+  //                 const SizedBox(width: 4.0),
+  //                 Icon(_myDay!.keep ? Icons.star : Icons.star_border, color: Colors.amber),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  Widget _buildMyDayButton() {
+    final email = context.read<AuthenticationBloc>().state.user!.email!;
+    return StreamBuilder(
+      stream: di<TaskRepository>().getOneMyDayStream(email, widget.task.tid!),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final map = snapshot.data?.data();
+          if (map == null) {
+            return TextButton(
+              onPressed: () {
+                final myDay = MyDayEntity(
+                  lid: widget.task.lid!,
+                  tid: widget.task.tid!,
+                  created: getToday(),
+                );
+                di<TaskRepository>().addToMyDay(email, myDay);
+              },
+              child: const Row(
+                children: [
+                  Icon(Icons.wb_sunny_outlined, color: AppColors.kDeactivateTextColor),
+                  SizedBox(width: 8),
+                  Text('Add to My Day', style: TextStyle(color: AppColors.kDeactivateTextColor)),
+                  Spacer(),
+                ],
+              ),
+            );
+          } else {
+            final myday = MyDayModel.fromMap(map);
+            return TextButton(
+              onPressed: () {
+                di<TaskRepository>().removeFromMyDay(email, myday);
+              },
+              child: Row(
+                children: [
+                  const Icon(Icons.wb_sunny, color: AppColors.kActiveTextColor),
+                  const SizedBox(width: 8),
+                  const Text('Remove from My Day', style: TextStyle(color: AppColors.kActiveTextColor)),
+                  const Spacer(), //> to push the icon to the right
+                  TextButton(
+                    onPressed: () {
+                      di<TaskRepository>().toggleKeepInMyDay(email, widget.task.tid!, !myday.keep);
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Keep in My Day',
+                          style: TextStyle(color: AppColors.kDeactivateTextColor),
+                        ),
+                        const SizedBox(width: 4.0),
+                        Icon(myday.keep ? Icons.star : Icons.star_border, color: Colors.amber),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
     );
   }
 
@@ -395,18 +534,16 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
           hintText: 'Task description',
           border: OutlineInputBorder(),
         ),
-        maxLines: 6,
+        maxLines: null,
+        minLines: 5,
         onChanged: (value) {
           if (value.trim() != widget.task.description) {
-            log('object: $value');
-            log('before _description object: $_description');
             setState(() {
               _description = value;
               unSavedDescription = true;
             });
           } else if (value.trim() == widget.task.description && _description != value) {
             // after trim, the value is the same as the original
-            log('test 2');
             setState(() {
               _description = value;
               unSavedDescription = false;

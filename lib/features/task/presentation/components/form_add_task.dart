@@ -130,8 +130,8 @@ class _AddTaskModalState extends State<AddTaskModal> {
         // Create Task
         TextButton.icon(
           onPressed: () {
-            if (_controller.text.isNotEmpty) {
-              handleAdd(context, _controller.text, _priority);
+            if (_controller.text.trim().isNotEmpty) {
+              handleAdd(context, _controller.text.trim(), _priority);
             } else {
               setState(() {
                 errorText = '*Please enter task name';
@@ -156,8 +156,13 @@ class _AddTaskModalState extends State<AddTaskModal> {
         errorText: errorText,
       ),
       onSubmitted: (value) {
-        // unfocus text field
-        focusNode.unfocus();
+        if (value.trim().isNotEmpty) {
+          handleAdd(context, value.trim(), _priority);
+        } else {
+          setState(() {
+            errorText = '*Please enter task name';
+          });
+        }
       },
     );
   }

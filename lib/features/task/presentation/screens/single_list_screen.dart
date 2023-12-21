@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,28 +18,38 @@ import '../components/dialog.dart';
 import '../components/form_add_task.dart';
 import '../components/task_item.dart';
 
-enum MenuItem { rename, delete, itemThree }
+enum MenuItem { rename, delete, hide }
+
+// enum TaskFilter { done }
 
 /// Show only the tasks of a single list
 //! Not using for default Group: Today, All Tasks, Scheduled, Done... >> use [MultiTaskListScreen] instead
-class SingleTaskListScreen extends StatelessWidget {
+class SingleTaskListScreen extends StatefulWidget {
   const SingleTaskListScreen(this.lid, {super.key});
 
   final String lid;
 
   @override
+  State<SingleTaskListScreen> createState() => _SingleTaskListScreenState();
+}
+
+class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
+  bool hideDone = false;
+  // Set<TaskFilter> filters = <TaskFilter>{};
+
+  @override
   Widget build(BuildContext context) {
     log('render SingleTaskListScreen');
     return StreamBuilder(
-      stream: di<TaskListRepository>().getOneTaskListStream(lid),
+      stream: di<TaskListRepository>().getOneTaskListStream(widget.lid),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.active && snapshot.hasData) {
+        if (snapshot.hasData) {
           final map = snapshot.data!.data();
 
           // > To avoid error when the list has been deleted -> ! on null value
           // > Notify user that the list has been deleted if they are still in this screen
           if (map == null) {
-            return const MessageScreen(message: 'Not found');
+            return const MessageScreen(message: 'Task Not found');
           }
           // check if user is member of this list
           //? because user may be deleted from this list by the owner while they are still in this screen
@@ -47,7 +58,6 @@ class SingleTaskListScreen extends StatelessWidget {
             return const MessageScreen(message: 'You are not a member of this list');
           }
           return Scaffold(
-            drawer: const AppNavigationDrawer(),
             appBar: _buildAppBar(context, taskList),
             floatingActionButton: FloatingActionButton(
               // handleAdd
@@ -55,12 +65,34 @@ class SingleTaskListScreen extends StatelessWidget {
               child: const Icon(Icons.add),
             ),
             body: StreamBuilder(
-              stream: di<TaskRepository>().getAllTaskStream(lid),
+              stream: di<TaskRepository>().getAllTaskStream(widget.lid),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.active) {
                   if (snapshot.hasData) {
                     final docs = snapshot.data!.docs;
+                    // filter out the tasks that are done
+                    if (hideDone) {
+                      docs.removeWhere((doc) => doc.data()['completed'] == true);
+                    }
                     final tasks = docs.map((doc) => TaskModel.fromMap(doc.data())).toList();
+                    // Wrap(
+                    //       spacing: 5.0,
+                    //       children: TaskFilter.values.map((TaskFilter filter) {
+                    //         return FilterChip(
+                    //           label: Text(filter.name),
+                    //           selected: filters.contains(filter),
+                    //           onSelected: (bool selected) {
+                    //             setState(() {
+                    //               if (selected) {
+                    //                 filters.add(filter);
+                    //               } else {
+                    //                 filters.remove(filter);
+                    //               }
+                    //             });
+                    //           },
+                    //         );
+                    //       }).toList(),
+                    //     ),
                     return _buildTaskListItem(context, tasks);
                   } else if (snapshot.hasError) {
                     return MessageScreen.error(snapshot.error.toString());
@@ -119,17 +151,32 @@ class SingleTaskListScreen extends StatelessWidget {
                 case MenuItem.delete:
                   handleDelete(context, taskList);
                   break;
+                case MenuItem.hide:
+                  setState(() {
+                    hideDone = !hideDone;
+                  });
+                  break;
                 default:
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<MenuItem>>[
               const PopupMenuItem<MenuItem>(
                 value: MenuItem.rename,
-                child: Text('Rename List'),
+                child: Text('Rename'),
               ),
               const PopupMenuItem<MenuItem>(
                 value: MenuItem.delete,
-                child: Text('Delete List'),
+                child: Text('Delete List', style: TextStyle(color: Colors.red)),
+              ),
+              PopupMenuItem<MenuItem>(
+                value: MenuItem.hide,
+                child: Row(
+                  children: [
+                    Icon(hideDone ? Icons.visibility : Icons.visibility_off),
+                    const SizedBox(width: 4.0),
+                    Text(hideDone ? 'Show All' : 'Hide Done'),
+                  ],
+                ),
               ),
             ],
           )
@@ -138,6 +185,7 @@ class SingleTaskListScreen extends StatelessWidget {
 
   Widget _buildTaskListItem(BuildContext context, List<TaskEntity> tasks) => ListView.builder(
         itemCount: tasks.length,
+        shrinkWrap: true,
         itemBuilder: (context, index) {
           return TaskItem(task: tasks[index]);
         },
@@ -146,13 +194,19 @@ class SingleTaskListScreen extends StatelessWidget {
   Future<void> openAddForm(BuildContext context) {
     return showModalBottomSheet(
       context: context,
-      builder: (context) => AddTaskModal(lid),
+      builder: (context) => AddTaskModal(widget.lid),
     );
   }
 
   Future<void> openMemberModal(BuildContext context, String lid) {
     return showModalBottomSheet<void>(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(12.0),
+          topRight: Radius.circular(12.0),
+        ),
+      ),
       builder: (BuildContext context) {
         return StreamBuilder(
           stream: di<TaskListRepository>().getOneTaskListStream(lid),
@@ -168,56 +222,53 @@ class SingleTaskListScreen extends StatelessWidget {
               }
               final taskList = TaskListModel.fromMap(map);
 
-              return SizedBox(
-                height: MediaQuery.of(context).size.height * 0.5,
-                child: Center(
-                  child: Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            const Text('List Members', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
-                            ElevatedButton.icon(
-                              label: const Text('Add Member'),
-                              icon: const Icon(Icons.add),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange.shade100,
-                              ),
-                              onPressed: () {
-                                showMyDialogToAddMember(
-                                  context,
-                                  controller: TextEditingController(),
-                                  onSubmitted: (value) async {
-                                    // NOTE: need refactor
-                                    di<TaskListRepository>().addMember(taskList.lid!, value!.trim());
-                                  },
-                                );
-                              },
+              return Center(
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          const Text('List Members', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
+                          ElevatedButton.icon(
+                            label: const Text('Add Member'),
+                            icon: const Icon(Icons.add),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange.shade100,
                             ),
-                          ],
-                        ),
-                      ),
-                      if (taskList.members != null)
-                        Expanded(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: taskList.members?.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return MemberItem(
-                                lid: taskList.lid!,
-                                memberEmail: taskList.members![index],
-                                ownerEmail: taskList.creator!.email!,
+                            onPressed: () {
+                              showMyDialogToAddMember(
+                                context,
+                                controller: TextEditingController(),
+                                onSubmitted: (value) async {
+                                  // NOTE: need refactor
+                                  di<TaskListRepository>().addMember(taskList.lid!, value!.trim());
+                                },
                               );
                             },
                           ),
-                        )
-                      else
-                        const Text('No Member'),
-                    ],
-                  ),
+                        ],
+                      ),
+                    ),
+                    if (taskList.members != null)
+                      Expanded(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: taskList.members?.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return MemberItem(
+                              lid: taskList.lid!,
+                              renderEmail: taskList.members![index],
+                              ownerEmail: taskList.creator!.email!,
+                            );
+                          },
+                        ),
+                      )
+                    else
+                      const Text('No Member'),
+                  ],
                 ),
               );
             } else if (snapshot.hasError) {
@@ -231,7 +282,16 @@ class SingleTaskListScreen extends StatelessWidget {
     );
   }
 
-  Future<void> handleDelete(BuildContext context, TaskListEntity taskList) {
+  Future<void> handleDelete(BuildContext context, TaskListEntity taskList) async {
+    // check if the current user is the owner of this list
+
+    if (taskList.creator!.email != context.read<AuthenticationBloc>().state.user?.email) {
+      showMySnackbarWithAwesome(context,
+          title: 'Unauthorized',
+          message: 'You must be the owner to delete this list',
+          contentType: ContentType.failure);
+      return;
+    }
     return showMyDialogToConfirm(
       context,
       title: 'Delete List',
