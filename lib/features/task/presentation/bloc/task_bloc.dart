@@ -33,7 +33,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       final taskStream = _getAllTaskStreamOfUserUC(user);
       emit(TaskState.loaded(taskStream));
     } else {
-      emit(const TaskState.error('You must login to continue!'));
+      emit(const TaskState.error('Please login to continue!'));
     }
   }
 }

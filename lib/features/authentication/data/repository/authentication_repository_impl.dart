@@ -22,8 +22,8 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   @override
   ResultEither<UserEntity> signInWithGoogle() async {
     try {
-      final result = await _firebaseAuthDataSource.signInWithGoogle();
-      final user = UserModel.fromUserCredential(result.user!);
+      final UserCredential credential = await _firebaseAuthDataSource.signInWithGoogle();
+      final user = UserModel.fromUserCredential(credential.user!);
       await _firebaseAuthDataSource.updateOrCreateUserInfo(user); // update or create user in 'users' collection
       // add current FCM token to user in 'users' collection
       await _firebaseAuthDataSource.addCurrentFCMTokenToUser(user.email!);
@@ -48,14 +48,20 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     String password,
   ) async {
     try {
-      final userCredential = await _firebaseAuthDataSource.signInWithEmailAndPassword(email, password);
+      final credential = await _firebaseAuthDataSource.signInWithEmailAndPassword(email, password);
       // add current FCM token
-      await _firebaseAuthDataSource.addCurrentFCMTokenToUser(userCredential.user!.email!);
-      return Right(UserModel.fromUserCredential(userCredential.user!));
+      await _firebaseAuthDataSource.addCurrentFCMTokenToUser(credential.user!.email!);
+      return Right(UserModel.fromUserCredential(credential.user!));
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'invalid-email':
           return Left(ServerFailure(code: e.code, message: kAuthInvalidEmail));
+        case 'user-disabled':
+          return Left(ServerFailure(code: e.code, message: kAuthUserDisabled));
+        case 'user-not-found':
+          return Left(ServerFailure(code: e.code, message: kAuthUserDisabled));
+        case 'wrong-password':
+          return Left(ServerFailure(code: e.code, message: kAuthUserDisabled));
         case 'INVALID_LOGIN_CREDENTIALS':
           return Left(ServerFailure(code: e.code, message: kAuthInvalidLoginCredentials));
         case 'too-many-requests':
@@ -131,6 +137,16 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     } on FirebaseAuthException catch (e) {
       log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return null;
+    }
+  }
+
+  @override
+  Future<void> updateDisplayName(String name) {
+    try {
+      return _firebaseAuthDataSource.updateDisplayName(name);
+    } on FirebaseAuthException catch (e) {
+      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      return Future.error(e);
     }
   }
 }

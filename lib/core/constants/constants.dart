@@ -28,6 +28,10 @@ const String kTask = 'task#instance';
  * /tasks/ [task#list] / task / [task#instance]
  */
 
+//! Firebase Cloud Messaging Type
+const String kFCMAddOrUpdateReminder = 'add_reminder';
+const String kFCMDeleteReminder = 'delete_reminder';
+
 //! Firebase Firestore
 // use to define the name of the collection in Firestore
 const String pathToUsers = 'users'; //* /users/{email}
@@ -60,7 +64,10 @@ const String kSignOutSuccessMessage = 'Sign out success';
 
 //* FirebaseAuth -- Email/Password
 // invalid-email
-const String kAuthInvalidEmail = 'Invalid email';
+const String kAuthInvalidEmail = 'Invalid email address';
+const String kAuthUserDisabled = 'The given email has been disabled';
+const String kAuthUserNotFound = 'User not found';
+const String kAuthWrongPassword = 'Your password is incorrect';
 // INVALID_LOGIN_CREDENTIALS -- wrong email/password
 const String kAuthInvalidLoginCredentials = 'Invalid login credentials';
 // too-many-requests
@@ -76,3 +83,6 @@ const String kAuthNetworkRequestFailed = 'Your network is not stable';
 const String kDefaultNotificationChannelId = 'default_notification';
 const String kScheduleNotificationChannelId = 'schedule_notification';
 const String kDailyNotificationChannelId = 'daily_notification';
+
+const String kDefaultReminderTitle = 'Reminder';
+const String kDefaultReminderBody = 'Hey, you have a task to do!';

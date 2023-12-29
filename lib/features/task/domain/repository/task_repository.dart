@@ -1,4 +1,4 @@
-import 'package:memo_planner/core/constants/typedef.dart';
+import '../../../../core/constants/typedef.dart';
 
 import '../entities/myday_entity.dart';
 import '../entities/task_entity.dart';
@@ -19,10 +19,10 @@ abstract class TaskRepository {
   // remove {email} from [TaskEntity]{assignedMembers}
   ResultVoid unassignTask(String lid, String tid, String email);
 
-  //* MyDay
+  //! MyDay
   SDocumentSnapshot getOneMyDayStream(String email, String tid);
   SQuerySnapshot getAllMyDayStream(String email, DateTime today);
-  Future<MyDayEntity?> findOneMyDay(String email, String tid);
+  // Future<MyDayEntity?> findOneMyDay(String email, String tid);
   ResultVoid addToMyDay(String email, MyDayEntity myDay); // /users/{email}/myday/{tid}
   ResultVoid toggleKeepInMyDay(String email, String tid, bool isKeep); // /users/{email}/myday/{tid}
   ResultVoid removeFromMyDay(String email, MyDayEntity myDay);

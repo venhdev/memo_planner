@@ -140,6 +140,7 @@ GoRoute habitRoutes() {
 //     ],
 //   );
 // }
+
 GoRoute taskRoute() {
   return GoRoute(
     path: '/task-list',
@@ -186,7 +187,5 @@ GoRoute authenticationRoutes() {
     ],
   );
 }
-
-
 
 // https://pub.dev/documentation/go_router/latest/go_router/StatefulShellRoute-class.html

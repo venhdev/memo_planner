@@ -17,11 +17,8 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // ChangeNotifierProvider<ApplicationState>(
-        //   create: (_) => ApplicationState(),
-        // ),
         BlocProvider(
-          create: (_) => di<AuthenticationBloc>()..add(const AuthenticationEventStarted()),
+          create: (_) => di<AuthenticationBloc>()..add(InitialEvent()),
         ),
         BlocProvider(
           create: (_) => di<HabitBloc>()..add(HabitEventInitial()),

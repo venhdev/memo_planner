@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import '../../../../core/constants/typedef.dart';
 
+import '../../../../core/constants/typedef.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 import '../repository/habit_repository.dart';

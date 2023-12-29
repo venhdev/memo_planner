@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:memo_planner/features/task/domain/entities/myday_entity.dart';
-import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart';
+import '../../domain/entities/myday_entity.dart';
+import '../../domain/repository/task_list_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../config/theme/text_style.dart';
@@ -161,10 +161,14 @@ class TaskItem extends StatelessWidget {
 
   Widget? moreTaskInfo(TaskEntity task, String email) {
     if (task.dueDate == null &&
-        task.reminders == null &&
         task.priority == null &&
         task.description!.trim() == '' &&
-        !showListName) return null;
+        (task.reminders == null
+            ? true
+            : task.reminders!.scheduledTime!.isBefore(DateTime.now())
+                ? true
+                : false)) return null;
+
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [

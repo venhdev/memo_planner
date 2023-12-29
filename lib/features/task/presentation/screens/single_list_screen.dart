@@ -35,6 +35,7 @@ class SingleTaskListScreen extends StatefulWidget {
 
 class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
   bool hideDone = false;
+
   // Set<TaskFilter> filters = <TaskFilter>{};
 
   @override
@@ -133,6 +134,14 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
           icon: const Icon(Icons.arrow_back),
         ),
         actions: [
+          // sort icon
+          IconButton(
+            onPressed: () {
+              // TODO: default sort will not order any thing, then show the sort options
+            },
+            icon: const Icon(Icons.sort),
+          ),
+
           IconButton(
             onPressed: () {
               openMemberModal(context, taskList.lid!);

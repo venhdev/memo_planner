@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../../core/constants/constants.dart';
 import '../../../domain/entities/user_entity.dart';
+import '../../../domain/usecase/update_display_name.dart';
 import '../../../domain/usecase/usecases.dart';
 
 part 'authentication_event.dart';
@@ -17,13 +18,15 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     this._signInWithGoogleUC,
     this._getCurrentUserUC,
     this._signUpWithEmailUC,
+    this._updateDisplayNameUC,
   ) : super(const AuthenticationState.unknown()) {
-    on<AuthenticationEventStarted>(_onAuthenticationStarted);
-    on<AuthenticationEventStatusChanged>(_onAuthenticationStatusChanged);
-    on<SignUpWithEmailEvent>(_onSignUpWithEmail);
-    on<AuthenticationEventSignIn>(_onSignedInWithEmailAndPassword);
-    on<AuthenticationEventSignInWithGoogle>(_onSignInWithGoogle);
+    on<InitialEvent>(_onInitial);
+    on<StatusChanged>(_onAuthenticationStatusChanged);
+    on<SignUpWithEmail>(_onSignUpWithEmail);
+    on<SignInWithEmail>(_onSignedInWithEmailAndPassword);
+    on<SignInWithGoogle>(_onSignInWithGoogle);
     on<SignOutEvent>(_onSignOut);
+    on<UpdateDisplayName>(_onUpdateDisplayName);
   }
 
   final SignUpWithEmailUC _signUpWithEmailUC;
@@ -31,34 +34,38 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   final SignInWithGoogleUC _signInWithGoogleUC;
   final SignOutUC _signOutUC;
   final GetCurrentUserUC _getCurrentUserUC;
+  final UpdateDisplayNameUC _updateDisplayNameUC;
 
   void _onSignInWithGoogle(
-    AuthenticationEventSignInWithGoogle event,
+    SignInWithGoogle event,
     Emitter<AuthenticationState> emit,
   ) async {
     emit(const AuthenticationState.authenticating());
     final userEntityEither = await _signInWithGoogleUC();
     userEntityEither.fold(
       (failure) => emit(AuthenticationState.unauthenticated(message: failure.message)),
-      (userEntity) => emit(AuthenticationState.authenticated(userEntity, message: 'Welcome back ${userEntity.displayName}')),
+      (userEntity) =>
+          emit(AuthenticationState.authenticated(userEntity, message: 'Welcome back ${userEntity.displayName}')),
     );
   }
 
   void _onSignedInWithEmailAndPassword(
-    AuthenticationEventSignIn event,
+    SignInWithEmail event,
     Emitter<AuthenticationState> emit,
   ) async {
     emit(const AuthenticationState.authenticating());
-    final userEntityEither = await _signInWithEmailAndPasswordUC(SignInParams(email: event.email, password: event.password));
+    final userEntityEither =
+        await _signInWithEmailAndPasswordUC(SignInParams(email: event.email, password: event.password));
 
     userEntityEither.fold(
       (failure) => emit(AuthenticationState.unauthenticated(message: failure.message)),
-      (userEntity) => emit(AuthenticationState.authenticated(userEntity, message: 'Welcome back ${userEntity.displayName}')),
+      (userEntity) =>
+          emit(AuthenticationState.authenticated(userEntity, message: 'Welcome back ${userEntity.displayName}')),
     );
   }
 
-  void _onAuthenticationStarted(
-    AuthenticationEventStarted event,
+  void _onInitial(
+    InitialEvent event,
     Emitter<AuthenticationState> emit,
   ) async {
     final user = _getCurrentUserUC();
@@ -85,7 +92,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   }
 
   void _onAuthenticationStatusChanged(
-    AuthenticationEventStatusChanged event,
+    StatusChanged event,
     Emitter<AuthenticationState> emit,
   ) {
     emit(const AuthenticationState.authenticating());
@@ -97,7 +104,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   }
 
   void _onSignUpWithEmail(
-    SignUpWithEmailEvent event,
+    SignUpWithEmail event,
     Emitter<AuthenticationState> emit,
   ) async {
     emit(const AuthenticationState.authenticating());
@@ -107,6 +114,18 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
     result.fold(
       (failure) => emit(AuthenticationState.unauthenticated(message: failure.message)),
       (userEntity) => emit(AuthenticationState.authenticated(userEntity)),
+    );
+  }
+
+  void _onUpdateDisplayName(
+    UpdateDisplayName event,
+    Emitter<AuthenticationState> emit,
+  ) async {
+    await _updateDisplayNameUC(event.name).then(
+      (value) {
+        final user = _getCurrentUserUC();
+        emit(AuthenticationState.authenticated(user!));
+      },
     );
   }
 }

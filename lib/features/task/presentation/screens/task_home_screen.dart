@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/core/components/widgets.dart';
-import 'package:memo_planner/core/constants/enum.dart';
-import 'package:memo_planner/features/task/data/models/task_list_model.dart';
-import 'package:memo_planner/features/task/presentation/components/task_list_item.dart';
+import '../../../../core/components/widgets.dart';
+import '../../../../core/constants/enum.dart';
+import '../../data/models/task_list_model.dart';
+import '../components/task_list_item.dart';
 
 import '../../domain/entities/task_list_entity.dart';
 import '../bloc/task_bloc.dart';

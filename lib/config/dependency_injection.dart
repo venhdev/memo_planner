@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
+// import 'package:googleapis/fcm/v1.dart' as fcm;
 
 import 'dependency_injection.config.dart';
 
@@ -18,8 +19,12 @@ abstract class RegisterModule {
   // @preResolve
   // Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
   @singleton
-  GoogleSignIn get googleSignIn => GoogleSignIn();
-  
+  GoogleSignIn get googleSignIn => GoogleSignIn(
+      // scopes: <String>[
+      //   fcm.FirebaseCloudMessagingApi.firebaseMessagingScope,
+      // ],
+      );
+
   @singleton
   FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
 
@@ -32,4 +37,3 @@ abstract class RegisterModule {
   @singleton
   FirebaseMessaging get firebaseMessaging => FirebaseMessaging.instance;
 }
-

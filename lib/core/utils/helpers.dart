@@ -1,7 +1,6 @@
-import 'dart:developer' as dev;
+// import 'dart:developer' as dev;
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -134,8 +133,6 @@ int generateNotificationId(DateTime date) {
   // get the first 4 digits
   // final first4Digits = result ~/ 10000;
   // l.log('object get first4Digits: ${first4Digits}');
-
-  dev.log('object generateNotificationId: $result');
   return result;
 }
 

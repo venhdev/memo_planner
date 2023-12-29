@@ -19,4 +19,7 @@ abstract class AuthenticationRepository {
   ResultVoid signOut();
   UserEntity? getCurrentUser();
   Future<UserEntity?> getUserByEmail(String email);
+
+  // Update Profile
+  Future<void> updateDisplayName(String name);
 }

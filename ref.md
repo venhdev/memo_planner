@@ -22,6 +22,12 @@
 - timestamp <https://firebase.google.com/docs/reference/unity/struct/firebase/firestore/timestamp>
 - query <https://firebase.google.com/docs/firestore/query-data/queries>
 
+## Firebase Messaging
+
+- <https://firebase.google.com/docs/cloud-messaging/migrate-v1>
+- <https://firebase.google.com/docs/reference/fcm/rest>
+- JSON representation <https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=0#Message>
+
 ## Firebase Auth
 
 - <https://firebase.google.com/docs/auth/admin/errors>

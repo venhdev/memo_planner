@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../../core/utils/helpers.dart';
 import '../../../authentication/data/models/user_model.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 import '../../domain/entities/habit_instance_entity.dart';
@@ -61,10 +60,10 @@ class HabitInstanceModel extends HabitInstanceEntity {
       hid: data['hid'],
       summary: data['summary'],
       description: data['description'],
-      start: convertTimestampToDateTime(data['start'] as Timestamp),
-      end: convertTimestampToDateTime(data['end'] as Timestamp),
-      date: convertTimestampToDateTime(data['date'] as Timestamp),
-      updated: convertTimestampToDateTime(data['updated'] as Timestamp),
+      start: (data['start'] as Timestamp).toDate(),
+      end: (data['end'] as Timestamp).toDate(),
+      date: (data['date'] as Timestamp).toDate(),
+      updated: (data['updated'] as Timestamp).toDate(),
       creator: UserModel.fromMap(data['creator']),
       completed: data['completed'],
       edited: data['edited'],

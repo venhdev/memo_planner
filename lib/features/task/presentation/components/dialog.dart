@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
-import 'package:memo_planner/config/theme/text_style.dart';
+import '../../../../config/theme/text_style.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/my_snackbar.dart';

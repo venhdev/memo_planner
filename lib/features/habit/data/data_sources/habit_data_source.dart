@@ -136,7 +136,6 @@ class HabitDataSourceImpl extends HabitDataSource {
   @override
   SQuerySnapshot getHabitStream(UserEntity user) {
     // final habitCollRef = _firestore.collection(pathToUsers).doc(user.email).collection(pathToHabits).orderBy('summary');
-    dev.log('getHabitStream params user: $user');
     // get all habits that user is owner & member
     final habitCollRef = _firestore
         .collection(pathToHabits)

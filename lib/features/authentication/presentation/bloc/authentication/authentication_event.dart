@@ -7,15 +7,10 @@ sealed class AuthenticationEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class AuthenticationEventStarted extends AuthenticationEvent {
-  const AuthenticationEventStarted();
+class InitialEvent extends AuthenticationEvent {}
 
-  @override
-  List<Object> get props => [];
-}
-
-class AuthenticationEventStatusChanged extends AuthenticationEvent {
-  const AuthenticationEventStatusChanged({
+class StatusChanged extends AuthenticationEvent {
+  const StatusChanged({
     required this.status,
     required this.user,
   });
@@ -23,14 +18,11 @@ class AuthenticationEventStatusChanged extends AuthenticationEvent {
   final UserEntity? user;
 
   @override
-  List<Object> get props => [
-        status,
-        user ?? user == null,
-      ];
+  List<Object> get props => [status, user ?? ''];
 }
 
-class AuthenticationEventSignIn extends AuthenticationEvent {
-  const AuthenticationEventSignIn({
+class SignInWithEmail extends AuthenticationEvent {
+  const SignInWithEmail({
     required this.email,
     required this.password,
   });
@@ -41,12 +33,12 @@ class AuthenticationEventSignIn extends AuthenticationEvent {
   List<Object> get props => [email, password];
 }
 
-class AuthenticationEventSignInWithGoogle extends AuthenticationEvent {}
+class SignInWithGoogle extends AuthenticationEvent {}
 
 class SignOutEvent extends AuthenticationEvent {}
 
-class SignUpWithEmailEvent extends AuthenticationEvent {
-  const SignUpWithEmailEvent({
+class SignUpWithEmail extends AuthenticationEvent {
+  const SignUpWithEmail({
     required this.email,
     required this.password,
   });
@@ -55,4 +47,14 @@ class SignUpWithEmailEvent extends AuthenticationEvent {
 
   @override
   List<Object> get props => [email, password];
+}
+
+class UpdateDisplayName extends AuthenticationEvent {
+  const UpdateDisplayName({
+    required this.name,
+  });
+  final String name;
+
+  @override
+  List<Object> get props => [name];
 }

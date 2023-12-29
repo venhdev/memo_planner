@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/core/components/widgets.dart';
-import 'package:memo_planner/features/task/domain/repository/task_repository.dart';
+import '../../../../core/components/widgets.dart';
+import '../../domain/repository/task_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/constants/enum.dart';

@@ -1,9 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/core/components/widgets.dart';
+import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart';
 
+import '../../core/components/widgets.dart';
+import '../../core/notification/firebase_cloud_messaging_manager.dart';
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
+import '../dependency_injection.dart';
 
 class AppNavigationDrawer extends StatelessWidget {
   const AppNavigationDrawer({
@@ -141,8 +146,37 @@ class AppNavigationDrawer extends StatelessWidget {
               context.go('/habit/add');
             },
           ),
-          // ~test bloc
-          // const Divider(),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.add),
+            title: const Text('Send test notification'),
+            onTap: () async {
+              final fcm = di<FirebaseCloudMessagingManager>();
+
+              await fcm.sendDataMessage(
+                token: fcm.currentFCMToken!,
+                data: {
+                  'test': 'test',
+                },
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.add),
+            title: const Text('Test Retrieve tokens'),
+            onTap: () async {
+              final repo = di<TaskListRepository>();
+
+              final tokensEither = await repo.getAllMemberTokens('4GmGZenVHC6QVdALcHac');
+              tokensEither.fold(
+                (l) => log('getAllMemberTokens Fail: ${l.message}'),
+                (tokens) {
+                  log('getAllMemberTokens Success: ${tokens.toString()}\n');
+                  log('getAllMemberTokens length: ${tokens.length}');
+                },
+              );
+            },
+          ),
           // ListTile(
           //   leading: const Icon(Icons.cast),
           //   title: const Text('(dev) show pending & activate notification'),

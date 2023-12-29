@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'habit_entity.dart';
 
+import 'habit_entity.dart';
 import 'streak_instance_entity.dart';
 
 class StreakEntity extends Equatable {

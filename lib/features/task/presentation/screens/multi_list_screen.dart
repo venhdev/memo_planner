@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart';
-import 'package:memo_planner/features/task/domain/repository/task_repository.dart';
+import '../../domain/repository/task_list_repository.dart';
+import '../../domain/repository/task_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/widgets.dart';
@@ -161,13 +161,10 @@ class _TaskListFilterState extends State<TaskListFilter> {
                     // Filter by type
                     switch (widget.type) {
                       case GroupType.assign:
-                        log('here');
                         docs.removeWhere(
                           (task) {
                             final currentUserEmail = context.read<AuthenticationBloc>().state.user!.email!;
-                            log('currentUserEmail: $currentUserEmail');
                             final assignedMembers = task.data()['assignedMembers'] as List<dynamic>;
-                            log('assignedMembers: $assignedMembers');
                             if (assignedMembers.contains(currentUserEmail)) return false;
                             return true;
                           },

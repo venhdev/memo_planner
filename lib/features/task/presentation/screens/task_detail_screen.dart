@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:memo_planner/core/utils/helpers.dart';
+import '../../../../core/utils/helpers.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/common_screen.dart';
@@ -678,7 +678,6 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
 
   void saveChanges() {
     if (unSavedChanges()) {
-      log('object _description: $_description');
       final updatedTask = widget.task.copyWith(
         taskName: _taskName,
         priority: _priority,

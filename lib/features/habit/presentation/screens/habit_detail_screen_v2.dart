@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:memo_planner/features/habit/data/data_sources/habit_data_source.dart';
-import 'package:memo_planner/features/habit/data/models/habit_model.dart';
-import 'package:memo_planner/features/habit/domain/entities/habit_entity.dart';
-import 'package:memo_planner/features/habit/domain/repository/habit_repository.dart';
+import '../../data/data_sources/habit_data_source.dart';
+import '../../data/models/habit_model.dart';
+import '../../domain/entities/habit_entity.dart';
+import '../../domain/repository/habit_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/widgets.dart';

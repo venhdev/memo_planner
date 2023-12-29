@@ -1,7 +1,9 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../features/task/domain/entities/task_entity.dart';
 import '../constants/constants.dart';
 
 // <https://pub.dev/packages/flutter_local_notifications>
@@ -72,7 +74,27 @@ class LocalNotificationManager {
       body,
       defaultNotificationDetails,
       payload: payload,
-    );
+    ).onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
+  }
+
+  /// Display a notification with a fixed date and time in the future
+  Future<void> setScheduleNotificationFromTask(
+    TaskEntity task,
+  ) async {
+    if (task.reminders!.useDefault == false) return;
+
+    await _flutterLocalNotificationsPlugin
+        .zonedSchedule(
+          task.reminders!.rid!,
+          task.taskName!,
+          kDefaultReminderBody,
+          tz.TZDateTime.from(task.reminders!.scheduledTime!, tz.local),
+          scheduleNotificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        )
+        .onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
+    // matchDateTimeComponents: DateTimeComponents.__, >> will recurring if set
   }
 
   /// Display a notification with a fixed date and time in the future
@@ -92,8 +114,8 @@ class LocalNotificationManager {
       payload: payload,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-    );
-    //! matchDateTimeComponents: DateTimeComponents.time, >> not recurring
+    ).onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
+    // matchDateTimeComponents: DateTimeComponents.__, >> will recurring if set
   }
 
   /// Display a notification with a daily schedule
@@ -113,7 +135,7 @@ class LocalNotificationManager {
       payload: payload,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time, // use to match time to trigger notification daily
-    );
+    ).onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
   }
 
   // > Retrieving pending notification requests
@@ -121,7 +143,6 @@ class LocalNotificationManager {
   // Future<List<PendingNotificationRequest>> pendingNotificationRequests() async {
   //   return await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
   // }
-
   // > Retrieving active notifications #
   // <https://pub.dev/packages/flutter_local_notifications#retrieving-active-notifications>
   // Future<List<ActiveNotification>> activeNotifications() async {

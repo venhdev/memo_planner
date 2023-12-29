@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/notification/reminder.dart';
-import '../../../../core/utils/helpers.dart';
 import '../../../authentication/data/models/user_model.dart';
 import '../../domain/entities/habit_entity.dart';
 
@@ -48,14 +47,14 @@ class HabitModel extends HabitEntity {
       hid: data['hid'],
       summary: data['summary'],
       description: data['description'],
-      start: convertTimestampToDateTime(data['start'] as Timestamp),
-      end: convertTimestampToDateTime(data['end'] as Timestamp),
+      start: (data['start'] as Timestamp).toDate(),
+      end: (data['end'] as Timestamp).toDate(),
       reminders: data['reminders'] != null
           ? Reminder.fromMap(data['reminders'] as Map<String, dynamic>)
           : null,
       recurrence: data['recurrence'],
-      created: convertTimestampToDateTime(data['created'] as Timestamp),
-      updated: convertTimestampToDateTime(data['updated'] as Timestamp),
+      created: (data['created'] as Timestamp).toDate(),
+      updated: (data['updated'] as Timestamp).toDate(),
       creator: UserModel.fromDocument(data['creator']),
       // members: data['members'] != null
       //     ? (data['members'] as List<dynamic>).map((member) => UserModel.fromDocument(member)).toList()

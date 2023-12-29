@@ -68,7 +68,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       BlocProvider.of<AuthenticationBloc>(context).add(
-                        AuthenticationEventSignIn(
+                        SignInWithEmail(
                           email: _emailController.text,
                           password: _passwordController.text,
                         ),
@@ -101,7 +101,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 GestureDetector(
                   onTap: () async {
                     BlocProvider.of<AuthenticationBloc>(context).add(
-                      AuthenticationEventSignInWithGoogle(),
+                      SignInWithGoogle(),
                     );
                   },
                   child: Container(

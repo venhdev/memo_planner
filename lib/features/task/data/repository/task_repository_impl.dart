@@ -20,9 +20,6 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid addTask(TaskEntity task) async {
     try {
-      log('addTask object: ${task.toString()}');
-      log('reminders object: ${task.reminders.toString()}');
-      log('priority object: ${task.priority.toString()}');
       await _dataSource.addTask(task);
       return const Right(null);
     } catch (e) {
@@ -145,16 +142,16 @@ class TaskRepositoryImpl implements TaskRepository {
     }
   }
 
-  @override
-  Future<MyDayEntity?> findOneMyDay(String email, String tid) async {
-    try {
-      final result = await _dataSource.findOneMyDay(email, tid);
-      return result;
-    } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return null;
-    }
-  }
+  // @override
+  // Future<MyDayEntity?> findOneMyDay(String email, String tid) async {
+  //   try {
+  //     final result = await _dataSource.findOneMyDay(email, tid);
+  //     return result;
+  //   } catch (e) {
+  //     log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+  //     return null;
+  //   }
+  // }
 
   @override
   SQuerySnapshot getAllMyDayStream(String email, DateTime today) {

@@ -1,8 +1,8 @@
 import 'package:injectable/injectable.dart';
-import '../../../../core/constants/typedef.dart';
-import '../entities/streak_entity.dart';
 
+import '../../../../core/constants/typedef.dart';
 import '../../../../core/usecase/usecase.dart';
+import '../entities/streak_entity.dart';
 import '../repository/habit_repository.dart';
 
 @singleton

@@ -86,7 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      BlocProvider.of<AuthenticationBloc>(context).add(SignUpWithEmailEvent(
+                      BlocProvider.of<AuthenticationBloc>(context).add(SignUpWithEmail(
                         email: _emailController.text,
                         password: _passwordController.text,
                       ));

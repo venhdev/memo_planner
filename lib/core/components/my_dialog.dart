@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:memo_planner/config/theme/text_style.dart';
+import '../../config/theme/text_style.dart';
 
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 

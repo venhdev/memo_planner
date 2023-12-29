@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/constants/typedef.dart';
-import 'package:memo_planner/features/task/domain/entities/group_entity.dart';
-import 'package:memo_planner/features/task/domain/repository/group_repository.dart';
+import '../../../../core/constants/typedef.dart';
+import '../../domain/entities/group_entity.dart';
+import '../../domain/repository/group_repository.dart';
 
 import '../data_sources/firestore_task_data_source.dart';
 

@@ -2,11 +2,11 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:memo_planner/core/notification/reminder.dart';
-import 'package:memo_planner/core/utils/helpers.dart';
-import 'package:memo_planner/features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
-import 'package:memo_planner/features/task/domain/entities/task_entity.dart';
-import 'package:memo_planner/features/task/domain/repository/task_repository.dart';
+import '../../../../core/notification/reminder.dart';
+import '../../../../core/utils/helpers.dart';
+import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
+import '../../domain/entities/task_entity.dart';
+import '../../domain/repository/task_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../config/theme/text_style.dart';

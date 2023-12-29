@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart';
-import 'package:memo_planner/features/task/domain/repository/task_repository.dart';
+import '../../domain/repository/task_list_repository.dart';
+import '../../domain/repository/task_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/common_screen.dart';

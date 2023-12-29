@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../../core/utils/helpers.dart';
 import '../../../../core/notification/reminder.dart';
 import '../../../authentication/data/models/user_model.dart';
 import '../../domain/entities/task_entity.dart';
@@ -39,7 +38,7 @@ class TaskModel extends TaskEntity {
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap([bool toJson = false]) {
     return <String, dynamic>{
       'tid': tid,
       'lid': lid,
@@ -47,16 +46,16 @@ class TaskModel extends TaskEntity {
       'description': description,
       'priority': priority,
       'completed': completed,
-      'dueDate': dueDate,
-      'reminders': reminders?.toMap(),
+      'dueDate': dueDate != null ? (toJson ? dueDate?.toIso8601String() : dueDate) : null,
+      'reminders': toJson ? reminders?.toJson() : reminders?.toMap(),
       'creator': creator != null ? UserModel.fromEntity(creator!).toMap() : null,
       'assignedMembers': assignedMembers,
-      'created': created,
-      'updated': updated,
+      'created': created != null ? (toJson ? created?.toIso8601String() : created) : null,
+      'updated': updated != null ? (toJson ? updated?.toIso8601String() : updated) : null,
     };
   }
 
-  factory TaskModel.fromMap(Map<String, dynamic> map) {
+  factory TaskModel.fromMap(Map<String, dynamic> map, [bool fromJson = false]) {
     return TaskModel(
       tid: map['tid'] != null ? map['tid'] as String : null,
       lid: map['lid'] != null ? map['lid'] as String : null,
@@ -64,20 +63,36 @@ class TaskModel extends TaskEntity {
       description: map['description'] != null ? map['description'] as String : null,
       priority: map['priority'] != null ? map['priority'] as int : null,
       completed: map['completed'] != null ? map['completed'] as bool : null,
-      dueDate: map['dueDate'] != null ? (map['dueDate'] as Timestamp).toDate() : null,
-      reminders: map['reminders'] != null ? Reminder.fromMap(map['reminders'] as Map<String, dynamic>) : null,
+      dueDate: map['dueDate'] != null
+          ? fromJson
+              ? DateTime.parse(map['dueDate'] as String)
+              : (map['dueDate'] as Timestamp).toDate()
+          : null,
+      reminders: map['reminders'] != null
+          ? fromJson
+              ? Reminder.fromJson(map['reminders'] as String)
+              : Reminder.fromMap(map['reminders'] as Map<String, dynamic>)
+          : null,
       creator: map['creator'] != null ? UserModel.fromMap(map['creator'] as Map<String, dynamic>) : null,
       assignedMembers: map['assignedMembers'] != null
           ? (map['assignedMembers'] as List<dynamic>).map((assigner) => assigner.toString()).toList()
           : null,
-      created: map['created'] != null ? convertTimestampToDateTime(map['created'] as Timestamp) : null,
-      updated: map['updated'] != null ? convertTimestampToDateTime(map['updated'] as Timestamp) : null,
+      created: map['created'] != null
+          ? fromJson
+              ? DateTime.parse(map['created'] as String)
+              : (map['created'] as Timestamp).toDate()
+          : null,
+      updated: map['updated'] != null
+          ? fromJson
+              ? DateTime.parse(map['updated'] as String)
+              : (map['updated'] as Timestamp).toDate()
+          : null,
     );
   }
 
-  String toJson() => json.encode(toMap());
+  String toJson() => json.encode(toMap(true));
 
-  factory TaskModel.fromJson(String source) => TaskModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory TaskModel.fromJson(String source) => TaskModel.fromMap(json.decode(source) as Map<String, dynamic>, true);
 
   @override
   String toString() {

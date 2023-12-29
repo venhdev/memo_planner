@@ -9,6 +9,8 @@ abstract class TaskListRepository {
   ResultVoid editTaskList(TaskListEntity updatedTaskList);
   ResultVoid deleteTaskList(String lid);
 
+  ResultEither<List<String>> getMembers(String lid);
+  ResultEither<List<String>> getAllMemberTokens(String lid);
   ResultVoid addMember(String lid, String email);
   ResultVoid removeMember(String lid, String email);
 

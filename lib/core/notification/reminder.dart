@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 enum ReminderMethod { email, popup }
@@ -32,21 +33,31 @@ class Reminder {
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap([bool toJson = false]) {
     return <String, dynamic>{
       'rid': rid,
       'useDefault': useDefault,
-      'scheduledTime': scheduledTime?.millisecondsSinceEpoch,
+      // 'scheduledTime': scheduledTime?.millisecondsSinceEpoch,
+      'scheduledTime': scheduledTime != null
+          ? toJson
+              ? scheduledTime?.toIso8601String()
+              : scheduledTime
+          : null,
       'overrides': overrides?.map((x) => x.toMap()).toList(),
     };
   }
 
-  factory Reminder.fromMap(Map<String, dynamic> map) {
+  factory Reminder.fromMap(Map<String, dynamic> map, [bool fromJson = false]) {
     return Reminder(
       rid: map['rid'] != null ? map['rid'] as int : null,
       useDefault: map['useDefault'] as bool,
-      scheduledTime:
-          map['scheduledTime'] != null ? DateTime.fromMillisecondsSinceEpoch(map['scheduledTime'] as int) : null,
+      // scheduledTime:
+      //     map['scheduledTime'] != null ? DateTime.fromMillisecondsSinceEpoch(map['scheduledTime'] as int) : null,
+      scheduledTime: map['scheduledTime'] != null
+          ? fromJson
+              ? DateTime.parse(map['scheduledTime'] as String)
+              : (map['scheduledTime'] as Timestamp).toDate()
+          : null,
       overrides: map['overrides'] != null
           ? List<OverrideReminder>.from(
               (map['overrides'] as List<int>).map<OverrideReminder?>(
@@ -57,12 +68,13 @@ class Reminder {
     );
   }
 
-  String toJson() => json.encode(toMap());
+  String toJson() => json.encode(toMap(true));
 
-  factory Reminder.fromJson(String source) => Reminder.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Reminder.fromJson(String source) => Reminder.fromMap(json.decode(source) as Map<String, dynamic>, true);
 
   @override
-  String toString() => 'Reminder(rid: $rid, useDefault: $useDefault, scheduledTime: $scheduledTime, overrides: $overrides)';
+  String toString() =>
+      'Reminder(rid: $rid, useDefault: $useDefault, scheduledTime: $scheduledTime, overrides: $overrides)';
 
   @override
   bool operator ==(covariant Reminder other) {

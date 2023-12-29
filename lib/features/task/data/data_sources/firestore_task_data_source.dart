@@ -2,16 +2,17 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/constants/typedef.dart';
-import 'package:memo_planner/features/task/data/models/myday_model.dart';
-import 'package:memo_planner/features/task/data/models/task_model.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/constants/typedef.dart';
+import '../../../../core/notification/firebase_cloud_messaging_manager.dart';
 import '../../../../core/notification/local_notification_manager.dart';
 import '../../domain/entities/myday_entity.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/entities/task_list_entity.dart';
+import '../models/myday_model.dart';
 import '../models/task_list_model.dart';
+import '../models/task_model.dart';
 
 abstract class FireStoreTaskDataSource {
   //! TaskList
@@ -22,16 +23,21 @@ abstract class FireStoreTaskDataSource {
   Future<void> editTaskList(TaskListEntity updatedTaskList);
   Future<void> deleteTaskList(String lid);
 
+  Future<List<String>> getMembers(String lid);
+  Future<List<String>> getAllMemberTokens(String lid);
   Future<void> addMember(String lid, String email);
   Future<void> removeMember(String lid, String email);
 
-  // other function
   Future<int> countTaskList(String lid);
 
   //! MyDay
   SDocumentSnapshot getOneMyDayStream(String email, String tid);
   Future<void> removeMismatchInMyDay(String email, DateTime date);
   SQuerySnapshot getAllMyDayStream(String email); // >> [getOneTaskStream]
+
+  Future<void> addToMyDay(String email, MyDayEntity myDay);
+  Future<void> toggleKeepInMyDay(String email, String tid, bool isKeep);
+  Future<void> removeFromMyDay(String email, MyDayEntity myDay);
 
   //! Task
   SQuerySnapshot getAllTaskStream(String lid);
@@ -46,19 +52,16 @@ abstract class FireStoreTaskDataSource {
   Future<void> assignTask(String lid, String tid, String email);
   Future<void> unassignTask(String lid, String tid, String email);
 
-  Future<void> addToMyDay(String email, MyDayEntity myDay);
-  Future<void> toggleKeepInMyDay(String email, String tid, bool isKeep);
-  Future<void> removeFromMyDay(String email, MyDayEntity myDay);
-
-  Future<MyDayEntity?> findOneMyDay(String email, String tid);
+  // Future<MyDayEntity?> findOneMyDay(String email, String tid);
 }
 
 @Singleton(as: FireStoreTaskDataSource)
 class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
-  FireStoreTaskDataSourceImpl(this._firestore, this._localNotification);
+  FireStoreTaskDataSourceImpl(this._firestore, this._localNotification, this._fcm);
 
   final FirebaseFirestore _firestore;
   final LocalNotificationManager _localNotification;
+  final FirebaseCloudMessagingManager _fcm;
 
   @override
   SQuerySnapshot getAllTaskListStreamOfUser(String email) {
@@ -153,17 +156,22 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   Future<void> addTask(TaskEntity task) async {
     final collRef = _firestore.collection(pathToTaskLists).doc(task.lid).collection(pathToTasks);
     final tid = collRef.doc().id;
-    task = task.copyWith(tid: tid);
+    final taskModel = TaskModel.fromEntity(task.copyWith(tid: tid));
 
-    await collRef.doc(tid).set(TaskModel.fromEntity(task).toMap()).then(
-      (_) {
+    await collRef.doc(tid).set(taskModel.toMap()).then(
+      (_) async {
         // set schedule notification for task
         if (task.reminders?.useDefault == true) {
-          _localNotification.setScheduleNotification(
-            id: task.reminders!.rid!,
-            title: task.taskName,
-            scheduledTime: task.reminders!.scheduledTime!,
-          );
+          _localNotification.setScheduleNotificationFromTask(task);
+
+          // done: send notification to assigned members and all their devices to add reminder
+          final data = {
+            'type': kFCMAddOrUpdateReminder,
+            'task': taskModel.toJson(),
+          };
+
+          final tokens = await getAllMemberTokens(task.lid!);
+          _fcm.sendDataMessageToMultipleDevices(tokens: tokens, data: data);
         }
       },
     );
@@ -171,10 +179,26 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
 
   @override
   Future<void> deleteTask(TaskEntity task) async {
-    if (task.reminders?.useDefault == true) {
-      await _localNotification.I.cancel(task.reminders!.rid!);
-    }
-    await _firestore.collection(pathToTaskLists).doc(task.lid).collection(pathToTasks).doc(task.tid).delete();
+    await _firestore
+        .collection(pathToTaskLists)
+        .doc(task.lid)
+        .collection(pathToTasks)
+        .doc(task.tid)
+        .delete()
+        .then((value) async {
+      // TEST: send notification to assigned members and all their devices to cancel reminder
+      if (task.reminders?.useDefault == true) {
+        await _localNotification.I.cancel(task.reminders!.rid!);
+
+        final data = {
+          'type': kFCMDeleteReminder,
+          'rid': task.reminders!.rid.toString(),
+        };
+
+        final tokens = await getAllMemberTokens(task.lid!);
+        _fcm.sendDataMessageToMultipleDevices(tokens: tokens, data: data);
+      }
+    });
   }
 
   @override
@@ -184,33 +208,43 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
 
     await docRef.update(TaskModel.fromEntity(updatedTask).toMap()).then(
       (_) async {
-        // -- new: have reminder, old?...
         if (updatedTask.reminders?.useDefault == true) {
-          // > oldTask have the same reminder time with updatedTask >> ignore
-
+          // -- newTask: have reminder, old?
           if (oldTask.reminders?.useDefault == true) {
             // -- old: have reminder, new: have reminder >> update schedule notification with same rid
             // > oldTask have the same reminder time with updatedTask >> ignore
             if (oldTask.reminders!.scheduledTime!.isAtSameMomentAs(updatedTask.reminders!.scheduledTime!)) return;
+
             // > update with same rid but different time
-            await _localNotification.setScheduleNotification(
-              id: updatedTask.reminders!.rid!,
-              title: updatedTask.taskName,
-              body: 'Remember to do this task',
-              scheduledTime: updatedTask.reminders!.scheduledTime!,
-            );
+            await _localNotification.setScheduleNotificationFromTask(updatedTask);
+            // done: send notification to assigned members and all their devices to edit reminder
+            final data = {
+              'type': kFCMAddOrUpdateReminder, // >> in this case, update
+              'task': TaskModel.fromEntity(updatedTask).toJson(),
+            };
+            final tokens = await getAllMemberTokens(updatedTask.lid!);
+            _fcm.sendDataMessageToMultipleDevices(tokens: tokens, data: data);
           } else {
-            // new: have reminder, old: no reminder >> set new schedule notification
-            await _localNotification.setScheduleNotification(
-              id: updatedTask.reminders!.rid!,
-              title: updatedTask.taskName,
-              body: 'Remember to do this task',
-              scheduledTime: updatedTask.reminders!.scheduledTime!,
-            );
+            // --new: have reminder, old: NO reminder >> set new schedule notification
+            await _localNotification.setScheduleNotificationFromTask(updatedTask);
+            // done: send notification to assigned members and all their devices to add new reminder
+            final data = {
+              'type': kFCMAddOrUpdateReminder, // >> in this case, add
+              'task': TaskModel.fromEntity(updatedTask).toJson(),
+            };
+            final tokens = await getAllMemberTokens(updatedTask.lid!);
+            _fcm.sendDataMessageToMultipleDevices(tokens: tokens, data: data);
           }
         } else {
           // new: no reminder, old: have reminder >> cancel old schedule notification
           if (oldTask.reminders?.rid != null) await _localNotification.I.cancel(oldTask.reminders!.rid!);
+          // done: send notification to assigned members and all their devices to remove old reminder
+          final data = {
+            'type': kFCMDeleteReminder, // >> in this case, delete old reminder
+            'rid': oldTask.reminders!.rid.toString(),
+          };
+          final tokens = await getAllMemberTokens(updatedTask.lid!);
+          _fcm.sendDataMessageToMultipleDevices(tokens: tokens, data: data);
         }
       },
     );
@@ -279,15 +313,15 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
     });
   }
 
-  @override
-  Future<MyDayEntity?> findOneMyDay(String email, String tid) async {
-    return await _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay).doc(tid).get().then(
-      (value) {
-        if (value.data() == null) return null;
-        return MyDayModel.fromMap(value.data()!);
-      },
-    );
-  }
+  // @override
+  // Future<MyDayEntity?> findOneMyDay(String email, String tid) async {
+  //   return await _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay).doc(tid).get().then(
+  //     (value) {
+  //       if (value.data() == null) return null;
+  //       return MyDayModel.fromMap(value.data()!);
+  //     },
+  //   );
+  // }
 
   @override
   Future<void> removeMismatchInMyDay(String email, DateTime date) async {
@@ -305,5 +339,36 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   SQuerySnapshot getAllMyDayStream(String email) {
     final collRef = _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay);
     return collRef.snapshots();
+  }
+
+  @override
+  Future<List<String>> getMembers(String lid) {
+    return _firestore.collection(pathToTaskLists).doc(lid).get().then((value) {
+      final model = TaskListModel.fromMap(value.data()!);
+      return model.members ?? [];
+    });
+  }
+
+  @override
+  Future<List<String>> getAllMemberTokens(String lid) async {
+    final tokens = <String>[];
+    final members = getMembers(lid);
+    return members.then((memberEmails) async {
+      for (final memberEmail in memberEmails) {
+        await _firestore.collection(pathToUsers).doc(memberEmail).get().then(
+          (value) {
+            final List<String> userTokens = (value.data()!['tokens'] as List<dynamic>)
+                .map(
+                  (token) => token.toString(),
+                )
+                .toList();
+
+            tokens.addAll(userTokens);
+          },
+        );
+      }
+      tokens.removeWhere((token) => token == _fcm.currentFCMToken);
+      return tokens;
+    });
   }
 }

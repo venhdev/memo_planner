@@ -2,9 +2,9 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/constants/typedef.dart';
-import 'package:memo_planner/core/error/failures.dart';
-import 'package:memo_planner/features/task/domain/entities/task_list_entity.dart';
+import '../../../../core/constants/typedef.dart';
+import '../../../../core/error/failures.dart';
+import '../../domain/entities/task_list_entity.dart';
 
 import '../../../authentication/data/data_sources/authentication_data_source.dart';
 import '../../domain/repository/task_list_repository.dart';
@@ -22,11 +22,11 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       final user = await _authDataSource.getUserByEmail(email);
       if (user == null) {
-        return const Left(Failure(message: 'User not found'));
+        return const Left(ServerFailure(message: 'User not found'));
       }
       return Right(_dataSource.addMember(tid, email));
     } catch (e) {
-      return Left(Failure(message: e.toString()));
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 
@@ -35,7 +35,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       return Right(await _dataSource.addTaskList(taskList));
     } catch (e) {
-      return Left(Failure(message: e.toString()));
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 
@@ -46,7 +46,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
 
       return const Right(null);
     } catch (e) {
-      return Left(Failure(message: e.toString()));
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 
@@ -55,7 +55,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       return Right(await _dataSource.editTaskList(updatedTaskList));
     } catch (e) {
-      return Left(Failure(message: e.toString()));
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 
@@ -74,7 +74,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       return Right(_dataSource.removeMember(tid, email));
     } catch (e) {
-      return Left(Failure(message: e.toString()));
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 
@@ -95,6 +95,24 @@ class TaskListRepositoryImpl implements TaskListRepository {
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return null;
+    }
+  }
+
+  @override
+  ResultEither<List<String>> getMembers(String lid) async {
+    try {
+      return Right(await _dataSource.getMembers(lid));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultEither<List<String>> getAllMemberTokens(String lid) async {
+    try {
+      return Right(await _dataSource.getAllMemberTokens(lid));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 }

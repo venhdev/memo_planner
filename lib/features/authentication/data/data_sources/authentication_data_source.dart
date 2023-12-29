@@ -4,11 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/constants/constants.dart';
-import 'package:memo_planner/features/authentication/data/models/user_model.dart';
 
-import '../../../../core/notification/messaging_manager.dart';
+import '../../../../core/constants/constants.dart';
+import '../../../../core/notification/firebase_cloud_messaging_manager.dart';
 import '../../domain/entities/user_entity.dart';
+import '../models/user_model.dart';
 
 abstract class AuthenticationDataSource {
   /// Tries to sign in a user with the given [email] and [password]
@@ -40,6 +40,9 @@ abstract class AuthenticationDataSource {
   Future<void> updateOrCreateUserInfo(UserModel user);
   Future<void> addCurrentFCMTokenToUser(String email);
   Future<void> removeCurrentFCMTokenFromUser(String email);
+
+  // Update Profile
+  Future<void> updateDisplayName(String name);
 }
 
 @Singleton(as: AuthenticationDataSource)
@@ -49,23 +52,18 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
   final FirebaseFirestore _firestore;
-  final MessagingManager _messagingManager;
+  final FirebaseCloudMessagingManager _messagingManager;
 
   @override
   Future<UserCredential> signInWithEmailAndPassword(
     String email,
     String password,
   ) async {
-    try {
-      final result = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      return result;
-    } catch (e) {
-      log('rethrow --> Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      rethrow;
-    }
+    final UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    return userCredential;
   }
 
   @override
@@ -101,8 +99,11 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
       idToken: googleAuth?.idToken,
     );
 
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+    log('signInWithGoogle accessToken: ${userCredential.credential?.accessToken}');
+
     // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+    return userCredential;
   }
 
   @override
@@ -150,5 +151,10 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
     return _firestore.collection(pathToUsers).doc(email).update({
       'tokens': FieldValue.arrayRemove([token])
     }).then((value) => log('Remove FCM Token Success'));
+  }
+
+  @override
+  Future<void> updateDisplayName(String name) {
+    return _firebaseAuth.currentUser!.updateDisplayName(name);
   }
 }

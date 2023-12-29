@@ -1,10 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:memo_planner/core/components/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/components/widgets.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/notification/local_notification_manager.dart';
 import '../../domain/entities/user_entity.dart';
-import '../components/profile_menu.dart';
+import '../bloc/authentication/authentication_bloc.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -19,50 +22,61 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String x = 'test';
   @override
   Widget build(BuildContext context) {
     // var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          TextButton.icon(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            label: const Text('Sign Out'),
+            onPressed: () {
+              // show dialog to confirm sign out
+              showMyDialogConfirmSignOut(context);
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 24, left: 24, right: 24),
           child: Column(
             children: [
               // IMAGE
-
               Stack(
                 children: [
                   SizedBox(
-                      width: 120,
-                      height: 120,
-                      child: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: widget.user.photoURL != null
-                              ? Image.network(
-                                  widget.user.photoURL!,
-                                  fit: BoxFit.cover,
-                                )
-                              : CircleAvatar(
-                                  radius: 52.0,
-                                  backgroundColor: Colors.green.shade100,
-                                  child: Text(
-                                    widget.user.email!.substring(0, 1),
-                                    style: const TextStyle(
-                                      fontSize: 52.0,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ))),
+                    width: 120,
+                    height: 120,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(50),
+                      child: widget.user.photoURL != null
+                          ? Image.network(
+                              widget.user.photoURL!,
+                              fit: BoxFit.cover,
+                            )
+                          : CircleAvatar(
+                              radius: 52.0,
+                              backgroundColor: Colors.green.shade100,
+                              child: Text(
+                                widget.user.email!.substring(0, 1),
+                                style: const TextStyle(
+                                  fontSize: 52.0,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                    ),
+                  ),
                   // Positioned(
                   //   bottom: 0,
                   //   right: 0,
                   //   child: Container(
                   //     width: 35,
                   //     height: 35,
-                  //     decoration: BoxDecoration(
-                  //         borderRadius: BorderRadius.circular(100),
-                  //         color: Colors.primaries[2]),
+                  //     decoration: BoxDecoration(borderRadius: BorderRadius.circular(100)),
                   //     child: const Icon(
                   //       Icons.edit,
                   //       color: Colors.black,
@@ -72,10 +86,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // ),
                 ],
               ),
-              const SizedBox(height: 10),
-              Text(widget.user.displayName ?? widget.user.email!.split('@')[0],
-                  style: const TextStyle(fontSize: 32, color: Colors.black)),
-              const SizedBox(height: 20),
+              const SizedBox(height: 8.0),
+              ListTile(
+                title: Text(
+                  widget.user.displayName ?? widget.user.email!.split('@')[0],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    color: Colors.black,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Tap to edit',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey,
+                  ),
+                ),
+                onTap: () {
+                  // show dialog to edit name
+                  showMyDialogEditName(context, widget.user.displayName ?? widget.user.email!.split('@')[0]);
+                },
+              ),
+
+              const SizedBox(height: 18.0),
 
               // Email
               GestureDetector(
@@ -144,16 +178,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // const SizedBox(height: 10),
               // ProfileMenuWidget(
               //     title: 'Information', icon: Icons.info, onPress: () {}),
-              ProfileMenuWidget(
-                title: 'Sign Out',
-                icon: Icons.logout,
-                textColor: Colors.red,
-                endIcon: false,
-                onPress: () {
-                  // show dialog to confirm sign out
-                  showMyDialogConfirmSignOut(context);
-                },
-              ),
+              // ProfileMenuWidget(
+              //   title: 'Sign Out',
+              //   icon: Icons.logout,
+              //   textColor: Colors.red,
+              //   endIcon: false,
+              //   onPress: () {
+              //     // show dialog to confirm sign out
+              //     showMyDialogConfirmSignOut(context);
+              //   },
+              // ),
               // ProfileMenuWidget(
               //   title: 'Test',
               //   icon: Icons.looks,
@@ -203,6 +237,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void showMyDialogEditName(BuildContext context, String s) async {
+    final controller = TextEditingController(text: s);
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Name'),
+        content: TextField(
+          controller: controller,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              // update name
+              context.read<AuthenticationBloc>().add(UpdateDisplayName(name: controller.text));
+              log('object: ${controller.text}');
+            },
+            child: const Text('Save'),
+          ),
+        ],
       ),
     );
   }

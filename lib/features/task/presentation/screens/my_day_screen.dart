@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:memo_planner/core/utils/helpers.dart';
-import 'package:memo_planner/features/task/data/models/myday_model.dart';
-import 'package:memo_planner/features/task/domain/repository/task_repository.dart';
+import '../../../../core/utils/helpers.dart';
+import '../../data/models/myday_model.dart';
+import '../../domain/repository/task_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/widgets.dart';
