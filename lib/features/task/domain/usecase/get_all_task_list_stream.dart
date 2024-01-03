@@ -6,8 +6,8 @@ import '../../../authentication/domain/entities/user_entity.dart';
 import '../repository/task_list_repository.dart';
 
 @singleton
-class GetAllTaskStreamOfUserUC extends UseCaseWithParams<SQuerySnapshot, UserEntity> {
-  GetAllTaskStreamOfUserUC(this._repository);
+class GetAllTaskListStreamOfUserUC extends UseCaseWithParams<SQuerySnapshot, UserEntity> {
+  GetAllTaskListStreamOfUserUC(this._repository);
 
   final TaskListRepository _repository;
 

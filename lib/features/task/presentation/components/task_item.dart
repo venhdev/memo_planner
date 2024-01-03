@@ -143,7 +143,7 @@ class TaskItem extends StatelessWidget {
         });
   }
 
-  Widget? assignedInfo(TaskEntity task) => (task.assignedMembers != null)
+  Widget? assignedInfo(TaskEntity task) => (task.assignedMembers!.isNotEmpty)
       ? SizedBox(
           width: 64.0,
           height: 28.0,
@@ -167,7 +167,8 @@ class TaskItem extends StatelessWidget {
             ? true
             : task.reminders!.scheduledTime!.isBefore(DateTime.now())
                 ? true
-                : false)) return null;
+                : false) &&
+        !showListName) return null;
 
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,

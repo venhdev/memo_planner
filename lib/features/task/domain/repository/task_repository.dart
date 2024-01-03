@@ -4,9 +4,15 @@ import '../entities/myday_entity.dart';
 import '../entities/task_entity.dart';
 
 abstract class TaskRepository {
-  // get all task in TaskListEntity{lid}
+  /// Get all task stream in a task list
   SQuerySnapshot getAllTaskStream(String lid);
-  // Get Stream of [TaskEntity]{tid} from [TaskListEntity]{lid}
+  /// Get all [TaskEntity] in a task list
+  ResultEither<List<TaskEntity>> getAllTask(String lid);
+  /// Get all [TaskEntity] in multi task list. [lids] is a list of taskList id
+  ResultEither<List<TaskEntity>> getAllTaskInMultiLists(List<String> lids);
+  ResultVoid loadAllRemindersInSingleList(String lid);
+  ResultVoid loadAllRemindersInMultiLists(List<String> lids);
+  /// Get a Stream of [TaskEntity] in a task list
   SDocumentSnapshot getOneTaskStream(String lid, String tid);
 
   ResultVoid addTask(TaskEntity task);
@@ -14,9 +20,9 @@ abstract class TaskRepository {
   ResultVoid deleteTask(TaskEntity task);
   ResultVoid toggleTask(String tid, String lid, bool value);
 
-  // append {email} to [TaskEntity]{assignedMembers}
+  /// append {email} to [TaskEntity]{assignedMembers}
   ResultVoid assignTask(String lid, String tid, String email);
-  // remove {email} from [TaskEntity]{assignedMembers}
+  /// remove {email} from [TaskEntity]{assignedMembers}
   ResultVoid unassignTask(String lid, String tid, String email);
 
   //! MyDay

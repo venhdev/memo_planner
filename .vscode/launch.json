@@ -11,9 +11,10 @@
             "program": "./test/"
         },
         {
-            "name": "memo_planner",
+            "name": "memo_planner (debug mode)",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "flutterMode": "debug"
         },
         {
             "name": "memo_planner (profile mode)",

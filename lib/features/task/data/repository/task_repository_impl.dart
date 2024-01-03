@@ -24,7 +24,7 @@ class TaskRepositoryImpl implements TaskRepository {
       return const Right(null);
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return Left(Failure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -34,7 +34,7 @@ class TaskRepositoryImpl implements TaskRepository {
       return Right(await _dataSource.deleteTask(task));
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return Left(Failure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -44,7 +44,7 @@ class TaskRepositoryImpl implements TaskRepository {
       return Right(await _dataSource.editTask(updatedTask, oldTask));
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return Left(Failure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -74,7 +74,7 @@ class TaskRepositoryImpl implements TaskRepository {
       return Right(_dataSource.toggleTask(tid, lid, value));
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return Left(Failure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -85,7 +85,7 @@ class TaskRepositoryImpl implements TaskRepository {
       return const Right(null);
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return Left(Failure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -96,7 +96,7 @@ class TaskRepositoryImpl implements TaskRepository {
       return const Right(null);
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return Left(Failure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -107,7 +107,7 @@ class TaskRepositoryImpl implements TaskRepository {
       return const Right(null);
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return Left(Failure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -118,7 +118,7 @@ class TaskRepositoryImpl implements TaskRepository {
       return const Right(null);
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return Left(Failure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -138,7 +138,7 @@ class TaskRepositoryImpl implements TaskRepository {
       return Right(await _dataSource.toggleKeepInMyDay(email, tid, isKeep));
     } catch (e) {
       log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return Left(Failure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -164,4 +164,51 @@ class TaskRepositoryImpl implements TaskRepository {
     }
   }
 
+  @override
+  ResultEither<List<TaskEntity>> getAllTask(String lid) async {
+    try {
+      return Right(await _dataSource.getAllTaskInSingleList(lid));
+    } catch (e) {
+      log('getAllTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultEither<List<TaskEntity>> getAllTaskInMultiLists(List<String> lids) async {
+    try {
+      List<TaskEntity> result = [];
+      for (final lid in lids) {
+        final taskList = await _dataSource.getAllTaskInSingleList(lid);
+        result.addAll(taskList);
+      }
+      return Right(result);
+    } catch (e) {
+      log('getAllTaskInMultiLists Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultVoid loadAllRemindersInMultiLists(List<String> lids) async {
+    try {
+      for (final lid in lids) {
+        _dataSource.loadAllRemindersInSingleList(lid);
+      }
+      return const Right(null);
+    } catch (e) {
+      log('loadAllRemindersInMultiLists Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultVoid loadAllRemindersInSingleList(String lid) async {
+    try {
+      return Right(await _dataSource.loadAllRemindersInSingleList(lid));
+    } catch (e) {
+      log('loadAllRemindersInSingleList Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(FirebaseFailure(message: e.toString()));
+    }
+  }
 }

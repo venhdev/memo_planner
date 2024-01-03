@@ -68,18 +68,14 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
 
   @override
   Future<void> signOut() async {
-    try {
-      // remove current FCM token
-      await removeCurrentFCMTokenFromUser(_firebaseAuth.currentUser!.email!);
-      await _firebaseAuth.signOut();
-      if (_googleSignIn.currentUser != null) {
-        log('Signing out from Google');
-        await _googleSignIn.signOut();
-      }
-    } catch (e) {
-      log('rethrow --> Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      rethrow;
+    // get the email of current user to remove FCM token
+    await removeCurrentFCMTokenFromUser(_firebaseAuth.currentUser!.email!);
+    // remove current FCM token
+    if (_googleSignIn.currentUser != null) {
+      log('Signing out from Google');
+      await _googleSignIn.signOut();
     }
+    await _firebaseAuth.signOut();
   }
 
   @override

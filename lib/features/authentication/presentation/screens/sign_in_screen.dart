@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/widgets.dart';
+import '../../../../core/notification/local_notification_manager.dart';
 import '../bloc/authentication/authentication_bloc.dart';
 import 'sign_up_screen.dart';
 
@@ -121,6 +123,36 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
                 const SizedBox(height: 16.0),
                 TextButton(
+                  // NOTE: for testing
+                  onLongPress: () async {
+                    final pending = await di<LocalNotificationManager>().I.pendingNotificationRequests();
+                    final activate = await di<LocalNotificationManager>().I.getActiveNotifications();
+
+                    // ignore: use_build_context_synchronously
+                    await showDialog(
+                      context: context,
+                      builder: (_) {
+                        return SimpleDialog(
+                          children: [
+                            Text('pending: ${pending.length}'),
+                            for (int i = 0; i < pending.length; i++)
+                              Text(
+                                '${pending[i].id} - ${pending[i].title} - ${pending[i].body}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            Text('activate: ${activate.length}'),
+                            for (int i = 0; i < activate.length; i++)
+                              Text(
+                                '${activate[i].id} - ${activate[i].title} - ${activate[i].body}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                   onPressed: () {
                     // context.go('/authentication/sign-up');
                     Navigator.push(

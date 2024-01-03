@@ -1,6 +1,6 @@
 # MemoPlanner - Habit Tracker, Planner App
 
-MemoPlanner is a mobile app designed to help you track your habits and plan your daily activities.
+MemoPlanner help you track your habits and plan your tasks
 
 ## Features
 

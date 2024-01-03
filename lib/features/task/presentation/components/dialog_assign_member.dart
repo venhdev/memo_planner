@@ -79,7 +79,7 @@ class DialogAssignMember extends StatelessWidget {
                 di<TaskRepository>().unassignTask(lid, tid, memberEmail);
               }
             },
-            title: Text(memberEmail),
+            title: Text(memberEmail, maxLines: 1, overflow: TextOverflow.ellipsis),
             leading: CircleAvatar(
               backgroundColor: Colors.green.shade100,
               child: Avatar(memberEmail: memberEmail),

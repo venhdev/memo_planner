@@ -147,7 +147,9 @@ class TaskListItem extends StatelessWidget {
                 stream: taskList != null ? di<TaskRepository>().getAllTaskStream(taskList!.lid!) : null,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    final docsLength = snapshot.data!.docs.length;
+                    final docs = snapshot.data!.docs;
+                    // filter out completed task
+                    final docsLength = docs.where((doc) => doc.data()['completed'] == false).length;
                     return Text(
                       docsLength.toString(),
                       style: const TextStyle(

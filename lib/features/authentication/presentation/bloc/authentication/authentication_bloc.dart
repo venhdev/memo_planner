@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -87,6 +89,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       await _signOutUC();
       emit(const AuthenticationState.unauthenticated(message: 'Sign out success'));
     } catch (e) {
+      log('_onSignOut Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       emit(const AuthenticationState.unauthenticated(message: 'Sign out failed'));
     }
   }

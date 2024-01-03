@@ -29,6 +29,13 @@ class ServerFailure extends Failure {
   }) : super(code: code, message: message);
 }
 
+class FirebaseFailure extends Failure {
+  const FirebaseFailure({
+    String code = 'firebase-failure',
+    String message = serverFailureFailureMessage,
+  }) : super(code: code, message: message);
+}
+
 class CacheFailure extends Failure {
   const CacheFailure({
     String code = 'cache-failure',

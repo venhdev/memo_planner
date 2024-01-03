@@ -11,6 +11,7 @@ import '../../domain/repository/task_repository.dart';
 import '../../../../config/dependency_injection.dart';
 import '../../../../config/theme/text_style.dart';
 import '../../../../core/components/widgets.dart';
+import 'priority_table.dart';
 
 enum SampleItem { itemOne, itemTwo, itemThree }
 
@@ -240,177 +241,14 @@ class _AddTaskModalState extends State<AddTaskModal> {
     );
   }
 
-  Table _buildPriorityTable() => Table(
-        columnWidths: const {
-          0: FlexColumnWidth(0.2),
-          1: FlexColumnWidth(1),
-          2: FlexColumnWidth(1),
+  Widget _buildPriorityTable() => PriorityTable(
+        priority: _priority,
+        callBack: (value) {
+          setState(() {
+            _priority = value;
+          });
         },
-        border: TableBorder.all(color: Colors.grey),
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        children: [
-          const TableRow(
-            children: [
-              SizedBox.shrink(),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Center(child: Text('Urgent')),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Center(child: Text('Not Urgent')),
-              ),
-            ],
-          ),
-          // Important Line
-          TableRow(
-            children: [
-              RotatedBox(
-                quarterTurns: 3,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  alignment: Alignment.center,
-                  child: const Text('Important'),
-                ),
-              ),
-              // Important & Urgent
-              ChoiceChip(
-                label: const Text('Do It Now'),
-                selected: _priority == 3,
-                selectedColor: Colors.green,
-                onSelected: (bool selected) {
-                  log('object: ${selected.toString()}');
-                  setState(() {
-                    _priority = selected ? 3 : null;
-                  });
-                },
-              ),
-              // Important & Not Urgent
-              ChoiceChip(
-                label: const Text('Schedule It'),
-                selected: _priority == 2,
-                selectedColor: Colors.blue,
-                onSelected: (bool selected) {
-                  log('object: ${selected.toString()}');
-                  setState(() {
-                    _priority = selected ? 2 : null;
-                  });
-                },
-              ),
-            ],
-          ),
-          // Not Important Line
-          TableRow(
-            children: [
-              RotatedBox(
-                quarterTurns: 3,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  alignment: Alignment.center,
-                  child: const Text('Not Urgent'),
-                ),
-              ),
-              // Not Important & Urgent
-              ChoiceChip(
-                label: const Text('Delegate It'),
-                selected: _priority == 1,
-                selectedColor: Colors.orange,
-                onSelected: (bool selected) {
-                  log('object: ${selected.toString()}');
-                  setState(() {
-                    _priority = selected ? 1 : null;
-                  });
-                },
-              ),
-              // Not Important & Not Urgent
-              ChoiceChip(
-                label: const Text('Eliminate It'),
-                selected: _priority == 0,
-                selectedColor: Colors.grey,
-                onSelected: (bool selected) {
-                  log('object: ${selected.toString()}');
-                  setState(() {
-                    _priority = selected ? 0 : null;
-                  });
-                },
-              ),
-            ],
-          ),
-        ],
       );
-
-  // Widget buildPriorityCard() => Column(
-  //       key: ValueKey<bool>(isSetPriority),
-  //       mainAxisSize: MainAxisSize.min,
-  //       children: [
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //           children: [
-  //             Text('Is Important?', style: MyTextStyle.blackBold87),
-  //             Wrap(
-  //               spacing: 12.0,
-  //               children: [
-  //                 ChoiceChip(
-  //                   label: const Text('Yes'), // (+) Important
-  //                   selected: isImportant == true,
-  //                   selectedColor: Colors.green,
-  //                   onSelected: (bool selected) {
-  //                     setState(() {
-  //                       // _value = selected ? 0 : null;
-  //                       isImportant = selected ? true : null;
-  //                     });
-  //                   },
-  //                 ),
-  //                 ChoiceChip(
-  //                   label: const Text('No'), // (-) Important
-  //                   selected: isImportant == false,
-  //                   selectedColor: Colors.red,
-  //                   onSelected: (bool selected) {
-  //                     setState(() {
-  //                       // _value = selected ? 1 : null;
-  //                       isImportant = selected ? false : null;
-  //                     });
-  //                   },
-  //                 ),
-  //               ],
-  //             ),
-  //           ],
-  //         ),
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //           children: [
-  //             Text('Is Urgent?', style: MyTextStyle.blackBold87),
-  //             Wrap(
-  //               spacing: 12.0,
-  //               children: [
-  //                 ChoiceChip(
-  //                   label: const Text('Yes'), // (+) Urgent
-  //                   selected: isUrgent == true,
-  //                   selectedColor: Colors.green,
-  //                   onSelected: (bool selected) {
-  //                     setState(() {
-  //                       // _value = selected ? 3 : null;
-  //                       isUrgent = selected ? true : null;
-  //                     });
-  //                   },
-  //                 ),
-  //                 ChoiceChip(
-  //                   label: const Text('No'), // (-) Urgent
-  //                   selected: isUrgent == false,
-  //                   selectedColor: Colors.red,
-  //                   onSelected: (bool selected) {
-  //                     setState(() {
-  //                       // _value = selected ? 4 : null;
-  //                       isUrgent = selected ? false : null;
-  //                     });
-  //                   },
-  //                 ),
-  //               ],
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     );
 
   int calculatePriority(bool? isImportant, bool? isUrgent) {
     if (isImportant == null || isUrgent == null) return -1;
@@ -480,7 +318,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
       created: DateTime.now(),
       updated: DateTime.now(),
     ));
-    
+
     // > reset all fields
     handleReset();
 

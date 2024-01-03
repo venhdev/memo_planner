@@ -80,7 +80,6 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   @override
   ResultVoid signOut() async {
     try {
-      // remove current FCM token from user in 'users' collection
       await _firebaseAuthDataSource.signOut();
       return const Right(null);
     } on FirebaseAuthException catch (e) {

@@ -43,17 +43,13 @@ class HabitBloc extends Bloc<HabitEvent, HabitState> {
 
   void _onInitial(HabitEventInitial event, Emitter<HabitState> emit) {
     emit(HabitLoading());
-    try {
-      var user = _getCurrentUserUC();
-      if (user != null) {
-        final habitStream = _getHabitStreamUC(user);
-        currentSteam = habitStream;
-        emit(HabitLoaded(habitStream: habitStream));
-      } else {
-        emit(const HabitError(message: 'User is not authenticated'));
-      }
-    } catch (e) {
-      emit(HabitError(message: e.toString()));
+    var user = _getCurrentUserUC();
+    if (user != null) {
+      final habitStream = _getHabitStreamUC(user);
+      currentSteam = habitStream;
+      emit(HabitLoaded(habitStream: habitStream));
+    } else {
+      emit(const HabitError(message: 'User is not authenticated'));
     }
   }
 

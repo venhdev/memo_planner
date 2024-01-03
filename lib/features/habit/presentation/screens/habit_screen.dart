@@ -1,9 +1,6 @@
-import 'dart:developer';
-
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/components/widgets.dart';
@@ -268,77 +265,6 @@ class _HabitScreenState extends State<HabitScreen> {
             return const MessageScreen(message: 'Something went wrong [e04]');
           }
         },
-      ),
-    );
-  }
-
-  Widget buildControllerBar(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                final current = DateTime.now();
-                _focus = DateTime(
-                  current.year,
-                  current.month,
-                  current.day,
-                );
-                setState(() {
-                  _controller.animateToDate(
-                    _focus,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.decelerate,
-                  );
-                });
-              },
-              child: const Icon(Icons.today),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-                final List<PendingNotificationRequest> pendingNotificationRequests =
-                    await flutterLocalNotificationsPlugin.pendingNotificationRequests();
-
-                final List<ActiveNotification> activeNotifications =
-                    await flutterLocalNotificationsPlugin.getActiveNotifications();
-
-                for (var pendingNotificationRequest in pendingNotificationRequests) {
-                  debugPrint('pending: ${pendingNotificationRequest.id.toString()}');
-                }
-                for (var activeNotification in activeNotifications) {
-                  debugPrint('active: ${activeNotification.id.toString()}');
-                }
-                log('done show');
-              },
-              child: const Text('all'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                log('object: ${generateNotificationId(DateTime.now())}');
-              },
-              child: const Text('random'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-                await flutterLocalNotificationsPlugin.cancelAll();
-              },
-              child: const Text('cancel all'),
-            ),
-            IconButton(
-              onPressed: () {
-                onTapFilter(context);
-              },
-              icon: const Icon(Icons.sort),
-            ),
-          ],
-        ),
       ),
     );
   }

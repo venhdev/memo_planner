@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/components/widgets.dart';
 import '../../../../core/constants/typedef.dart';
@@ -36,7 +37,10 @@ class HabitList extends StatelessWidget {
           if (snapshot.hasData) {
             final habits = snapshot.data!.docs;
             if (habits.isEmpty) {
-              return const EmptyHabit();
+              return EmptyScreen(
+                richText: 'You have no habit today',
+                onPressed: () => context.go('/habit/add'),
+              );
             }
             // Filter by query that user type
             final filteredHabits = habits.where((element) {
@@ -66,7 +70,7 @@ class HabitList extends StatelessWidget {
 
             if (currentRoutine != null) {
               // to delete the habit that not in currentRoutine time
-             filteredHabits.removeWhere((element) {
+              filteredHabits.removeWhere((element) {
                 final habit = HabitModel.fromDocument(element.data());
                 if (currentRoutine == Routine.morning) {
                   // delete the habit that start time is after 12:00
@@ -123,7 +127,7 @@ class _FilterHabitListState extends State<FilterHabitList> {
       );
     }).toList();
 
-    if (progressingHabits.isEmpty) return const EmptyHabit();
+    if (progressingHabits.isEmpty) return const EmptyScreen(richText: 'You have no habit today');
 
     return Expanded(
       child: Padding(

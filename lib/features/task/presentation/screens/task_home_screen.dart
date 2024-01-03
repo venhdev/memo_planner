@@ -3,14 +3,14 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/components/widgets.dart';
+
+import '../../../../core/components/common_screen.dart';
 import '../../../../core/constants/enum.dart';
 import '../../data/models/task_list_model.dart';
-import '../components/task_list_item.dart';
-
 import '../../domain/entities/task_list_entity.dart';
 import '../bloc/task_bloc.dart';
 import '../components/dialog.dart';
+import '../components/task_list_item.dart';
 
 // show all list of tasks
 class TaskHomeScreen extends StatelessWidget {

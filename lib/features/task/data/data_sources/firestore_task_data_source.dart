@@ -17,6 +17,7 @@ import '../models/task_model.dart';
 abstract class FireStoreTaskDataSource {
   //! TaskList
   SQuerySnapshot getAllTaskListStreamOfUser(String email);
+  Future<List<TaskListEntity>> getAllTaskListOfUser(String email);
   SDocumentSnapshot getOneTaskListStream(String lid);
 
   Future<void> addTaskList(TaskListEntity taskList);
@@ -42,6 +43,9 @@ abstract class FireStoreTaskDataSource {
   //! Task
   SQuerySnapshot getAllTaskStream(String lid);
   SDocumentSnapshot getOneTaskStream(String lid, String tid);
+  Future<List<TaskEntity>> getAllTaskInSingleList(String lid, {bool filterCompleted = false});
+
+  Future<void> loadAllRemindersInSingleList(String lid);
 
   Future<TaskEntity> getTask(String lid, String tid);
   Future<void> addTask(TaskEntity task);
@@ -71,8 +75,27 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
           Filter('creator.email', isEqualTo: email),
           Filter('members', arrayContains: email),
         ))
-        .orderBy('listName')
+        // .orderBy('listName')
         .snapshots();
+  }
+
+  @override
+  Future<List<TaskListEntity>> getAllTaskListOfUser(String email) {
+    return _firestore
+        .collection(pathToTaskLists)
+        .where(Filter.or(
+          Filter('creator.email', isEqualTo: email),
+          Filter('members', arrayContains: email),
+        ))
+        .get()
+        .then((querySnapshot) {
+      final taskLists = <TaskListEntity>[];
+      for (final doc in querySnapshot.docs) {
+        final model = TaskListModel.fromMap(doc.data());
+        taskLists.add(model);
+      }
+      return taskLists;
+    });
   }
 
   @override
@@ -149,7 +172,7 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
 
   @override
   SQuerySnapshot getAllTaskStream(String lid) {
-    return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).orderBy('taskName').snapshots();
+    return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).orderBy('created').snapshots();
   }
 
   @override
@@ -370,5 +393,48 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
       tokens.removeWhere((token) => token == _fcm.currentFCMToken);
       return tokens;
     });
+  }
+
+  @override
+  Future<List<TaskEntity>> getAllTaskInSingleList(String lid, {bool filterCompleted = false}) async {
+    final collRef = _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks);
+    if (filterCompleted) {
+      final filteredQuery = collRef.where('completed', isEqualTo: false);
+      return await filteredQuery.get().then(
+        (querySnapshot) {
+          if (querySnapshot.docs.isEmpty) return [];
+          final tasks = <TaskEntity>[];
+          for (final doc in querySnapshot.docs) {
+            final model = TaskModel.fromMap(doc.data());
+            tasks.add(model);
+          }
+          return tasks;
+        },
+      );
+    }
+    return await collRef.get().then(
+      (querySnapshot) {
+        if (querySnapshot.docs.isEmpty) return [];
+        final tasks = <TaskEntity>[];
+        for (final doc in querySnapshot.docs) {
+          final model = TaskModel.fromMap(doc.data());
+          tasks.add(model);
+        }
+        return tasks;
+      },
+    );
+  }
+
+  @override
+  Future<void> loadAllRemindersInSingleList(String lid) async {
+    // tasks: incomplete tasks
+    final tasks = await getAllTaskInSingleList(lid, filterCompleted: true);
+    final now = DateTime.now();
+    for (final task in tasks) {
+      if (task.reminders?.useDefault == true) {
+        if (task.reminders!.scheduledTime!.isBefore(now)) continue;
+        _localNotification.setScheduleNotificationFromTask(task);
+      }
+    }
   }
 }

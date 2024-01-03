@@ -3,6 +3,7 @@ import '../entities/task_list_entity.dart';
 
 abstract class TaskListRepository {
   SQuerySnapshot getAllTaskListStreamOfUser(String email);
+  ResultEither<List<TaskListEntity>> getAllTaskListOfUser(String email);
   SDocumentSnapshot getOneTaskListStream(String lid);
 
   ResultVoid addTaskList(TaskListEntity taskList);
@@ -15,5 +16,5 @@ abstract class TaskListRepository {
   ResultVoid removeMember(String lid, String email);
 
   // other function
-  Future<int?> countTaskList(String lid);
+  Future<int> countTaskList(String lid);
 }

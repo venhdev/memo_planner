@@ -1,5 +1,11 @@
 # App
 
+- cmd: dart run flutter_native_splash:create
+- cmd: flutter pub run flutter_launcher_icons
+- cmd: flutter build apk --release --no-tree-shake-icons
+- cmd: flutter build apk --build-number=210010001 --build-name="1.0.1-beta" --no-tree-shake-icons
+- cmd: flutter build appbundle --build-number=210010002 --build-name="1.0.2-beta" --no-tree-shake-icons
+
 ## UI
 
 - Draggable Modal Bottom Sheet: <https://www.youtube.com/watch?v=AjAQglJKcb4&t=7s>

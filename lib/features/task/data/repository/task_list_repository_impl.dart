@@ -22,11 +22,11 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       final user = await _authDataSource.getUserByEmail(email);
       if (user == null) {
-        return const Left(ServerFailure(message: 'User not found'));
+        return const Left(FirebaseFailure(message: 'User not found'));
       }
       return Right(_dataSource.addMember(tid, email));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -35,7 +35,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       return Right(await _dataSource.addTaskList(taskList));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -46,7 +46,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
 
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -55,7 +55,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       return Right(await _dataSource.editTaskList(updatedTaskList));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -64,7 +64,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       return _dataSource.getAllTaskListStreamOfUser(email);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('getAllTaskListStreamOfUser Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
     }
   }
@@ -74,7 +74,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       return Right(_dataSource.removeMember(tid, email));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -83,18 +83,18 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       return _dataSource.getOneTaskListStream(lid);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('getOneTaskListStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
     }
   }
 
   @override
-  Future<int?> countTaskList(String lid) async {
+  Future<int> countTaskList(String lid) async {
     try {
       return await _dataSource.countTaskList(lid);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      return null;
+      log('countTaskList Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return -1;
     }
   }
 
@@ -103,7 +103,8 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       return Right(await _dataSource.getMembers(lid));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      log('getMembers Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
@@ -112,7 +113,18 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       return Right(await _dataSource.getAllMemberTokens(lid));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      log('getAllMemberTokens Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(FirebaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  ResultEither<List<TaskListEntity>> getAllTaskListOfUser(String email) async {
+    try {
+      return Right(await _dataSource.getAllTaskListOfUser(email));
+    } catch (e) {
+      log('getAllTaskListOfUser Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 }

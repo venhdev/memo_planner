@@ -1,6 +1,67 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+class EmptyScreen extends StatelessWidget {
+  const EmptyScreen({
+    super.key,
+    this.richText = 'No data',
+    this.onPressed,
+    this.actionText = 'Create new',
+    this.spanChildren,
+  });
+  final String? richText;
+
+  final VoidCallback? onPressed;
+  final String? actionText;
+  final List<InlineSpan>? spanChildren;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Center(
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          shrinkWrap: true,
+          children: [
+            SvgPicture.asset(
+              'assets/images/no-data.svg',
+              height: 200,
+              fit: BoxFit.scaleDown,
+            ),
+            const SizedBox(height: 18),
+            Text.rich(
+              TextSpan(
+                text: richText,
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+                children: spanChildren,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Builder(builder: (context) {
+              if (onPressed == null) return const SizedBox.shrink();
+              return GestureDetector(
+                onTap: onPressed,
+                child: Text(
+                  actionText!,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontStyle: FontStyle.italic,
+                    decoration: TextDecoration.underline,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class LoadingScreen extends StatelessWidget {
   const LoadingScreen({super.key});
@@ -31,7 +92,7 @@ class MessageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // log('MessageScreen: $message');
+    log('render MessageScreen with message: $message');
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
