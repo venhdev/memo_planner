@@ -52,6 +52,7 @@ dependencies:
 
   # Firebase + Google
   googleapis_auth: ^1.4.1 #this package is not compatible with google_sign_in
+  extension_google_sign_in_as_googleapis_auth: ^2.0.12
   googleapis: ^11.4.0
   google_sign_in: ^6.1.5
   firebase_core: ^2.17.0
