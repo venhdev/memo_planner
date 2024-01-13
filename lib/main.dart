@@ -8,9 +8,8 @@ import 'app.dart';
 import 'config/bloc_config.dart';
 import 'config/dependency_injection.dart';
 import 'config/firebase_options.dart';
-import 'core/notification/local_notification_manager.dart';
 import 'core/notification/firebase_cloud_messaging_manager.dart';
-
+import 'core/notification/local_notification_manager.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +24,6 @@ void main() async {
   await di<LocalNotificationManager>().init();
   await di<FirebaseCloudMessagingManager>().init();
 
-  FlutterNativeSplash.remove(); // remove splash screen
+  FlutterNativeSplash.remove(); // remove splash screen when app is initialized
   runApp(const App());
 }

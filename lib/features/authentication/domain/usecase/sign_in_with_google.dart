@@ -8,7 +8,7 @@ import '../repository/authentication_repository.dart';
 @singleton
 class SignInWithGoogleUC extends UseCaseNoParam<ResultEither<UserEntity>> {
   SignInWithGoogleUC(this._authRepo);
-  final AuthenticationRepository _authRepo;
+  final AuthRepository _authRepo;
 
   @override
   ResultEither<UserEntity> call() {

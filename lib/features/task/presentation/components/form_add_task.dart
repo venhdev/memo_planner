@@ -298,7 +298,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
   }
 
   void handleAdd(BuildContext context, String value, int? priority) {
-    final currentUser = context.read<AuthenticationBloc>().state.user;
+    final currentUser = context.read<AuthBloc>().state.user;
     di<TaskRepository>().addTask(TaskEntity(
       tid: null,
       lid: widget.lid,

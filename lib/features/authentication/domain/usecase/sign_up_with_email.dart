@@ -11,7 +11,7 @@ class SignUpWithEmailUC
     extends UseCaseWithParams<ResultEither<UserEntity>, SignUpParams> {
   SignUpWithEmailUC(this._authenticationRepository);
 
-  final AuthenticationRepository _authenticationRepository;
+  final AuthRepository _authenticationRepository;
   @override
   ResultEither<UserEntity> call(SignUpParams params) async {
     return await _authenticationRepository.signUpWithEmail(

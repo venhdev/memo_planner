@@ -3,14 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/components/common_screen.dart';
 import '../bloc/authentication/authentication_bloc.dart';
-import 'screens.dart';
+import 'profile_screen.dart';
 
-class AuthenticationScreen extends StatelessWidget {
-  const AuthenticationScreen({super.key});
+class AuthScreen extends StatelessWidget {
+  const AuthScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthenticationBloc, AuthenticationState>(
+    return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state.status == AuthenticationStatus.authenticated) {
           return ProfileScreen(user: state.user!);

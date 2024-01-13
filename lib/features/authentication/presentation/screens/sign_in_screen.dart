@@ -69,7 +69,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      BlocProvider.of<AuthenticationBloc>(context).add(
+                      BlocProvider.of<AuthBloc>(context).add(
                         SignInWithEmail(
                           email: _emailController.text,
                           password: _passwordController.text,
@@ -77,7 +77,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       );
                     }
                   },
-                  child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+                  child: BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
                       if (state.status == AuthenticationStatus.authenticating) {
                         return const SizedBox(
@@ -102,7 +102,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 16.0),
                 GestureDetector(
                   onTap: () async {
-                    BlocProvider.of<AuthenticationBloc>(context).add(
+                    BlocProvider.of<AuthBloc>(context).add(
                       SignInWithGoogle(),
                     );
                   },

@@ -1,3 +1,4 @@
+import '../../../../core/constants/enum.dart';
 import '../../../../core/constants/typedef.dart';
 
 import '../entities/myday_entity.dart';
@@ -5,13 +6,16 @@ import '../entities/task_entity.dart';
 
 abstract class TaskRepository {
   /// Get all task stream in a task list
-  SQuerySnapshot getAllTaskStream(String lid);
+  SQuerySnapshot getAllTaskStream(String lid, {TaskSortOptions sortBy = TaskSortOptions.none});
+
   /// Get all [TaskEntity] in a task list
   ResultEither<List<TaskEntity>> getAllTask(String lid);
+
   /// Get all [TaskEntity] in multi task list. [lids] is a list of taskList id
   ResultEither<List<TaskEntity>> getAllTaskInMultiLists(List<String> lids);
   ResultVoid loadAllRemindersInSingleList(String lid);
   ResultVoid loadAllRemindersInMultiLists(List<String> lids);
+
   /// Get a Stream of [TaskEntity] in a task list
   SDocumentSnapshot getOneTaskStream(String lid, String tid);
 
@@ -22,6 +26,7 @@ abstract class TaskRepository {
 
   /// append {email} to [TaskEntity]{assignedMembers}
   ResultVoid assignTask(String lid, String tid, String email);
+
   /// remove {email} from [TaskEntity]{assignedMembers}
   ResultVoid unassignTask(String lid, String tid, String email);
 

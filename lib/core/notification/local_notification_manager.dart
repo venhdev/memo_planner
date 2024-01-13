@@ -16,13 +16,14 @@ class LocalNotificationManager {
 
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
 
-  static InitializationSettings initializationSettings = const InitializationSettings(
-    android: AndroidInitializationSettings('@mipmap/launcher_icon'),
-    // iOS: DarwinInitializationSettings(),
-  );
-
   Future<void> init() async {
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    InitializationSettings initializationSettings = const InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/launcher_icon'),
+      // iOS: DarwinInitializationSettings(),
+    );
+    await _flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+    );
   }
 
   /// Default Notification Details >> single notification
@@ -68,13 +69,15 @@ class LocalNotificationManager {
     required String body,
     required String? payload,
   }) async {
-    await _flutterLocalNotificationsPlugin.show(
-      id,
-      title,
-      body,
-      defaultNotificationDetails,
-      payload: payload,
-    ).onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
+    await _flutterLocalNotificationsPlugin
+        .show(
+          id,
+          title,
+          body,
+          defaultNotificationDetails,
+          payload: payload,
+        )
+        .onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
   }
 
   /// Display a notification with a fixed date and time in the future
@@ -105,16 +108,18 @@ class LocalNotificationManager {
     String? payload,
     required DateTime scheduledTime,
   }) async {
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledTime, tz.local),
-      scheduleNotificationDetails,
-      payload: payload,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-    ).onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
+    await _flutterLocalNotificationsPlugin
+        .zonedSchedule(
+          id,
+          title,
+          body,
+          tz.TZDateTime.from(scheduledTime, tz.local),
+          scheduleNotificationDetails,
+          payload: payload,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        )
+        .onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
     // matchDateTimeComponents: DateTimeComponents.__, >> will recurring if set
   }
 
@@ -126,16 +131,18 @@ class LocalNotificationManager {
     String? payload,
     required DateTime scheduledDate,
   }) async {
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
-      dailyNotificationDetails,
-      payload: payload,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // use to match time to trigger notification daily
-    ).onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
+    await _flutterLocalNotificationsPlugin
+        .zonedSchedule(
+          id,
+          title,
+          body,
+          tz.TZDateTime.from(scheduledDate, tz.local),
+          dailyNotificationDetails,
+          payload: payload,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time, // use to match time to trigger notification daily
+        )
+        .onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
   }
 
   // > Retrieving pending notification requests

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/helpers.dart';
+import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../data/models/myday_model.dart';
 import '../../domain/repository/task_repository.dart';
 
@@ -33,11 +35,12 @@ class MyDayScreen extends StatelessWidget {
               );
             }
             final myDays = maps.map((e) => MyDayModel.fromMap(e)).toList();
+            final currentUserEmail = context.read<AuthBloc>().state.user!.email!;
             return Scaffold(
               appBar: AppBar(
                 title: const Text('My Day'),
               ),
-              body: _build(myDays),
+              body: _build(myDays, currentUserEmail),
             );
           } else if (snapshot.hasError) {
             return MessageScreen(message: snapshot.error.toString());
@@ -55,7 +58,7 @@ class MyDayScreen extends StatelessWidget {
     );
   }
 
-  Widget _build(List<MyDayModel> myDays) => ListView.builder(
+  Widget _build(List<MyDayModel> myDays, String currentUserEmail) => ListView.builder(
         itemCount: myDays.length,
         itemBuilder: (context, index) => StreamBuilder(
           stream: di<TaskRepository>().getOneTaskStream(myDays[index].lid, myDays[index].tid),
@@ -65,6 +68,7 @@ class MyDayScreen extends StatelessWidget {
               if (map == null) return const SizedBox.shrink();
               return TaskItem(
                 task: TaskModel.fromMap(map),
+                currentUserEmail: currentUserEmail,
                 showListName: true,
               );
             } else {

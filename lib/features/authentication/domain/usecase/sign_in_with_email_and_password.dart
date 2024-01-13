@@ -10,7 +10,7 @@ import '../repository/authentication_repository.dart';
 class SignInWithEmailAndPasswordUC
     extends UseCaseWithParams<ResultEither<UserEntity>, SignInParams> {
   SignInWithEmailAndPasswordUC(this._authRepo);
-  final AuthenticationRepository _authRepo;
+  final AuthRepository _authRepo;
 
   @override
   ResultEither<UserEntity> call(SignInParams params) async {

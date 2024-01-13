@@ -35,14 +35,15 @@ DateTime convertStringToDateTime(
   return DateTime.parse(date);
 }
 
-/// Default convert DateTime to String 'dd-MM-yyyy'
-///
 /// Change [pattern] to change the format
+/// 
+/// {defaultValue} will return if [date] is null
 String convertDateTimeToString(
   DateTime? date, {
   String pattern = 'dd-MM-yyyy',
+  
   String defaultValue = '',
-  bool useTextValue = true,
+  bool useTextValue = false,
 }) {
   if (date == null) {
     return defaultValue;

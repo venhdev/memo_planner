@@ -9,7 +9,7 @@ import '../repository/authentication_repository.dart';
 @singleton
 class SignOutUC extends UseCaseNoParam<void> {
   SignOutUC(this.authenticationRepository, this.localNotificationManager);
-  final AuthenticationRepository authenticationRepository;
+  final AuthRepository authenticationRepository;
   final LocalNotificationManager localNotificationManager;
 
   @override

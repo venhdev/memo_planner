@@ -11,6 +11,8 @@ import '../../domain/entities/task_list_entity.dart';
 
 // Every [TaskGroupItem] item is [TaskListEntity]
 
+String _route = '/multi-list';
+
 class TaskListItem extends StatelessWidget {
   const TaskListItem(
     this.isDefault, {
@@ -51,8 +53,8 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.today.codePoint,
         iconColor: Colors.amber,
         onTap: () {
-          final currentUserEmail = context.read<AuthenticationBloc>().state.user!.email!;
-          context.go('/task-list/myday', extra: currentUserEmail);
+          final currentUserEmail = context.read<AuthBloc>().state.user!.email!;
+          context.go('/myday', extra: currentUserEmail);
         },
       );
 
@@ -62,7 +64,7 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.today.codePoint,
         iconColor: Colors.red,
         onTap: () {
-          context.go('/task-list/multi-list', extra: GroupType.today);
+          context.go(_route, extra: GroupType.today);
         },
       );
 
@@ -72,7 +74,7 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.pending_actions.codePoint,
         iconColor: Colors.green,
         onTap: () {
-          context.go('/task-list/multi-list', extra: GroupType.scheduled);
+          context.go(_route, extra: GroupType.scheduled);
         },
       );
 
@@ -82,7 +84,7 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.list.codePoint,
         iconColor: Colors.blue,
         onTap: () {
-          context.go('/task-list/multi-list', extra: GroupType.all);
+          context.go(_route, extra: GroupType.all);
         },
       );
   factory TaskListItem.done(BuildContext context) => TaskListItem(
@@ -91,7 +93,7 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.check_circle.codePoint,
         iconColor: Colors.green,
         onTap: () {
-          context.go('/task-list/multi-list', extra: GroupType.done);
+          context.go(_route, extra: GroupType.done);
         },
       );
 
@@ -101,7 +103,7 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.person.codePoint,
         iconColor: Colors.blue,
         onTap: () {
-          context.go('/task-list/multi-list', extra: GroupType.assign);
+          context.go(_route, extra: GroupType.assign);
         },
       );
 
@@ -110,7 +112,7 @@ class TaskListItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.06,
+        height: 48.0,
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         margin: margin,
         decoration: BoxDecoration(

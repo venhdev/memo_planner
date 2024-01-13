@@ -7,6 +7,7 @@ import 'package:memo_planner/core/constants/typedef.dart';
 import 'package:memo_planner/features/task/domain/entities/myday_entity.dart';
 import 'package:memo_planner/features/task/domain/entities/task_entity.dart';
 
+import '../../../../core/constants/enum.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/repository/task_repository.dart';
 import '../data_sources/firestore_task_data_source.dart';
@@ -23,7 +24,7 @@ class TaskRepositoryImpl implements TaskRepository {
       await _dataSource.addTask(task);
       return const Right(null);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('addTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
     }
   }
@@ -33,7 +34,7 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       return Right(await _dataSource.deleteTask(task));
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('deleteTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
     }
   }
@@ -43,7 +44,7 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       return Right(await _dataSource.editTask(updatedTask, oldTask));
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('editTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
     }
   }
@@ -53,17 +54,17 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       return _dataSource.getOneTaskStream(lid, tid);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('getOneTaskStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
     }
   }
 
   @override
-  SQuerySnapshot getAllTaskStream(String lid) {
+  SQuerySnapshot getAllTaskStream(String lid, {TaskSortOptions sortBy = TaskSortOptions.none}) {
     try {
-      return _dataSource.getAllTaskStream(lid);
+      return _dataSource.getAllTaskStream(lid, sortBy);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('getAllTaskStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
     }
   }
@@ -73,7 +74,7 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       return Right(_dataSource.toggleTask(tid, lid, value));
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('toggleTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
     }
   }
@@ -84,7 +85,7 @@ class TaskRepositoryImpl implements TaskRepository {
       await _dataSource.assignTask(lid, tid, email);
       return const Right(null);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('assignTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
     }
   }
@@ -95,7 +96,7 @@ class TaskRepositoryImpl implements TaskRepository {
       await _dataSource.unassignTask(lid, tid, email);
       return const Right(null);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('unassignTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
     }
   }
@@ -106,7 +107,7 @@ class TaskRepositoryImpl implements TaskRepository {
       await _dataSource.addToMyDay(email, myDay);
       return const Right(null);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('addToMyDay Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
     }
   }
@@ -117,7 +118,7 @@ class TaskRepositoryImpl implements TaskRepository {
       _dataSource.removeFromMyDay(email, myDay);
       return const Right(null);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('removeFromMyDay Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
     }
   }
@@ -127,7 +128,7 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       return _dataSource.getOneMyDayStream(email, tid);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('getOneMyDayStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
     }
   }
@@ -137,7 +138,7 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       return Right(await _dataSource.toggleKeepInMyDay(email, tid, isKeep));
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('toggleKeepInMyDay Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
     }
   }
@@ -148,7 +149,7 @@ class TaskRepositoryImpl implements TaskRepository {
   //     final result = await _dataSource.findOneMyDay(email, tid);
   //     return result;
   //   } catch (e) {
-  //     log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+  //     log('findOneMyDay Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
   //     return null;
   //   }
   // }
@@ -159,7 +160,7 @@ class TaskRepositoryImpl implements TaskRepository {
       _dataSource.removeMismatchInMyDay(email, today);
       return _dataSource.getAllMyDayStream(email);
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('getAllMyDayStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
     }
   }

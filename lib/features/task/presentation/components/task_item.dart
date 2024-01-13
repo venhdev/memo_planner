@@ -1,115 +1,78 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/myday_entity.dart';
-import '../../domain/repository/task_list_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
-import '../../../../config/theme/text_style.dart';
 import '../../../../core/components/widgets.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/utils/helpers.dart';
-import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../data/models/task_list_model.dart';
+import '../../domain/entities/myday_entity.dart';
 import '../../domain/entities/task_entity.dart';
+import '../../domain/repository/task_list_repository.dart';
 import '../../domain/repository/task_repository.dart';
 import '../screens/task_detail_screen.dart';
 import 'assigned_members.dart';
 
 class TaskItem extends StatelessWidget {
-  const TaskItem({super.key, required this.task, this.showListName = false});
+  const TaskItem({super.key, required this.task, this.showListName = false, required this.currentUserEmail});
 
   final TaskEntity task;
   final bool showListName;
+  final String currentUserEmail;
+
+  ({bool isMyDay, bool isKeep}) getMyDayRecord(AsyncSnapshot snapshot) {
+    if (snapshot.hasData) {
+      final map = snapshot.data?.data();
+      if (map == null) {
+        return (isMyDay: false, isKeep: false);
+      } else {
+        return (isMyDay: true, isKeep: map['keep']);
+      }
+    } else {
+      return (isMyDay: false, isKeep: false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final email = context.read<AuthenticationBloc>().state.user!.email!;
     return StreamBuilder(
-        stream: di<TaskRepository>().getOneMyDayStream(email, task.tid!),
+        stream: di<TaskRepository>().getOneMyDayStream(currentUserEmail, task.tid!),
         builder: (context, snapshot) {
           return Dismissible(
             key: Key(task.tid!),
-            dismissThresholds: const {
-              DismissDirection.startToEnd: 0.3,
-              DismissDirection.endToStart: 0.3,
-            },
-            background: getDismissBackGround(snapshot),
-            secondaryBackground: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              child: const ListTile(
-                title: Text(
-                  'Delete',
-                  textDirection: TextDirection.rtl,
-                  style: TextStyle(color: Colors.white),
-                ),
-                trailing: Icon(Icons.delete, color: Colors.white),
-              ),
-            ),
+            dismissThresholds: const {DismissDirection.startToEnd: 0.3, DismissDirection.endToStart: 0.3},
+            background: dismissBackGround(snapshot),
+            secondaryBackground: deleteBackGround(),
             confirmDismiss: (direction) async {
               if (direction == DismissDirection.startToEnd) {
-                final map = snapshot.data?.data();
-                if (map == null) {
-                  // Add to MyDay
-                  di<TaskRepository>()
-                      .addToMyDay(
-                        email,
-                        MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()),
-                      )
-                      .then(
-                        (value) => value.fold(
-                          (l) => showMySnackbar(context, message: l.message),
-                          (r) => showMySnackbar(context, message: 'Added to MyDay'),
-                        ),
-                      );
-                } else {
-                  // Remove from MyDay
-                  di<TaskRepository>()
-                      .removeFromMyDay(
-                        email,
-                        MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()),
-                      )
-                      .then(
-                        (value) => value.fold(
-                          (l) => showMySnackbar(context, message: l.message),
-                          (r) => showMySnackbar(context, message: 'Removed to MyDay'),
-                        ),
-                      );
-                }
-                // Just call Add to MyDay Function, if true it will dismiss the item
+                getMyDayRecord(snapshot).isMyDay
+                    ? await di<TaskRepository>()
+                        .removeFromMyDay(currentUserEmail, MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()))
+                        .then((value) => value.fold(
+                              (l) => showMySnackbar(context, message: l.message),
+                              (r) => showMySnackbar(context, message: 'Removed from MyDay'),
+                            ))
+                    : await di<TaskRepository>()
+                        .addToMyDay(currentUserEmail, MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()))
+                        .then(
+                          (value) => value.fold(
+                            (l) => showMySnackbar(context, message: l.message),
+                            (r) => showMySnackbar(context, message: 'Added to MyDay'),
+                          ),
+                        );
+
+                // ? Just call Add to MyDay Function, if true it will dismiss the item
                 return false;
               } else if (direction == DismissDirection.endToStart) {
-                return showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('Delete Task'),
-                      content: const Text('Are you sure you want to delete this task?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () async {
-                            Navigator.of(context).pop(true);
-                          },
-                          child: Text('Yes', style: MyTextStyle.redTextDialog),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop(false);
-                          },
-                          child: Text('No', style: MyTextStyle.blueTextDialog),
-                        ),
-                      ],
-                    );
-                  },
+                return showMyDialogToConfirm(
+                  context,
+                  title: 'Delete Task?',
+                  content: 'Are you sure you want to delete this task?',
                 );
               }
               return null;
             },
             onDismissed: (direction) async {
-              if (direction == DismissDirection.endToStart) {
-                // Delete Task
-                await di<TaskRepository>().deleteTask(task);
-              }
+              direction == DismissDirection.endToStart ? await di<TaskRepository>().deleteTask(task) : null;
             },
             child: Container(
               decoration: BoxDecoration(
@@ -126,7 +89,7 @@ class TaskItem extends StatelessWidget {
                       value: task.completed,
                       onChanged: (value) => handleToggleTask(task, value!),
                     ),
-                    buildMyDayIcon(email),
+                    buildMyDayIcon(snapshot),
                   ],
                 ),
                 title: Text(
@@ -135,7 +98,7 @@ class TaskItem extends StatelessWidget {
                     decoration: task.completed! ? TextDecoration.lineThrough : null,
                   ),
                 ),
-                subtitle: moreTaskInfo(task, email),
+                subtitle: moreTaskInfo(task, currentUserEmail),
                 trailing: assignedInfo(task),
               ),
             ),
@@ -153,7 +116,7 @@ class TaskItem extends StatelessWidget {
             children: [
               // How many members are assigned to this task
               if (task.assignedMembers!.isNotEmpty) Text('${task.assignedMembers!.length}'),
-              AssignedMembers(task: task, height: 28.0),
+              AssignedMembersList(assignedMembers: task.assignedMembers!, height: 28.0),
             ],
           ),
         )
@@ -245,35 +208,22 @@ class TaskItem extends StatelessWidget {
     );
   }
 
-  Widget buildMyDayIcon(String email) => StreamBuilder(
-        stream: di<TaskRepository>().getOneMyDayStream(email, task.tid!),
-        builder: (_, snapshot) {
-          if (snapshot.hasData) {
-            final map = snapshot.data?.data();
-            if (map == null) {
-              return const SizedBox.shrink();
-            } else {
-              return Icon(
-                Icons.wb_sunny,
-                color: map['keep'] ? Colors.amber : AppColors.kActiveTextColor,
-              );
-            }
-          } else {
-            return const SizedBox.shrink();
-          }
+  Widget buildMyDayIcon(AsyncSnapshot snapshot) => Builder(
+        builder: (context) {
+          final record = getMyDayRecord(snapshot);
+          return record.isMyDay
+              ? Icon(Icons.wb_sunny, color: record.isKeep ? Colors.amber : AppColors.kActiveTextColor)
+              : const SizedBox.shrink();
         },
       );
 
   void openTaskDetailScreen(BuildContext context, TaskEntity task) async {
-    final currentUserEmail = context.read<AuthenticationBloc>().state.user!.email!;
-    // open Modal Bottom Sheet
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => TaskDetailScreen(
-        lid: task.lid!,
-        tid: task.tid!,
+        task: task,
         currentUserEmail: currentUserEmail,
       ),
     );
@@ -283,11 +233,10 @@ class TaskItem extends StatelessWidget {
     di<TaskRepository>().toggleTask(task.tid!, task.lid!, value);
   }
 
-  Widget getDismissBackGround(AsyncSnapshot snapshot) {
+  Widget dismissBackGround(AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
       final map = snapshot.data?.data();
       if (map == null) {
-        // return const Icon(Icons.wb_sunny_outlined, color: AppColors.kDeactivateTextColor);
         return Container(
           color: Colors.green,
           alignment: Alignment.centerLeft,
@@ -315,5 +264,20 @@ class TaskItem extends StatelessWidget {
     } else {
       return const LoadingScreen();
     }
+  }
+
+  Container deleteBackGround() {
+    return Container(
+      color: Colors.red,
+      alignment: Alignment.centerRight,
+      child: const ListTile(
+        title: Text(
+          'Delete',
+          textDirection: TextDirection.rtl,
+          style: TextStyle(color: Colors.white),
+        ),
+        trailing: Icon(Icons.delete, color: Colors.white),
+      ),
+    );
   }
 }

@@ -3,11 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../config/dependency_injection.dart';
-import '../../../../authentication/domain/entities/user_entity.dart';
-import '../../../../authentication/domain/repository/authentication_repository.dart';
-import '../../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
-import '../../../../task/domain/repository/task_list_repository.dart';
-import '../../../data/data_sources/habit_data_source.dart';
+import '../../features/authentication/domain/entities/user_entity.dart';
+import '../../features/authentication/domain/repository/authentication_repository.dart';
+import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
+import '../../features/task/domain/repository/task_list_repository.dart';
 
 class MemberItem extends StatelessWidget {
   /// only pass hid or lid, not both
@@ -29,12 +28,12 @@ class MemberItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: di<AuthenticationRepository>().getUserByEmail(renderEmail),
+      future: di<AuthRepository>().getUserByEmail(renderEmail),
       builder: (context, snapshot) {
         // if (snapshot.connectionState == ConnectionState.done) {
         if (snapshot.hasData) {
           final member = snapshot.data;
-          final currentUser = context.read<AuthenticationBloc>().state.user;
+          final currentUser = context.read<AuthBloc>().state.user;
           return _build(member!, currentUser!, context);
         } else {
           return Text(renderEmail);
@@ -111,7 +110,7 @@ class MemberItem extends StatelessWidget {
           //* Remove button
           TextButton.icon(
             label: Text((renderEmail == ownerEmail) ? 'Owner' : 'Remove'),
-            onPressed: getHandleFunction(
+            onPressed: handleRemoveMember(
               currentUser: currentUser,
               member: member,
               context: context,
@@ -123,12 +122,28 @@ class MemberItem extends StatelessWidget {
     );
   }
 
-  VoidCallback? getHandleFunction({
+  VoidCallback? handleRemoveMember({
     required UserEntity currentUser,
     required UserEntity member,
     required BuildContext context,
   }) {
-    if (hid != null) {
+    return ownerEmail == currentUser.email // if owner
+        ? renderEmail == currentUser.email //> current render member is owner
+            ? null // cannot remove self
+            : () {
+                di<TaskListRepository>().removeMember(lid!, member.email!); // remove other member
+              }
+        : renderEmail == currentUser.email //> current render member is member
+            ? () {
+                di<TaskListRepository>().removeMember(lid!, member.email!); // remove self
+                // redirect to home
+                context.go('/task-list');
+              }
+            : null; // cannot remove other member
+  }
+}
+
+/**if (hid != null) {
       return ownerEmail == currentUser.email // if owner
           ? renderEmail == currentUser.email //> current render member is owner
               ? null // cannot remove self
@@ -142,20 +157,4 @@ class MemberItem extends StatelessWidget {
                   context.go('/habit');
                 }
               : null; // cannot remove other member
-    } else {
-      return ownerEmail == currentUser.email // if owner
-          ? renderEmail == currentUser.email //> current render member is owner
-              ? null // cannot remove self
-              : () {
-                  di<TaskListRepository>().removeMember(lid!, member.email!); // remove other member
-                }
-          : renderEmail == currentUser.email //> current render member is member
-              ? () {
-                  di<TaskListRepository>().removeMember(lid!, member.email!); // remove self
-                  // redirect to home
-                  context.go('/task-list');
-                }
-              : null; // cannot remove other member
-    }
-  }
-}
+    } else  */

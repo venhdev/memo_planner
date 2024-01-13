@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:googleapis/fcm/v1.dart';
-import 'package:googleapis_auth/auth_io.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart' as notification;
+import 'package:googleapis/fcm/v1.dart';
+import 'package:googleapis_auth/auth_io.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/notification/local_notification_manager.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 import '../../config/credentials.dart';
-import '../../config/dependency_injection.dart';
 import '../../features/task/data/models/task_model.dart';
 import '../constants/constants.dart';
+import 'local_notification_manager.dart';
 
 // Use service account credentials to get an authenticated and auto refreshing client.
 Future<AuthClient> obtainAuthenticatedClient() async {
@@ -30,18 +31,7 @@ Future<AuthClient> obtainAuthenticatedClient() async {
 void _foregroundMessageHandler(RemoteMessage message) {
   try {
     log('Got a message whilst in the foreground!');
-    final type = message.data['type'] as String;
-
-    switch (type) {
-      case kFCMAddOrUpdateReminder:
-        handleAddOrUpdateReminder(message.data);
-        break;
-      case kFCMDeleteReminder:
-        handleDeleteReminder(message.data);
-        break;
-      default:
-        log('Unknown type: $type');
-    }
+    syncNotification(message);
 
     // if (message.notification != null) {
     //   log('Message also contained a notification: ${message.notification}');
@@ -59,11 +49,7 @@ void _foregroundMessageHandler(RemoteMessage message) {
 @pragma('vm:entry-point')
 Future<void> _backgroundMessageHandler(RemoteMessage message) async {
   log('Got a message whilst in the background!');
-  log('Message data: ${message.data}');
-  log('Message also contained a notification: ${message.notification}');
-  log('Title: ${message.notification?.title}');
-  log('Body: ${message.notification?.body}');
-  // delete message to prevent showing notification
+  syncNotification(message);
 }
 
 @singleton
@@ -108,7 +94,7 @@ class FirebaseCloudMessagingManager {
     // background message handler
     FirebaseMessaging.onBackgroundMessage(_backgroundMessageHandler);
 
-    log('init MessagingManager success! with currentFCMToken: $currentFCMToken');
+    // log('init MessagingManager success! with currentFCMToken: $currentFCMToken');
   }
 
   Future<void> sendDataMessageToMultipleDevices({
@@ -136,7 +122,7 @@ class FirebaseCloudMessagingManager {
 
       client.close();
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('sendDataMessageToMultipleDevices Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
     }
   }
 
@@ -163,19 +149,36 @@ class FirebaseCloudMessagingManager {
 
       client.close();
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('sendDataMessage Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
     }
+  }
+}
+
+void syncNotification(RemoteMessage message) {
+  final type = message.data['type'] as String;
+
+  switch (type) {
+    case kFCMAddOrUpdateReminder:
+      tz.initializeTimeZones();
+      handleAddOrUpdateReminder(message.data);
+      break;
+    case kFCMDeleteReminder:
+      handleDeleteReminder(message.data);
+      break;
+    default:
+      log('Unknown type: $type');
   }
 }
 
 Future<void> handleAddOrUpdateReminder(Map<String, dynamic> data) async {
   final TaskModel task = TaskModel.fromJson(data['task']!);
-  di<LocalNotificationManager>().setScheduleNotificationFromTask(task);
+
+  LocalNotificationManager(notification.FlutterLocalNotificationsPlugin()).setScheduleNotificationFromTask(task);
 }
 
 Future<void> handleDeleteReminder(Map<String, dynamic> data) async {
   final int rid = int.parse(data['rid']! as String);
-  di<LocalNotificationManager>().I.cancel(rid);
+  LocalNotificationManager(notification.FlutterLocalNotificationsPlugin()).I.cancel(rid);
 }
 
 // POST https://fcm.googleapis.com/v1/projects/{projectId}/messages:send

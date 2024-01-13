@@ -7,7 +7,9 @@ sealed class TaskEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class TaskEventInitial extends TaskEvent {
-  const TaskEventInitial();
-}
+class TaskInitial extends TaskEvent {
+  const TaskInitial();
 
+  @override
+  List<Object> get props => [];
+}

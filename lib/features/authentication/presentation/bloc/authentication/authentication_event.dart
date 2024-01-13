@@ -1,15 +1,15 @@
 part of 'authentication_bloc.dart';
 
-sealed class AuthenticationEvent extends Equatable {
-  const AuthenticationEvent();
+sealed class AuthEvent extends Equatable {
+  const AuthEvent();
 
   @override
   List<Object> get props => [];
 }
 
-class InitialEvent extends AuthenticationEvent {}
+class AuthInitial extends AuthEvent {}
 
-class StatusChanged extends AuthenticationEvent {
+class StatusChanged extends AuthEvent {
   const StatusChanged({
     required this.status,
     required this.user,
@@ -21,7 +21,7 @@ class StatusChanged extends AuthenticationEvent {
   List<Object> get props => [status, user ?? ''];
 }
 
-class SignInWithEmail extends AuthenticationEvent {
+class SignInWithEmail extends AuthEvent {
   const SignInWithEmail({
     required this.email,
     required this.password,
@@ -33,11 +33,11 @@ class SignInWithEmail extends AuthenticationEvent {
   List<Object> get props => [email, password];
 }
 
-class SignInWithGoogle extends AuthenticationEvent {}
+class SignInWithGoogle extends AuthEvent {}
 
-class SignOutEvent extends AuthenticationEvent {}
+class SignOutEvent extends AuthEvent {}
 
-class SignUpWithEmail extends AuthenticationEvent {
+class SignUpWithEmail extends AuthEvent {
   const SignUpWithEmail({
     required this.email,
     required this.password,
@@ -49,7 +49,7 @@ class SignUpWithEmail extends AuthenticationEvent {
   List<Object> get props => [email, password];
 }
 
-class UpdateDisplayName extends AuthenticationEvent {
+class UpdateDisplayName extends AuthEvent {
   const UpdateDisplayName({
     required this.name,
   });

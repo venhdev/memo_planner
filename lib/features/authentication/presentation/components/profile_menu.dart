@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ProfileMenuWidget extends StatelessWidget {
-  const ProfileMenuWidget({
+class SettingMenuItem extends StatelessWidget {
+  const SettingMenuItem({
     Key? key,
     required this.title,
     required this.icon,
@@ -18,7 +18,6 @@ class ProfileMenuWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     // var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return ListTile(
       onTap: onPress,

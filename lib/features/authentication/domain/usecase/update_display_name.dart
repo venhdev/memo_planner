@@ -7,7 +7,7 @@ import '../repository/authentication_repository.dart';
 class UpdateDisplayNameUC extends UseCaseWithParams<void, String> {
   UpdateDisplayNameUC(this._authenticationRepository);
 
-  final AuthenticationRepository _authenticationRepository;
+  final AuthRepository _authenticationRepository;
 
   @override
   Future<void> call(String params) async {

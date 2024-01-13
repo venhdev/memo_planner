@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:memo_planner/config/routes/app_navigation_drawer.dart';
+import 'package:memo_planner/core/utils/helpers.dart';
 
 import '../../../../core/components/common_screen.dart';
 import '../../../../core/constants/enum.dart';
@@ -21,6 +23,7 @@ class TaskHomeScreen extends StatelessWidget {
     log('render TaskHomeScreen');
     return Scaffold(
       appBar: _buildAppBar(context),
+      drawer: const AppNavigationDrawer(),
       body: BlocBuilder<TaskBloc, TaskState>(
         builder: (context, state) {
           if (state.status == BlocStatus.loaded) {
@@ -56,7 +59,10 @@ class TaskHomeScreen extends StatelessWidget {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text('Your Task', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+      title: Text(
+        convertDateTimeToString(getToday(), pattern: 'dd/MM'),
+        style: const TextStyle(color: Colors.black87, fontStyle: FontStyle.italic),
+      ),
       actions: [
         // IconButton(
         //   onPressed: () {
@@ -119,7 +125,7 @@ class TaskHomeScreen extends StatelessWidget {
               false,
               taskList: taskLists[index],
               onTap: () {
-                context.go('/task-list/single-list/${taskLists[index].lid}');
+                context.go('/single-list/${taskLists[index].lid}');
               },
             );
           },

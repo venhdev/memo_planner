@@ -1,34 +1,27 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/utils/helpers.dart';
 
 import '../../../../config/dependency_injection.dart';
-import '../../../../core/components/common_screen.dart';
 import '../../../../core/components/my_picker.dart';
 import '../../../../core/constants/colors.dart';
 import '../../../../core/notification/reminder.dart';
-import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
+import '../../../../core/utils/helpers.dart';
 import '../../data/models/myday_model.dart';
-import '../../data/models/task_model.dart';
 import '../../domain/entities/myday_entity.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/repository/task_repository.dart';
 import '../components/assigned_members.dart';
-import '../components/dialog_assign_member.dart';
 import '../components/priority_table.dart';
 
 class TaskDetailScreen extends StatelessWidget {
   const TaskDetailScreen({
     super.key,
-    required this.lid,
-    required this.tid,
+    required this.task,
     required this.currentUserEmail,
   });
 
-  final String lid;
-  final String tid;
+  final TaskEntity task;
   final String currentUserEmail;
 
   @override
@@ -36,41 +29,46 @@ class TaskDetailScreen extends StatelessWidget {
         initialChildSize: 1.0,
         maxChildSize: 1.0,
         minChildSize: 0.9,
-        builder: (context, scrollController) => StreamBuilder(
-          stream: di<TaskRepository>().getOneTaskStream(lid, tid),
-          builder: (context, snapshot) {
-            log('render TaskDetailScreen with ${snapshot.connectionState}');
-            if (snapshot.connectionState == ConnectionState.active) {
-              if (snapshot.hasData) {
-                final map = snapshot.data?.data();
-                if (map == null) {
-                  return Container(
-                    color: Colors.white,
-                    child: const MessageScreen(message: 'Not found'),
-                  );
-                }
-                if (map.isEmpty) {
-                  return Container(
-                    color: Colors.white,
-                    child: const MessageScreen(message: 'Empty'),
-                  );
-                }
-                final TaskEntity task = TaskModel.fromMap(map);
-                return TaskDetailBody(
-                  scrollController: scrollController,
-                  task: task,
-                  currentUserEmail: currentUserEmail,
-                );
-              } else if (snapshot.hasError) {
-                return MessageScreen(message: snapshot.error.toString());
-              } else {
-                return const LoadingScreen();
-              }
-            } else {
-              return const LoadingScreen();
-            }
-          },
+        builder: (context, scrollController) => TaskDetailBody(
+          scrollController: scrollController,
+          oldTask: task,
+          currentUserEmail: currentUserEmail,
         ),
+        // builder: (context, scrollController) => StreamBuilder(
+        //   stream: di<TaskRepository>().getOneTaskStream(task.lid!, task.tid!),
+        //   builder: (context, snapshot) {
+        //     log('render TaskDetailScreen with ${snapshot.connectionState}');
+        //     // if (snapshot.connectionState == ConnectionState.active) {
+        //       if (snapshot.hasData) {
+        //         final map = snapshot.data?.data();
+        //         if (map == null) {
+        //           return Container(
+        //             color: Colors.white,
+        //             child: const MessageScreen(message: 'Not found'),
+        //           );
+        //         }
+        //         if (map.isEmpty) {
+        //           return Container(
+        //             color: Colors.white,
+        //             child: const MessageScreen(message: 'Empty'),
+        //           );
+        //         }
+        //         final TaskEntity task = TaskModel.fromMap(map);
+        //         return TaskDetailBody(
+        //           scrollController: scrollController,
+        //           task: task,
+        //           currentUserEmail: currentUserEmail,
+        //         );
+        //       } else if (snapshot.hasError) {
+        //         return MessageScreen(message: snapshot.error.toString());
+        //       } else {
+        //         return const LoadingScreen();
+        //       }
+        //     // } else {
+        //     //   return const LoadingScreen();
+        //     // }
+        //   },
+        // ),
       );
 }
 
@@ -78,64 +76,74 @@ class TaskDetailBody extends StatefulWidget {
   const TaskDetailBody({
     super.key,
     required this.scrollController,
-    required this.task,
+    required this.oldTask,
     required this.currentUserEmail,
-    this.prevMyDay,
   });
 
   final ScrollController scrollController;
 
-  final TaskEntity task;
+  final TaskEntity oldTask;
   final String currentUserEmail;
-  final MyDayEntity? prevMyDay;
 
   @override
   State<TaskDetailBody> createState() => _TaskDetailBodyState();
 }
 
 class _TaskDetailBodyState extends State<TaskDetailBody> {
-  final taskNameFocusNode = FocusNode();
   final taskNameController = TextEditingController();
   final taskDescriptionController = TextEditingController();
+  bool isDismiss = false;
 
-  bool unSavedChanges() =>
+  bool isUnSavedChanges() =>
+      unSavedCompleted ||
       unSavedTaskName ||
       unSavedPriority ||
+      unSavedAddToMyDay ||
       unSavedReminder ||
       unSavedDueDate ||
-      unSavedDescription ||
-      unSavedAddToMyDay;
+      unSavedAssignTo ||
+      unSavedDescription;
 
+  bool unSavedCompleted = false;
   bool unSavedTaskName = false;
   bool unSavedPriority = false;
+  bool unSavedMyDay = false;
   bool unSavedReminder = false;
   bool unSavedDueDate = false;
   bool unSavedDescription = false;
   bool unSavedAddToMyDay = false;
+  bool unSavedAssignTo = false;
 
+  late bool _completed;
   late String _taskName;
   int? _priority;
   Reminder? _reminder;
   DateTime? _dueDate;
+  late List<String> _assignedMembers;
   String? _description;
+
+  late Stream stream;
 
   @override
   void initState() {
     super.initState();
-    taskNameController.text = widget.task.taskName!;
-    taskDescriptionController.text = widget.task.description!;
-    _taskName = widget.task.taskName!;
-    _priority = widget.task.priority;
-    _reminder = widget.task.reminders;
-    _dueDate = widget.task.dueDate;
-    _description = widget.task.description;
+    _completed = widget.oldTask.completed!;
+    taskNameController.text = widget.oldTask.taskName!;
+    taskDescriptionController.text = widget.oldTask.description!;
+    _taskName = widget.oldTask.taskName!;
+    _priority = widget.oldTask.priority;
+    _reminder = widget.oldTask.reminders;
+    _dueDate = widget.oldTask.dueDate;
+    _assignedMembers = widget.oldTask.assignedMembers!;
+    _description = widget.oldTask.description;
+    stream = di<TaskRepository>().getOneMyDayStream(widget.currentUserEmail, widget.oldTask.tid!);
   }
 
   @override
   void dispose() {
-    saveChanges();
-    taskNameFocusNode.dispose();
+    if (!isDismiss) saveChanges();
     taskNameController.dispose();
+    taskDescriptionController.dispose();
     super.dispose();
   }
 
@@ -167,22 +175,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
 
           // Priority table
           const SizedBox(height: 16.0),
-          PriorityTable(
-            priority: _priority,
-            callBack: (value) {
-              if (value != widget.task.priority) {
-                setState(() {
-                  _priority = value;
-                  unSavedPriority = true;
-                });
-              } else {
-                setState(() {
-                  _priority = value;
-                  unSavedPriority = false;
-                });
-              }
-            },
-          ),
+          _buildPriorityTable(),
 
           // Add to MyDay button
           const SizedBox(height: 16.0),
@@ -208,9 +201,9 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
           const SizedBox(height: 16.0),
           Text(
             'createdAt: ${convertDateTimeToString(
-              widget.task.created,
+              widget.oldTask.created,
               pattern: 'dd/MM/yyyy - HH:mm',
-            )} by ${widget.task.creator?.displayName ?? 'unknown'}',
+            )} by ${widget.oldTask.creator?.displayName ?? 'unknown'}',
             style: const TextStyle(color: Colors.grey),
           ),
 
@@ -218,7 +211,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
           const SizedBox(height: 16.0),
           Text(
             'updatedAt: ${convertDateTimeToString(
-              widget.task.updated,
+              widget.oldTask.updated,
               pattern: 'dd/MM/yyyy - HH:mm',
             )}',
             style: const TextStyle(color: Colors.grey),
@@ -232,26 +225,23 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: TextButton(
-        onPressed: () {
-          // show dialog to select members
-          showMemberToAddAssign();
-        },
+        onPressed: () => showAssignMemberDialog(), // show dialog to select members
         child: Row(
           children: [
             Icon(
               Icons.person_outline,
-              color: widget.task.assignedMembers!.isNotEmpty ? AppColors.kActiveTextColor : Colors.black,
+              color: _assignedMembers.isNotEmpty ? AppColors.kActiveTextColor : Colors.black,
             ),
             const SizedBox(width: 8),
             Text(
               'Assign to ',
               style: TextStyle(
-                color: widget.task.assignedMembers!.isNotEmpty ? AppColors.kActiveTextColor : Colors.black,
+                color: _assignedMembers.isNotEmpty ? AppColors.kActiveTextColor : Colors.black,
               ),
             ),
-            widget.task.assignedMembers != null
-                ? AssignedMembers(
-                    task: widget.task,
+            _assignedMembers.isNotEmpty
+                ? AssignedMembersList(
+                    assignedMembers: _assignedMembers,
                   )
                 : const SizedBox.shrink(),
           ],
@@ -266,7 +256,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         await showMyDatePicker(context, initDate: _dueDate ?? DateTime.now()).then(
           (value) {
             // if the picked date different from the original date
-            if (value != widget.task.dueDate) {
+            if (value != widget.oldTask.dueDate) {
               setState(() {
                 _dueDate = value;
                 unSavedDueDate = true;
@@ -296,7 +286,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                     setState(() {
                       _dueDate = null;
                       // if before due date is not null >> there is a change
-                      if (widget.task.dueDate != null) {
+                      if (widget.oldTask.dueDate != null) {
                         unSavedDueDate = true;
                       } else {
                         unSavedDueDate = false;
@@ -308,6 +298,25 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
               : const SizedBox.shrink(),
         ],
       ),
+    );
+  }
+
+  PriorityTable _buildPriorityTable() {
+    return PriorityTable(
+      priority: _priority,
+      callBack: (value) {
+        if (value != widget.oldTask.priority) {
+          setState(() {
+            _priority = value;
+            unSavedPriority = true;
+          });
+        } else {
+          setState(() {
+            _priority = value;
+            unSavedPriority = false;
+          });
+        }
+      },
     );
   }
 
@@ -337,7 +346,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
             setState(
               () {
                 // > if the current reminder is null > create new reminder
-                if (widget.task.reminders == null) {
+                if (widget.oldTask.reminders == null) {
                   final newReminder = Reminder(
                     rid: generateNotificationId(pickedDateTime),
                     scheduledTime: pickedDateTime,
@@ -393,7 +402,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                     setState(() {
                       _reminder = null;
                       // if before reminder is not null >> there is a change
-                      if (widget.task.reminders != null) {
+                      if (widget.oldTask.reminders != null) {
                         unSavedReminder = true;
                       } else {
                         unSavedReminder = false;
@@ -460,9 +469,8 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
   // }
 
   Widget _buildMyDayButton() {
-    final email = context.read<AuthenticationBloc>().state.user!.email!;
     return StreamBuilder(
-      stream: di<TaskRepository>().getOneMyDayStream(email, widget.task.tid!),
+      stream: stream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final map = snapshot.data?.data();
@@ -470,11 +478,11 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
             return TextButton(
               onPressed: () {
                 final myDay = MyDayEntity(
-                  lid: widget.task.lid!,
-                  tid: widget.task.tid!,
+                  lid: widget.oldTask.lid!,
+                  tid: widget.oldTask.tid!,
                   created: getToday(),
                 );
-                di<TaskRepository>().addToMyDay(email, myDay);
+                di<TaskRepository>().addToMyDay(widget.currentUserEmail, myDay);
               },
               child: const Row(
                 children: [
@@ -489,7 +497,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
             final myday = MyDayModel.fromMap(map);
             return TextButton(
               onPressed: () {
-                di<TaskRepository>().removeFromMyDay(email, myday);
+                di<TaskRepository>().removeFromMyDay(widget.currentUserEmail, myday);
               },
               child: Row(
                 children: [
@@ -499,7 +507,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                   const Spacer(), //> to push the icon to the right
                   TextButton(
                     onPressed: () {
-                      di<TaskRepository>().toggleKeepInMyDay(email, widget.task.tid!, !myday.keep);
+                      di<TaskRepository>().toggleKeepInMyDay(widget.currentUserEmail, widget.oldTask.tid!, !myday.keep);
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -537,12 +545,12 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         maxLines: null,
         minLines: 5,
         onChanged: (value) {
-          if (value.trim() != widget.task.description) {
+          if (value.trim() != widget.oldTask.description) {
             setState(() {
               _description = value;
               unSavedDescription = true;
             });
-          } else if (value.trim() == widget.task.description && _description != value) {
+          } else if (value.trim() == widget.oldTask.description && _description != value) {
             // after trim, the value is the same as the original
             setState(() {
               _description = value;
@@ -559,22 +567,39 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         opacity: animation,
         child: child,
       ),
-      child: unSavedChanges()
-          ? TextButton.icon(
-              onPressed: () {
-                saveChanges();
-                setState(
-                  () {
-                    unSavedTaskName = false;
-                    unSavedPriority = false;
-                    unSavedReminder = false;
-                    unSavedDueDate = false;
-                    unSavedDescription = false;
+      child: isUnSavedChanges()
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Save changes button
+                TextButton.icon(
+                  onPressed: () async {
+                    await saveChanges();
+                    setState(
+                      () {
+                        unSavedCompleted = false;
+                        unSavedTaskName = false;
+                        unSavedPriority = false;
+                        unSavedReminder = false;
+                        unSavedDueDate = false;
+                        unSavedDescription = false;
+                        unSavedAssignTo = false;
+                      },
+                    );
                   },
-                );
-              },
-              label: const Text('Save changes', style: TextStyle(color: Colors.green)),
-              icon: const Icon(Icons.save_alt, color: Colors.green),
+                  label: const Text('Save changes', style: TextStyle(color: Colors.green)),
+                  icon: const Icon(Icons.save_alt, color: Colors.green),
+                ),
+                // Dismiss button
+                TextButton.icon(
+                  onPressed: () {
+                    isDismiss = true;
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.close, color: Colors.red),
+                  label: const Text('Dismiss', style: TextStyle(color: Colors.red)),
+                ),
+              ],
             )
           : ElevatedButton(
               onPressed: () {
@@ -593,7 +618,6 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
 
   Widget _buildTaskName() {
     return TextField(
-      focusNode: taskNameFocusNode,
       controller: taskNameController,
       textAlignVertical: TextAlignVertical.center,
       maxLines: null,
@@ -605,12 +629,22 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         ),
         // checkbox
         prefixIcon: Checkbox(
-          value: widget.task.completed,
-          onChanged: (value) => di<TaskRepository>().toggleTask(
-            widget.task.tid!,
-            widget.task.lid!,
-            value!,
-          ),
+          value: _completed,
+          onChanged: (value) {
+            setState(() {
+              _completed = value!;
+              if (_completed != widget.oldTask.completed) {
+                unSavedCompleted = true;
+              } else {
+                unSavedCompleted = false;
+              }
+            });
+            // di<TaskRepository>().toggleTask(
+            //   widget.oldTask.tid!,
+            //   widget.oldTask.lid!,
+            //   value!,
+            // );
+          },
         ),
       ),
       style: const TextStyle(
@@ -618,12 +652,12 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         fontWeight: FontWeight.bold,
       ),
       onChanged: (value) {
-        if (value.trim() != widget.task.taskName) {
+        if (value.trim() != widget.oldTask.taskName) {
           setState(() {
             _taskName = value;
             unSavedTaskName = true;
           });
-        } else if (value.trim() == widget.task.taskName && _taskName != value) {
+        } else if (value.trim() == widget.oldTask.taskName && _taskName != value) {
           // after trim, the value is the same as the original
           setState(() {
             _taskName = value;
@@ -634,22 +668,19 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
     );
   }
 
-  Future<TimeOfDay?> pickTime() => showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-      );
-
-  Future<DateTime?> pickDate() => showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2020),
-        lastDate: DateTime(2030),
-      );
-
-  Future<dynamic> showMemberToAddAssign() {
+  Future<void> showAssignMemberDialog() {
     return showDialog(
       context: context,
-      builder: (context) => DialogAssignMember(lid: widget.task.lid!, tid: widget.task.tid!),
+      builder: (context) => AssignMemberDialog(
+        task: widget.oldTask,
+        valueChanged: (value) {
+          // the same location between _assignedMembers and widget.oldTask.assignedMembers
+          setState(() {
+            _assignedMembers = value;
+            if (_assignedMembers != widget.oldTask.assignedMembers) unSavedAssignTo = true;
+          });
+        },
+      ),
     );
   }
 
@@ -676,20 +707,26 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
       ..showSnackBar(snackBar);
   }
 
-  void saveChanges() {
-    if (unSavedChanges()) {
-      final updatedTask = widget.task.copyWith(
+  Future<void> saveChanges() async {
+    if (isUnSavedChanges()) {
+      final updatedTask = widget.oldTask.copyWith(
+        completed: _completed,
         taskName: _taskName,
         priority: _priority,
         reminders: _reminder,
         dueDate: _dueDate,
+        assignedMembers: _assignedMembers,
         description: _description,
         allowDueDateNull: true,
         allowRemindersNull: true,
         allowPriorityNull: true,
         updated: DateTime.now(),
       );
-      di<TaskRepository>().editTask(updatedTask, widget.task);
+      await di<TaskRepository>().editTask(updatedTask, widget.oldTask);
     }
   }
+
+  Future<TimeOfDay?> pickTime() => showMyTimePicker(context, initTime: TimeOfDay.now());
+
+  Future<DateTime?> pickDate() => showMyDatePicker(context, initDate: DateTime.now());
 }

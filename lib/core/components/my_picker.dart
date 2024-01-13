@@ -128,5 +128,4 @@ class MyDateTimePicker extends StatelessWidget {
 }
 
 /// Return the same [date] with the [time] set
-DateTime copyTimeOfDay(DateTime date, TimeOfDay time) =>
-    DateTime(date.year, date.month, date.day, time.hour, time.minute);
+DateTime copyTimeOfDay(DateTime date, TimeOfDay time) => DateTime(date.year, date.month, date.day, time.hour, time.minute);

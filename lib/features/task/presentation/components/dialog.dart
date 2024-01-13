@@ -86,7 +86,7 @@ class _AddTaskListDialogState extends State<AddTaskListDialog> {
         TextButton(
           onPressed: () async {
             if (widget.controller.text.isNotEmpty) {
-              final currentUser = context.read<AuthenticationBloc>().state.user;
+              final currentUser = context.read<AuthBloc>().state.user;
               //! handle Add
               widget.isAdd
                   ? await di<TaskListRepository>()

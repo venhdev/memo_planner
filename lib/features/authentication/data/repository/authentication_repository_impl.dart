@@ -14,8 +14,8 @@ import '../models/user_model.dart';
 
 // https://firebase.google.com/docs/auth/admin/errors
 
-@Singleton(as: AuthenticationRepository)
-class AuthenticationRepositoryImpl implements AuthenticationRepository {
+@Singleton(as: AuthRepository)
+class AuthenticationRepositoryImpl implements AuthRepository {
   AuthenticationRepositoryImpl(this._firebaseAuthDataSource);
   final AuthenticationDataSource _firebaseAuthDataSource;
 

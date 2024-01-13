@@ -18,7 +18,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     this._getCurrentUserUC,
     this._loadAllReminderUC,
   ) : super(const TaskState.initial()) {
-    on<TaskEventInitial>(_onInitial);
+    on<TaskInitial>(_onInitial);
   }
 
   final GetAllTaskListStreamOfUserUC _getAllTaskStreamOfUserUC;
@@ -26,7 +26,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   final LoadAllReminderUC _loadAllReminderUC;
 
   Future<void> _onInitial(
-    TaskEventInitial event,
+    TaskInitial event,
     Emitter<TaskState> emit,
   ) async {
     emit(const TaskState.loading());

@@ -7,7 +7,7 @@ import '../repository/authentication_repository.dart';
 @singleton
 class GetCurrentUserUC extends UseCaseNoParam<UserEntity?> {
   GetCurrentUserUC(this._authenticationRepository);
-  final AuthenticationRepository _authenticationRepository;
+  final AuthRepository _authenticationRepository;
 
   @override
   UserEntity? call() {

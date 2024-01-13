@@ -1,14 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart';
 
 import '../../core/components/widgets.dart';
-import '../../core/notification/firebase_cloud_messaging_manager.dart';
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
-import '../dependency_injection.dart';
+import '../../features/authentication/presentation/screens/about_screen.dart';
 
 class AppNavigationDrawer extends StatelessWidget {
   const AppNavigationDrawer({
@@ -32,12 +28,12 @@ class AppNavigationDrawer extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      color: Colors.blue.shade500,
+      color: Colors.green.shade500,
       padding: EdgeInsets.only(
         top: 16 + MediaQuery.of(context).padding.top,
         bottom: 16.0,
       ),
-      child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+      child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           if (state.status == AuthenticationStatus.authenticated) {
             return Column(
@@ -68,13 +64,32 @@ class AppNavigationDrawer extends StatelessWidget {
                   }
                 }),
                 const SizedBox(height: 12.0),
-                Text(
-                  state.user!.displayName ?? state.user!.email!.split('@')[0],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28.0,
+                ListTile(
+                  title: Text(
+                    state.user!.displayName ?? state.user!.email!.split('@')[0],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                    ),
                   ),
+                  subtitle: const Text(
+                    'Tap to edit',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black38,
+                    ),
+                  ),
+                  onTap: () {
+                    // show dialog to edit name
+                    showDialogForEditName(
+                      context,
+                      state.user!.displayName ?? state.user!.email!.split('@')[0],
+                    );
+                  },
                 ),
+
                 const SizedBox(height: 8.0),
                 Text(
                   state.user!.email!,
@@ -121,62 +136,75 @@ class AppNavigationDrawer extends StatelessWidget {
       child: Wrap(
         runSpacing: 8.0,
         children: [
-          ListTile(
-            leading: const Icon(Icons.checklist),
-            title: const Text('Habit'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/habit');
-            },
-          ),
+          // ListTile(
+          //   leading: const Icon(Icons.checklist),
+          //   title: const Text('Habit'),
+          //   onTap: () {
+          //     Navigator.pop(context);
+          //     context.go('/habit');
+          //   },
+          // ),
           ListTile(
             leading: const Icon(Icons.task_alt),
-            title: const Text('Task'),
+            title: const Text('Home'),
             onTap: () {
               Navigator.pop(context);
-              context.go('/task-list');
+              context.go('/');
             },
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.add),
-            title: const Text('Add New Habit'),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/habit/add');
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.add),
-            title: const Text('Send test notification'),
-            onTap: () async {
-              final fcm = di<FirebaseCloudMessagingManager>();
 
-              await fcm.sendDataMessage(
-                token: fcm.currentFCMToken!,
-                data: {
-                  'test': 'test',
-                },
+          // const Divider(),
+          // ListTile(
+          //   leading: const Icon(Icons.add),
+          //   title: const Text('Add New Habit'),
+          //   onTap: () {
+          //     Navigator.pop(context);
+          //     context.go('/habit/add');
+          //   },
+          // ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text('About'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AboutScreen(),
+                ),
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.add),
-            title: const Text('Test Retrieve tokens'),
-            onTap: () async {
-              final repo = di<TaskListRepository>();
+          // ListTile(
+          //   leading: const Icon(Icons.add),
+          //   title: const Text('Send test notification'),
+          //   onTap: () async {
+          //     final fcm = di<FirebaseCloudMessagingManager>();
 
-              final tokensEither = await repo.getAllMemberTokens('4GmGZenVHC6QVdALcHac');
-              tokensEither.fold(
-                (l) => log('getAllMemberTokens Fail: ${l.message}'),
-                (tokens) {
-                  log('getAllMemberTokens Success: ${tokens.toString()}\n');
-                  log('getAllMemberTokens length: ${tokens.length}');
-                },
-              );
-            },
-          ),
+          //     await fcm.sendDataMessage(
+          //       token: fcm.currentFCMToken!,
+          //       data: {
+          //         'test': 'test',
+          //       },
+          //     );
+          //   },
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.add),
+          //   title: const Text('Test Retrieve tokens'),
+          //   onTap: () async {
+          //     final repo = di<TaskListRepository>();
+
+          //     final tokensEither = await repo.getAllMemberTokens('4GmGZenVHC6QVdALcHac');
+          //     tokensEither.fold(
+          //       (l) => log('getAllMemberTokens Fail: ${l.message}'),
+          //       (tokens) {
+          //         log('getAllMemberTokens Success: ${tokens.toString()}\n');
+          //         log('getAllMemberTokens length: ${tokens.length}');
+          //       },
+          //     );
+          //   },
+          // ),
           // ListTile(
           //   leading: const Icon(Icons.cast),
           //   title: const Text('(dev) show pending & activate notification'),

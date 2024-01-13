@@ -4,6 +4,34 @@ import '../../config/theme/text_style.dart';
 
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 
+void showDialogForEditName(BuildContext context, String prevName) async {
+  final controller = TextEditingController(text: prevName);
+  await showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Edit Name'),
+      content: TextField(
+        controller: controller,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () async {
+            Navigator.pop(context);
+            context.read<AuthBloc>().add(UpdateDisplayName(name: controller.text));
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+}
+
 void showMyDialogConfirmSignOut(BuildContext context) {
   showDialog(
     context: context,
@@ -17,7 +45,7 @@ void showMyDialogConfirmSignOut(BuildContext context) {
         ),
         TextButton(
           onPressed: () {
-            BlocProvider.of<AuthenticationBloc>(context).add(SignOutEvent());
+            BlocProvider.of<AuthBloc>(context).add(SignOutEvent());
             Navigator.pop(context);
           },
           child: const Text('Sign Out'),
@@ -27,13 +55,13 @@ void showMyDialogConfirmSignOut(BuildContext context) {
   );
 }
 
-Future<void> showMyDialogToConfirm(
+Future<T?> showMyDialogToConfirm<T>(
   BuildContext context, {
   required String title,
   required String content,
-  required VoidCallback? onConfirm,
+  VoidCallback? onConfirm,
 }) async {
-  showDialog(
+  return await showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
@@ -41,17 +69,17 @@ Future<void> showMyDialogToConfirm(
         content: Text(content),
         actions: [
           TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text('No', style: MyTextStyle.blueTextDialog),
+          ),
+          TextButton(
             onPressed: () async {
               onConfirm?.call();
               Navigator.of(context).pop(true);
             },
             child: Text('Yes', style: MyTextStyle.redTextDialog),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text('No', style: MyTextStyle.blueTextDialog),
           ),
         ],
       );

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/constants/enum.dart';
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/notification/firebase_cloud_messaging_manager.dart';
 import '../../../../core/notification/local_notification_manager.dart';
@@ -41,7 +42,7 @@ abstract class FireStoreTaskDataSource {
   Future<void> removeFromMyDay(String email, MyDayEntity myDay);
 
   //! Task
-  SQuerySnapshot getAllTaskStream(String lid);
+  SQuerySnapshot getAllTaskStream(String lid, TaskSortOptions sortBy);
   SDocumentSnapshot getOneTaskStream(String lid, String tid);
   Future<List<TaskEntity>> getAllTaskInSingleList(String lid, {bool filterCompleted = false});
 
@@ -171,8 +172,32 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   }
 
   @override
-  SQuerySnapshot getAllTaskStream(String lid) {
-    return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).orderBy('created').snapshots();
+  SQuerySnapshot getAllTaskStream(String lid, TaskSortOptions sortBy) {
+    // return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).orderBy('created').snapshots();
+    switch (sortBy) {
+      case TaskSortOptions.none:
+        return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).snapshots();
+      case TaskSortOptions.createdDate:
+        return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).orderBy('created').snapshots();
+      case TaskSortOptions.name:
+        return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).orderBy('taskName').snapshots();
+      case TaskSortOptions.dueDate:
+        return _firestore
+            .collection(pathToTaskLists)
+            .doc(lid)
+            .collection(pathToTasks)
+            .orderBy('dueDate', descending: false)
+            .snapshots();
+      case TaskSortOptions.priority:
+        return _firestore
+            .collection(pathToTaskLists)
+            .doc(lid)
+            .collection(pathToTasks)
+            .orderBy('priority', descending: true)
+            .snapshots();
+      default:
+        return _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).snapshots();
+    }
   }
 
   @override
@@ -202,13 +227,7 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
 
   @override
   Future<void> deleteTask(TaskEntity task) async {
-    await _firestore
-        .collection(pathToTaskLists)
-        .doc(task.lid)
-        .collection(pathToTasks)
-        .doc(task.tid)
-        .delete()
-        .then((value) async {
+    await _firestore.collection(pathToTaskLists).doc(task.lid).collection(pathToTasks).doc(task.tid).delete().then((value) async {
       // TEST: send notification to assigned members and all their devices to cancel reminder
       if (task.reminders?.useDefault == true) {
         await _localNotification.I.cancel(task.reminders!.rid!);
@@ -226,8 +245,7 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
 
   @override
   Future<void> editTask(TaskEntity updatedTask, TaskEntity oldTask) async {
-    final docRef =
-        _firestore.collection(pathToTaskLists).doc(updatedTask.lid).collection(pathToTasks).doc(updatedTask.tid);
+    final docRef = _firestore.collection(pathToTaskLists).doc(updatedTask.lid).collection(pathToTasks).doc(updatedTask.tid);
 
     await docRef.update(TaskModel.fromEntity(updatedTask).toMap()).then(
       (_) async {
@@ -259,9 +277,11 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
             _fcm.sendDataMessageToMultipleDevices(tokens: tokens, data: data);
           }
         } else {
+          if (oldTask.reminders == null) return;
           // new: no reminder, old: have reminder >> cancel old schedule notification
           if (oldTask.reminders?.rid != null) await _localNotification.I.cancel(oldTask.reminders!.rid!);
           // done: send notification to assigned members and all their devices to remove old reminder
+          log('oldTask: ${oldTask.reminders!.toJson()}');
           final data = {
             'type': kFCMDeleteReminder, // >> in this case, delete old reminder
             'rid': oldTask.reminders!.rid.toString(),

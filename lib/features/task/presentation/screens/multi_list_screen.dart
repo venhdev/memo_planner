@@ -57,7 +57,7 @@ class _MultiTaskListScreenState extends State<MultiTaskListScreen> {
     if (isEmpty) return _buildEmpty();
     return StreamBuilder(
       stream: di<TaskListRepository>().getAllTaskListStreamOfUser(
-        context.read<AuthenticationBloc>().state.user!.email!,
+        context.read<AuthBloc>().state.user!.email!,
       ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
@@ -191,12 +191,16 @@ class _TaskListFilterState extends State<TaskListFilter> {
   // init state
   bool isOpen = true;
   late SQuerySnapshot stream;
+  late String currentUserEmail;
 
   @override
   void initState() {
     super.initState();
     stream = di<TaskRepository>().getAllTaskStream(widget.taskList.lid!);
+    currentUserEmail = context.read<AuthBloc>().state.user!.email!;
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -247,7 +251,10 @@ class _TaskListFilterState extends State<TaskListFilter> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: tasks.length,
                   itemBuilder: (context, index) {
-                    return TaskItem(task: tasks[index]);
+                    return TaskItem(
+                      task: tasks[index],
+                      currentUserEmail: currentUserEmail,
+                    );
                   },
                 )
               ]
@@ -267,7 +274,7 @@ class _TaskListFilterState extends State<TaskListFilter> {
       case GroupType.assign:
         docs.removeWhere(
           (task) {
-            final currentUserEmail = context.read<AuthenticationBloc>().state.user!.email!;
+            final currentUserEmail = context.read<AuthBloc>().state.user!.email!;
             final assignedMembers = task.data()['assignedMembers'] as List<dynamic>;
             if (assignedMembers.contains(currentUserEmail)) return false;
             return true;

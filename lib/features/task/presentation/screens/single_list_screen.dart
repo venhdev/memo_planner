@@ -6,8 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/widgets.dart';
+import '../../../../core/constants/enum.dart';
 import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
-import '../../../habit/presentation/components/detail/member_item.dart';
 import '../../data/models/task_list_model.dart';
 import '../../data/models/task_model.dart';
 import '../../domain/entities/task_entity.dart';
@@ -17,8 +17,6 @@ import '../../domain/repository/task_repository.dart';
 import '../components/dialog.dart';
 import '../components/form_add_task.dart';
 import '../components/task_item.dart';
-
-enum MenuItem { rename, delete, hide }
 
 // enum TaskFilter { done }
 
@@ -35,8 +33,16 @@ class SingleTaskListScreen extends StatefulWidget {
 
 class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
   bool hideDone = false;
+  TaskSortOptions sortBy = TaskSortOptions.none;
 
-  // Set<TaskFilter> filters = <TaskFilter>{};
+  void _sortTasksWithNullsLast(List<TaskModel> tasks) {
+    tasks.sort((a, b) => a.dueDate == null
+        ? 1
+        : b.dueDate == null
+            ? -1
+            : a.dueDate!.compareTo(b.dueDate!));
+    // return tasks;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +61,7 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
           // check if user is member of this list
           //? because user may be deleted from this list by the owner while they are still in this screen
           final taskList = TaskListModel.fromMap(map);
-          if (!taskList.members!.contains(context.read<AuthenticationBloc>().state.user?.email!)) {
+          if (!taskList.members!.contains(context.read<AuthBloc>().state.user?.email!)) {
             return const MessageScreen(message: 'You are not a member of this list');
           }
           return Scaffold(
@@ -66,7 +72,7 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
               child: const Icon(Icons.add),
             ),
             body: StreamBuilder(
-              stream: di<TaskRepository>().getAllTaskStream(widget.lid),
+              stream: di<TaskRepository>().getAllTaskStream(widget.lid, sortBy: sortBy),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.active) {
                   if (snapshot.hasData) {
@@ -76,6 +82,8 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
                       docs.removeWhere((doc) => doc.data()['completed'] == true);
                     }
                     final tasks = docs.map((doc) => TaskModel.fromMap(doc.data())).toList();
+
+                    if (sortBy == TaskSortOptions.dueDate) _sortTasksWithNullsLast(tasks);
                     // Wrap(
                     //       spacing: 5.0,
                     //       children: TaskFilter.values.map((TaskFilter filter) {
@@ -94,7 +102,8 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
                     //         );
                     //       }).toList(),
                     //     ),
-                    return _buildTaskListItem(context, tasks);
+                    String currentUserEmail = context.read<AuthBloc>().state.user!.email!;
+                    return _buildTaskListItem(context, tasks, currentUserEmail);
                   } else if (snapshot.hasError) {
                     return MessageScreen.error(snapshot.error.toString());
                   } else {
@@ -123,25 +132,15 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
           title: Text(taskList.listName!),
           leading: Icon(taskList.iconData),
         ),
-        // title: GestureDetector(
-        //   child: Text(taskList.listName!),
-        //   onTap: () {
-        //     handleRename(context, taskList);
-        //   },
-        // ),
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back),
-        ),
         actions: [
           // sort icon
           IconButton(
-            onPressed: () {
-              // TODO: default sort will not order any thing, then show the sort options
+            onPressed: () async {
+              await showSortOptionsAndHandleSort(context);
             },
             icon: const Icon(Icons.sort),
           ),
-
+          // member icon
           IconButton(
             onPressed: () {
               openMemberModal(context, taskList.lid!);
@@ -192,11 +191,11 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
         ],
       );
 
-  Widget _buildTaskListItem(BuildContext context, List<TaskEntity> tasks) => ListView.builder(
+  Widget _buildTaskListItem(BuildContext context, List<TaskEntity> tasks, String currentUserEmail) => ListView.builder(
         itemCount: tasks.length,
         shrinkWrap: true,
         itemBuilder: (context, index) {
-          return TaskItem(task: tasks[index]);
+          return TaskItem(task: tasks[index], currentUserEmail: currentUserEmail);
         },
       );
 
@@ -252,7 +251,7 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
                                 context,
                                 controller: TextEditingController(),
                                 onSubmitted: (value) async {
-                                  // NOTE: need refactor
+                                  // REVIEW: need refactor
                                   di<TaskListRepository>().addMember(taskList.lid!, value!.trim());
                                 },
                               );
@@ -291,10 +290,76 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
     );
   }
 
+  Future<dynamic> showSortOptionsAndHandleSort(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Sort By'),
+        children: [
+          RadioListTile<TaskSortOptions>(
+            title: const Text('Priority'),
+            value: TaskSortOptions.priority,
+            groupValue: sortBy,
+            onChanged: (TaskSortOptions? value) {
+              setState(() {
+                sortBy = value!;
+              });
+              Navigator.pop(context);
+            },
+          ),
+          RadioListTile<TaskSortOptions>(
+            title: const Text('Due Date'),
+            value: TaskSortOptions.dueDate,
+            groupValue: sortBy,
+            onChanged: (TaskSortOptions? value) {
+              setState(() {
+                sortBy = value!;
+              });
+              Navigator.pop(context);
+            },
+          ),
+          RadioListTile<TaskSortOptions>(
+            title: const Text('Created Date'),
+            value: TaskSortOptions.createdDate,
+            groupValue: sortBy,
+            onChanged: (TaskSortOptions? value) {
+              setState(() {
+                sortBy = value!;
+              });
+              Navigator.pop(context);
+            },
+          ),
+          RadioListTile<TaskSortOptions>(
+            title: const Text('Name'),
+            value: TaskSortOptions.name,
+            groupValue: sortBy,
+            onChanged: (TaskSortOptions? value) {
+              setState(() {
+                sortBy = value!;
+              });
+              Navigator.pop(context);
+            },
+          ),
+          RadioListTile<TaskSortOptions>(
+            title: const Text('None'),
+            value: TaskSortOptions.none,
+            groupValue: sortBy,
+            onChanged: (TaskSortOptions? value) {
+              setState(() {
+                sortBy = value!;
+              });
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> handleDelete(BuildContext context, TaskListEntity taskList) async {
     // check if the current user is the owner of this list
 
-    if (taskList.creator!.email != context.read<AuthenticationBloc>().state.user?.email) {
+    if (taskList.creator!.email != context.read<AuthBloc>().state.user?.email) {
       showMySnackbarWithAwesome(context,
           title: 'Unauthorized',
           message: 'You must be the owner to delete this list',
