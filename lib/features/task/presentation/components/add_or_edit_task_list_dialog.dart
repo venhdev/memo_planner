@@ -1,40 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
-import '../../../../config/theme/text_style.dart';
 
 import '../../../../config/dependency_injection.dart';
+import '../../../../config/theme/text_style.dart';
 import '../../../../core/components/my_snackbar.dart';
+import '../../../../core/entities/member.dart';
 import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../domain/entities/task_list_entity.dart';
 import '../../domain/repository/task_list_repository.dart';
 
-Future<void> showAddOrEditForm(
-  BuildContext context, {
-  required TextEditingController controller,
-  bool isAdd = true, // check if use this dialog for add or edit
-  TaskListEntity? taskList,
-}) async {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AddTaskListDialog(controller: controller, isAdd: isAdd, taskList: taskList);
-    },
-  );
-}
-
-class AddTaskListDialog extends StatefulWidget {
-  const AddTaskListDialog({super.key, required this.controller, required this.isAdd, this.taskList});
+class AddOrEditTaskListDialog extends StatefulWidget {
+  const AddOrEditTaskListDialog({super.key, required this.controller, this.isAdd = true, this.taskList});
 
   final TextEditingController controller;
   final bool isAdd;
   final TaskListEntity? taskList;
 
   @override
-  State<AddTaskListDialog> createState() => _AddTaskListDialogState();
+  State<AddOrEditTaskListDialog> createState() => _AddOrEditTaskListDialogState();
 }
 
-class _AddTaskListDialogState extends State<AddTaskListDialog> {
+class _AddOrEditTaskListDialogState extends State<AddOrEditTaskListDialog> {
   late Icon icon;
   @override
   void initState() {
@@ -97,7 +84,7 @@ class _AddTaskListDialogState extends State<AddTaskListDialog> {
                         listName: widget.controller.text,
                         iconData: icon.icon,
                         creator: currentUser,
-                        members: [currentUser!.email!],
+                        members: [Member(uid: currentUser!.uid!, role: UserRole.admin)],
                       ),
                     )
                       .then((value) {

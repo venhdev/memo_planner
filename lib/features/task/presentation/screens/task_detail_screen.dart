@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/my_picker.dart';
@@ -18,11 +19,11 @@ class TaskDetailScreen extends StatelessWidget {
   const TaskDetailScreen({
     super.key,
     required this.task,
-    required this.currentUserEmail,
+    required this.currentUID,
   });
 
   final TaskEntity task;
-  final String currentUserEmail;
+  final String currentUID;
 
   @override
   Widget build(BuildContext context) => DraggableScrollableSheet(
@@ -32,7 +33,7 @@ class TaskDetailScreen extends StatelessWidget {
         builder: (context, scrollController) => TaskDetailBody(
           scrollController: scrollController,
           oldTask: task,
-          currentUserEmail: currentUserEmail,
+          currentUserEmail: currentUID,
         ),
         // builder: (context, scrollController) => StreamBuilder(
         //   stream: di<TaskRepository>().getOneTaskStream(task.lid!, task.tid!),
@@ -151,7 +152,11 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
   Widget build(BuildContext context) {
     log('render TaskDetailBody');
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 8.0,
+        right: 8.0,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
       ),
@@ -197,6 +202,16 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
           const SizedBox(height: 16.0),
           _buildTaskDescription(),
 
+          // Last updated
+          const SizedBox(height: 16.0),
+          Text(
+            'last updated: ${convertDateTimeToString(
+              widget.oldTask.updated,
+              pattern: 'dd/MM/yyyy - hh:mm aa',
+            )}',
+            style: const TextStyle(color: Colors.grey),
+          ),
+
           // Created At and Created By
           const SizedBox(height: 16.0),
           Text(
@@ -204,16 +219,6 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
               widget.oldTask.created,
               pattern: 'dd/MM/yyyy - HH:mm',
             )} by ${widget.oldTask.creator?.displayName ?? 'unknown'}',
-            style: const TextStyle(color: Colors.grey),
-          ),
-
-          // Last updated
-          const SizedBox(height: 16.0),
-          Text(
-            'updatedAt: ${convertDateTimeToString(
-              widget.oldTask.updated,
-              pattern: 'dd/MM/yyyy - HH:mm',
-            )}',
             style: const TextStyle(color: Colors.grey),
           ),
         ],
@@ -338,8 +343,8 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         );
 
         // > the reminder date time must be in the future
-        if (pickedDateTime.isBefore(DateTime.now())) {
-          showSnackBar(message: 'Reminder must be in the future', backgroundColor: Colors.red);
+        if (pickedDateTime.isBefore(DateTime.now().add(const Duration(minutes: 1)))) {
+          Fluttertoast.showToast(msg: 'Reminder must later than 1 minute from now!');
         } else {
           // > if the picked reminder is different from the current reminder
           if (pickedDateTime != _reminder?.scheduledTime) {

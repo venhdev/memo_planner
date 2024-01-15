@@ -63,7 +63,11 @@ class _AddTaskModalState extends State<AddTaskModal> {
   Widget build(BuildContext context) {
     log('render AddTaskModal');
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 8.0,
+        right: 8.0,
+      ),
       child: ListView(
         shrinkWrap: true,
         children: [
@@ -71,7 +75,6 @@ class _AddTaskModalState extends State<AddTaskModal> {
           _buildHeaderBar(context),
           // Task Name
           _buildTextField(),
-
           // Priority level
           const SizedBox(height: 8.0),
           Row(
@@ -98,7 +101,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
             child: isSetPriority ? _buildPriorityTable() : const SizedBox.shrink(),
           ),
 
-          // Due Date
+          // Due Date & Reminder & Clear All Fields
           const SizedBox(height: 8.0),
           _buildBottomToolBar(context),
         ],

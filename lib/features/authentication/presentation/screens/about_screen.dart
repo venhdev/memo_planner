@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../../config/dependency_injection.dart';
+import '../../../../core/notification/local_notification_manager.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({
@@ -32,11 +36,19 @@ class _AboutScreenState extends State<AboutScreen> {
       body: Center(
         child: Column(
           children: [
-            const Image(
-              alignment: Alignment.center,
-              image: AssetImage('assets/images/logo/logo_rmbg.png'),
-              height: 64,
-              semanticLabel: 'Memo Planner Logo',
+            GestureDetector(
+              onLongPress: () async {
+                final pending = await di<LocalNotificationManager>().I.pendingNotificationRequests();
+                final activate = await di<LocalNotificationManager>().I.getActiveNotifications();
+
+                testNotification(pending, activate);
+              },
+              child: const Image(
+                alignment: Alignment.center,
+                image: AssetImage('assets/images/logo/logo_rmbg.png'),
+                height: 64,
+                semanticLabel: 'Memo Planner Logo',
+              ),
             ),
             Text(
               myPackageData['appName'] ?? '',
@@ -66,7 +78,6 @@ class _AboutScreenState extends State<AboutScreen> {
                   onPressed: () {
                     _launchUrl('https://www.facebook.com/page.MemoPlanner');
                   },
-                  
                 ),
               ],
             ),
@@ -89,6 +100,35 @@ class _AboutScreenState extends State<AboutScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<dynamic> testNotification(
+    List<PendingNotificationRequest> pending,
+    List<ActiveNotification> activate,
+  ) {
+    return showDialog(
+      context: context,
+      builder: (_) {
+        return SimpleDialog(
+          children: [
+            Text('pending: ${pending.length}'),
+            for (int i = 0; i < pending.length; i++)
+              Text(
+                '${pending[i].id} - ${pending[i].title} - ${pending[i].body}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            Text('activate: ${activate.length}'),
+            for (int i = 0; i < activate.length; i++)
+              Text(
+                '${activate[i].id} - ${activate[i].title} - ${activate[i].body}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
+        );
+      },
     );
   }
 }

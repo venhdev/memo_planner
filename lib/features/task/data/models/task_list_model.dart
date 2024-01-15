@@ -1,6 +1,7 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import '../../../../core/entities/icon_data.dart';
+import '../../../../core/entities/member.dart';
 import '../../../authentication/data/models/user_model.dart';
 import '../../domain/entities/task_list_entity.dart';
 
@@ -32,7 +33,7 @@ class TaskListModel extends TaskListEntity {
       if (listName != null) 'listName': listName,
       if (iconData != null) 'iconData': IconDataModel.fromIconData(iconData!).toMap(),
       if (creator != null) 'creator': UserModel.fromEntity(creator!).toDocument(),
-      if (members != null) 'members': members,
+      if (members != null) 'members': Member.toMapList(members!),
     };
   }
 
@@ -43,16 +44,13 @@ class TaskListModel extends TaskListEntity {
       listName: map['listName'] != null ? map['listName'] as String : null,
       iconData: map['iconData'] != null ? IconDataModel.fromMap(map['iconData']) : null,
       creator: UserModel.fromDocument(map['creator']),
-      members: map['members'] != null
-          ? (map['members'] as List<dynamic>).map((member) => member.toString()).toList()
-          : null,
+      members: Member.fromMapList(map['members'] as List<dynamic>),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory TaskListModel.fromJson(String source) =>
-      TaskListModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory TaskListModel.fromJson(String source) => TaskListModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {

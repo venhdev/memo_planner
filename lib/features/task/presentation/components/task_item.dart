@@ -13,11 +13,11 @@ import '../screens/task_detail_screen.dart';
 import 'assigned_members.dart';
 
 class TaskItem extends StatelessWidget {
-  const TaskItem({super.key, required this.task, this.showListName = false, required this.currentUserEmail});
+  const TaskItem({super.key, required this.task, this.showListName = false, required this.currentUID});
 
   final TaskEntity task;
   final bool showListName;
-  final String currentUserEmail;
+  final String currentUID;
 
   ({bool isMyDay, bool isKeep}) getMyDayRecord(AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
@@ -35,7 +35,7 @@ class TaskItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: di<TaskRepository>().getOneMyDayStream(currentUserEmail, task.tid!),
+        stream: di<TaskRepository>().getOneMyDayStream(currentUID, task.tid!),
         builder: (context, snapshot) {
           return Dismissible(
             key: Key(task.tid!),
@@ -46,13 +46,13 @@ class TaskItem extends StatelessWidget {
               if (direction == DismissDirection.startToEnd) {
                 getMyDayRecord(snapshot).isMyDay
                     ? await di<TaskRepository>()
-                        .removeFromMyDay(currentUserEmail, MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()))
+                        .removeFromMyDay(currentUID, MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()))
                         .then((value) => value.fold(
                               (l) => showMySnackbar(context, message: l.message),
                               (r) => showMySnackbar(context, message: 'Removed from MyDay'),
                             ))
                     : await di<TaskRepository>()
-                        .addToMyDay(currentUserEmail, MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()))
+                        .addToMyDay(currentUID, MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()))
                         .then(
                           (value) => value.fold(
                             (l) => showMySnackbar(context, message: l.message),
@@ -98,7 +98,7 @@ class TaskItem extends StatelessWidget {
                     decoration: task.completed! ? TextDecoration.lineThrough : null,
                   ),
                 ),
-                subtitle: moreTaskInfo(task, currentUserEmail),
+                subtitle: moreTaskInfo(task, currentUID),
                 trailing: assignedInfo(task),
               ),
             ),
@@ -224,7 +224,7 @@ class TaskItem extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (context) => TaskDetailScreen(
         task: task,
-        currentUserEmail: currentUserEmail,
+        currentUID: currentUID,
       ),
     );
   }

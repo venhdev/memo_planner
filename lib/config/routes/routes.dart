@@ -4,7 +4,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/components/widgets.dart';
-import '../../core/constants/enum.dart';
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../features/authentication/presentation/screens/screens.dart';
 import '../../features/task/presentation/bloc/task_bloc.dart';
@@ -21,6 +20,7 @@ class AppRouters {
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/',
     routes: <RouteBase>[
+      //! some routes config in TaskListItem
       GoRoute(
         path: '/',
         builder: (context, state) => const ScaffoldWithNavBar(),
@@ -35,7 +35,7 @@ class AppRouters {
           GoRoute(
             path: 'multi-list',
             builder: (context, state) {
-              final GroupType type = GoRouterState.of(context).extra! as GroupType;
+              final String type = GoRouterState.of(context).extra! as String;
               return MultiTaskListScreen(type: type);
             },
           ),
@@ -43,7 +43,7 @@ class AppRouters {
             path: 'myday',
             builder: (context, state) {
               final String email = GoRouterState.of(context).extra! as String;
-              return MyDayScreen(currentUserEmail: email);
+              return MyDayScreen(currentUserUID: email);
             },
           ),
         ],

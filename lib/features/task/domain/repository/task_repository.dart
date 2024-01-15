@@ -31,10 +31,10 @@ abstract class TaskRepository {
   ResultVoid unassignTask(String lid, String tid, String email);
 
   //! MyDay
-  SDocumentSnapshot getOneMyDayStream(String email, String tid);
+  SDocumentSnapshot getOneMyDayStream(String uid, String tid);
   SQuerySnapshot getAllMyDayStream(String email, DateTime today);
   // Future<MyDayEntity?> findOneMyDay(String email, String tid);
-  ResultVoid addToMyDay(String email, MyDayEntity myDay); // /users/{email}/myday/{tid}
+  ResultVoid addToMyDay(String uid, MyDayEntity myDay); // /users/{uid}/myday/{tid}
   ResultVoid toggleKeepInMyDay(String email, String tid, bool isKeep); // /users/{email}/myday/{tid}
   ResultVoid removeFromMyDay(String email, MyDayEntity myDay);
 }

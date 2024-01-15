@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/constants/typedef.dart';
+import '../../../../core/entities/member.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/task_list_entity.dart';
 
@@ -12,19 +13,20 @@ import '../data_sources/firestore_task_data_source.dart';
 
 @Singleton(as: TaskListRepository)
 class TaskListRepositoryImpl implements TaskListRepository {
-  TaskListRepositoryImpl(this._dataSource, this._authDataSource);
+  TaskListRepositoryImpl(this._taskDataSource, this._authDataSource);
 
-  final FireStoreTaskDataSource _dataSource;
+  final FireStoreTaskDataSource _taskDataSource;
   final AuthenticationDataSource _authDataSource;
 
   @override
-  ResultVoid addMember(String tid, String email) async {
+  ResultVoid inviteMemberViaEmail(String lid, String email) async {
     try {
       final user = await _authDataSource.getUserByEmail(email);
       if (user == null) {
-        return const Left(FirebaseFailure(message: 'User not found'));
+        return const Left(UserFailure(message: 'This email is not registered yet'));
       }
-      return Right(_dataSource.addMember(tid, email));
+      Member member = Member(uid: user.uid!, role: UserRole.member);
+      return Right(_taskDataSource.addMemberToTaskList(lid, member));
     } catch (e) {
       return Left(FirebaseFailure(message: e.toString()));
     }
@@ -33,7 +35,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
   @override
   ResultVoid addTaskList(TaskListEntity taskList) async {
     try {
-      return Right(await _dataSource.addTaskList(taskList));
+      return Right(await _taskDataSource.addTaskList(taskList));
     } catch (e) {
       return Left(FirebaseFailure(message: e.toString()));
     }
@@ -42,7 +44,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
   @override
   ResultVoid deleteTaskList(String lid) async {
     try {
-      await _dataSource.deleteTaskList(lid);
+      await _taskDataSource.deleteTaskList(lid);
 
       return const Right(null);
     } catch (e) {
@@ -53,16 +55,16 @@ class TaskListRepositoryImpl implements TaskListRepository {
   @override
   ResultVoid editTaskList(TaskListEntity updatedTaskList) async {
     try {
-      return Right(await _dataSource.editTaskList(updatedTaskList));
+      return Right(await _taskDataSource.editTaskList(updatedTaskList));
     } catch (e) {
       return Left(FirebaseFailure(message: e.toString()));
     }
   }
 
   @override
-  SQuerySnapshot getAllTaskListStreamOfUser(String email) {
+  SQuerySnapshot getAllTaskListStreamOfUser(String uid) {
     try {
-      return _dataSource.getAllTaskListStreamOfUser(email);
+      return _taskDataSource.getAllTaskListStreamOfUser(uid);
     } catch (e) {
       log('getAllTaskListStreamOfUser Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
@@ -70,9 +72,9 @@ class TaskListRepositoryImpl implements TaskListRepository {
   }
 
   @override
-  ResultVoid removeMember(String tid, String email) async {
+  ResultVoid removeMember(String tid, String uid) async {
     try {
-      return Right(_dataSource.removeMember(tid, email));
+      return Right(_taskDataSource.removeMember(tid, uid));
     } catch (e) {
       return Left(FirebaseFailure(message: e.toString()));
     }
@@ -81,7 +83,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
   @override
   SDocumentSnapshot getOneTaskListStream(String lid) {
     try {
-      return _dataSource.getOneTaskListStream(lid);
+      return _taskDataSource.getOneTaskListStream(lid);
     } catch (e) {
       log('getOneTaskListStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
@@ -91,7 +93,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
   @override
   Future<int> countTaskList(String lid) async {
     try {
-      return await _dataSource.countTaskList(lid);
+      return await _taskDataSource.countTaskList(lid);
     } catch (e) {
       log('countTaskList Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return -1;
@@ -99,9 +101,9 @@ class TaskListRepositoryImpl implements TaskListRepository {
   }
 
   @override
-  ResultEither<List<String>> getMembers(String lid) async {
+  ResultEither<List<Member>> getMembers(String lid) async {
     try {
-      return Right(await _dataSource.getMembers(lid));
+      return Right(await _taskDataSource.getMembers(lid));
     } catch (e) {
       log('getMembers Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
@@ -111,7 +113,7 @@ class TaskListRepositoryImpl implements TaskListRepository {
   @override
   ResultEither<List<String>> getAllMemberTokens(String lid) async {
     try {
-      return Right(await _dataSource.getAllMemberTokens(lid));
+      return Right(await _taskDataSource.getAllMemberTokens(lid));
     } catch (e) {
       log('getAllMemberTokens Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
@@ -119,9 +121,9 @@ class TaskListRepositoryImpl implements TaskListRepository {
   }
 
   @override
-  ResultEither<List<TaskListEntity>> getAllTaskListOfUser(String email) async {
+  ResultEither<List<TaskListEntity>> getAllTaskListOfUser(String uid) async {
     try {
-      return Right(await _dataSource.getAllTaskListOfUser(email));
+      return Right(await _taskDataSource.getAllTaskListOfUser(uid));
     } catch (e) {
       log('getAllTaskListOfUser Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));

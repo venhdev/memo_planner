@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,7 +24,7 @@ void main() async {
   configureDependencies();
 
   await di<LocalNotificationManager>().init();
-  await di<FirebaseCloudMessagingManager>().init();
+  await di<FirebaseCloudMessagingManager>().init().then((_) => log('FCM initialized'));
 
   FlutterNativeSplash.remove(); // remove splash screen when app is initialized
   runApp(const App());

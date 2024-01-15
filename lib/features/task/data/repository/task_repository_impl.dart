@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
@@ -14,14 +13,14 @@ import '../data_sources/firestore_task_data_source.dart';
 
 @Singleton(as: TaskRepository)
 class TaskRepositoryImpl implements TaskRepository {
-  TaskRepositoryImpl(this._dataSource);
+  TaskRepositoryImpl(this._taskDataSource);
 
-  final FireStoreTaskDataSource _dataSource;
+  final FireStoreTaskDataSource _taskDataSource;
 
   @override
   ResultVoid addTask(TaskEntity task) async {
     try {
-      await _dataSource.addTask(task);
+      await _taskDataSource.addTask(task);
       return const Right(null);
     } catch (e) {
       log('addTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
@@ -32,7 +31,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid deleteTask(TaskEntity task) async {
     try {
-      return Right(await _dataSource.deleteTask(task));
+      return Right(await _taskDataSource.deleteTask(task));
     } catch (e) {
       log('deleteTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
@@ -42,7 +41,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid editTask(TaskEntity updatedTask, TaskEntity oldTask) async {
     try {
-      return Right(await _dataSource.editTask(updatedTask, oldTask));
+      return Right(await _taskDataSource.editTask(updatedTask, oldTask));
     } catch (e) {
       log('editTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
@@ -52,7 +51,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   SDocumentSnapshot getOneTaskStream(String lid, String tid) {
     try {
-      return _dataSource.getOneTaskStream(lid, tid);
+      return _taskDataSource.getOneTaskStream(lid, tid);
     } catch (e) {
       log('getOneTaskStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
@@ -62,7 +61,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   SQuerySnapshot getAllTaskStream(String lid, {TaskSortOptions sortBy = TaskSortOptions.none}) {
     try {
-      return _dataSource.getAllTaskStream(lid, sortBy);
+      return _taskDataSource.getAllTaskStream(lid, sortBy);
     } catch (e) {
       log('getAllTaskStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
@@ -72,7 +71,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid toggleTask(String tid, String lid, bool value) async {
     try {
-      return Right(_dataSource.toggleTask(tid, lid, value));
+      return Right(_taskDataSource.toggleTask(tid, lid, value));
     } catch (e) {
       log('toggleTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
@@ -82,7 +81,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid assignTask(String lid, String tid, String email) async {
     try {
-      await _dataSource.assignTask(lid, tid, email);
+      await _taskDataSource.assignTask(lid, tid, email);
       return const Right(null);
     } catch (e) {
       log('assignTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
@@ -93,7 +92,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid unassignTask(String lid, String tid, String email) async {
     try {
-      await _dataSource.unassignTask(lid, tid, email);
+      await _taskDataSource.unassignTask(lid, tid, email);
       return const Right(null);
     } catch (e) {
       log('unassignTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
@@ -102,9 +101,9 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  ResultVoid addToMyDay(String email, MyDayEntity myDay) async {
+  ResultVoid addToMyDay(String uid, MyDayEntity myDay) async {
     try {
-      await _dataSource.addToMyDay(email, myDay);
+      await _taskDataSource.addToMyDay(uid, myDay);
       return const Right(null);
     } catch (e) {
       log('addToMyDay Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
@@ -115,7 +114,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid removeFromMyDay(String email, MyDayEntity myDay) async {
     try {
-      _dataSource.removeFromMyDay(email, myDay);
+      _taskDataSource.removeFromMyDay(email, myDay);
       return const Right(null);
     } catch (e) {
       log('removeFromMyDay Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
@@ -124,9 +123,9 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  SDocumentSnapshot getOneMyDayStream(String email, String tid) {
+  SDocumentSnapshot getOneMyDayStream(String uid, String tid) {
     try {
-      return _dataSource.getOneMyDayStream(email, tid);
+      return _taskDataSource.getOneMyDayStream(uid, tid);
     } catch (e) {
       log('getOneMyDayStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
@@ -136,7 +135,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid toggleKeepInMyDay(String email, String tid, bool isKeep) async {
     try {
-      return Right(await _dataSource.toggleKeepInMyDay(email, tid, isKeep));
+      return Right(await _taskDataSource.toggleKeepInMyDay(email, tid, isKeep));
     } catch (e) {
       log('toggleKeepInMyDay Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
@@ -155,10 +154,10 @@ class TaskRepositoryImpl implements TaskRepository {
   // }
 
   @override
-  SQuerySnapshot getAllMyDayStream(String email, DateTime today) {
+  SQuerySnapshot getAllMyDayStream(String uid, DateTime today) {
     try {
-      _dataSource.removeMismatchInMyDay(email, today);
-      return _dataSource.getAllMyDayStream(email);
+      _taskDataSource.removeMismatchInMyDay(uid, today);
+      return _taskDataSource.getAllMyDayStream(uid);
     } catch (e) {
       log('getAllMyDayStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Stream.empty();
@@ -168,7 +167,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultEither<List<TaskEntity>> getAllTask(String lid) async {
     try {
-      return Right(await _dataSource.getAllTaskInSingleList(lid));
+      return Right(await _taskDataSource.getAllTaskInSingleList(lid));
     } catch (e) {
       log('getAllTask Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));
@@ -180,7 +179,7 @@ class TaskRepositoryImpl implements TaskRepository {
     try {
       List<TaskEntity> result = [];
       for (final lid in lids) {
-        final taskList = await _dataSource.getAllTaskInSingleList(lid);
+        final taskList = await _taskDataSource.getAllTaskInSingleList(lid);
         result.addAll(taskList);
       }
       return Right(result);
@@ -194,7 +193,7 @@ class TaskRepositoryImpl implements TaskRepository {
   ResultVoid loadAllRemindersInMultiLists(List<String> lids) async {
     try {
       for (final lid in lids) {
-        _dataSource.loadAllRemindersInSingleList(lid);
+        _taskDataSource.loadAllRemindersInSingleList(lid);
       }
       return const Right(null);
     } catch (e) {
@@ -206,7 +205,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultVoid loadAllRemindersInSingleList(String lid) async {
     try {
-      return Right(await _dataSource.loadAllRemindersInSingleList(lid));
+      return Right(await _taskDataSource.loadAllRemindersInSingleList(lid));
     } catch (e) {
       log('loadAllRemindersInSingleList Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(FirebaseFailure(message: e.toString()));

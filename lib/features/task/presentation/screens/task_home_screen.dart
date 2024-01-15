@@ -3,15 +3,15 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/config/routes/app_navigation_drawer.dart';
-import 'package:memo_planner/core/utils/helpers.dart';
 
+import '../../../../config/routes/app_navigation_drawer.dart';
 import '../../../../core/components/common_screen.dart';
 import '../../../../core/constants/enum.dart';
+import '../../../../core/utils/helpers.dart';
 import '../../data/models/task_list_model.dart';
 import '../../domain/entities/task_list_entity.dart';
 import '../bloc/task_bloc.dart';
-import '../components/dialog.dart';
+import '../components/add_or_edit_task_list_dialog.dart';
 import '../components/task_list_item.dart';
 
 // show all list of tasks
@@ -76,20 +76,10 @@ class TaskHomeScreen extends StatelessWidget {
             label: const Text('New List', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
             icon: const Icon(Icons.add, color: Colors.black87),
             style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.greenAccent.shade100)),
-            onPressed: () async => showAddOrEditForm(
-              context,
-              controller: TextEditingController(),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => AddOrEditTaskListDialog(controller: TextEditingController(), isAdd: true),
             ),
-            // showDialog(
-            //   context: context,
-            //   builder: (context) => Container(
-            //     color: Colors.red,
-            //     height: 200,
-            //     child: const Center(
-            //       child: Text('Add new list'),
-            //     ),
-            //   ),
-            // )
           ),
         ),
       ],
@@ -99,10 +89,6 @@ class TaskHomeScreen extends StatelessWidget {
   Widget _build(BuildContext context, List<TaskListEntity> taskLists) {
     return ListView(
       children: [
-        // TaskGroupItem.today(),
-        // TaskGroupItem.allTasks(),
-        // TaskGroupItem.scheduled(),
-        // TaskGroupItem.done(),
         Column(
           children: [
             TaskListItem.myday(context),
@@ -113,9 +99,7 @@ class TaskHomeScreen extends StatelessWidget {
             TaskListItem.assignToMe(context),
           ],
         ),
-
         const Divider(),
-
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),

@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/constants/enum.dart';
 import '../../../../core/constants/typedef.dart';
+import '../../../../core/entities/member.dart';
 import '../../../../core/notification/firebase_cloud_messaging_manager.dart';
 import '../../../../core/notification/local_notification_manager.dart';
 import '../../domain/entities/myday_entity.dart';
@@ -17,29 +18,30 @@ import '../models/task_model.dart';
 
 abstract class FireStoreTaskDataSource {
   //! TaskList
-  SQuerySnapshot getAllTaskListStreamOfUser(String email);
-  Future<List<TaskListEntity>> getAllTaskListOfUser(String email);
+  SQuerySnapshot getAllTaskListStreamOfUser(String uid);
+  Future<List<TaskListEntity>> getAllTaskListOfUser(String uid); // for loading reminder
   SDocumentSnapshot getOneTaskListStream(String lid);
 
   Future<void> addTaskList(TaskListEntity taskList);
   Future<void> editTaskList(TaskListEntity updatedTaskList);
   Future<void> deleteTaskList(String lid);
 
-  Future<List<String>> getMembers(String lid);
+  Future<List<Member>> getMembers(String lid);
   Future<List<String>> getAllMemberTokens(String lid);
-  Future<void> addMember(String lid, String email);
-  Future<void> removeMember(String lid, String email);
+  Future<void> addMemberToTaskList(String lid, Member member);
+  Future<void> removeMember(String lid, String uid);
 
   Future<int> countTaskList(String lid);
 
   //! MyDay
-  SDocumentSnapshot getOneMyDayStream(String email, String tid);
-  Future<void> removeMismatchInMyDay(String email, DateTime date);
-  SQuerySnapshot getAllMyDayStream(String email); // >> [getOneTaskStream]
+  // path: /users/{uid}/myday/{tid}
+  SDocumentSnapshot getOneMyDayStream(String uid, String tid); 
+  Future<void> removeMismatchInMyDay(String uid, DateTime date);
+  SQuerySnapshot getAllMyDayStream(String uid); // >> [getOneTaskStream]
 
-  Future<void> addToMyDay(String email, MyDayEntity myDay);
-  Future<void> toggleKeepInMyDay(String email, String tid, bool isKeep);
-  Future<void> removeFromMyDay(String email, MyDayEntity myDay);
+  Future<void> addToMyDay(String uid, MyDayEntity myDay);
+  Future<void> toggleKeepInMyDay(String uid, String tid, bool isKeep);
+  Future<void> removeFromMyDay(String uid, MyDayEntity myDay);
 
   //! Task
   SQuerySnapshot getAllTaskStream(String lid, TaskSortOptions sortBy);
@@ -69,24 +71,24 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   final FirebaseCloudMessagingManager _fcm;
 
   @override
-  SQuerySnapshot getAllTaskListStreamOfUser(String email) {
+  SQuerySnapshot getAllTaskListStreamOfUser(String uid) {
     return _firestore
         .collection(pathToTaskLists)
         .where(Filter.or(
-          Filter('creator.email', isEqualTo: email),
-          Filter('members', arrayContains: email),
+          Filter('creator.uid', isEqualTo: uid),
+          Filter('members', arrayContains: Member.member(uid).toMap()),
         ))
         // .orderBy('listName')
         .snapshots();
   }
 
   @override
-  Future<List<TaskListEntity>> getAllTaskListOfUser(String email) {
+  Future<List<TaskListEntity>> getAllTaskListOfUser(String uid) {
     return _firestore
         .collection(pathToTaskLists)
         .where(Filter.or(
-          Filter('creator.email', isEqualTo: email),
-          Filter('members', arrayContains: email),
+          Filter('creator.uid', isEqualTo: uid),
+          Filter('members', arrayContains: Member.member(uid).toMap()),
         ))
         .get()
         .then((querySnapshot) {
@@ -137,30 +139,28 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   }
 
   @override
-  Future<void> addMember(String lid, String email) async {
+  Future<void> addMemberToTaskList(String lid, Member member) async {
     _firestore.collection(pathToTaskLists).doc(lid).update({
-      'members': FieldValue.arrayUnion([email])
+      'members': FieldValue.arrayUnion([member.toMap()])
     });
   }
 
   @override
-  Future<void> removeMember(String lid, String email) async {
+  Future<void> removeMember(String lid, String uid) async {
     _firestore.collection(pathToTaskLists).doc(lid).update({
-      'members': FieldValue.arrayRemove([email])
+      'members': FieldValue.arrayRemove([Member.member(uid).toMap()])
     });
 
     // remove member from every task that assigned to him/her
     final tasks = await _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).get();
     for (final task in tasks.docs) {
       final model = TaskModel.fromMap(task.data());
-      // if (model.assignedMembers == null ) continue;
 
-      if (model.assignedMembers == null) continue;
       if (model.assignedMembers!.isEmpty) continue;
 
-      if (model.assignedMembers!.contains(email)) {
-        // remove member (string email) from assignedMembers
-        model.assignedMembers!.remove(email);
+      if (model.assignedMembers!.contains(uid)) {
+        // remove member (by uid) from assignedMembers
+        model.assignedMembers!.remove(uid);
         await task.reference.update(model.toMap());
       }
     }
@@ -246,6 +246,8 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   @override
   Future<void> editTask(TaskEntity updatedTask, TaskEntity oldTask) async {
     final docRef = _firestore.collection(pathToTaskLists).doc(updatedTask.lid).collection(pathToTasks).doc(updatedTask.tid);
+    log('updatedTask reminders: ${updatedTask.reminders.toString()}');
+    log('oldTask reminders: ${oldTask.reminders.toString()}');
 
     await docRef.update(TaskModel.fromEntity(updatedTask).toMap()).then(
       (_) async {
@@ -281,7 +283,6 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
           // new: no reminder, old: have reminder >> cancel old schedule notification
           if (oldTask.reminders?.rid != null) await _localNotification.I.cancel(oldTask.reminders!.rid!);
           // done: send notification to assigned members and all their devices to remove old reminder
-          log('oldTask: ${oldTask.reminders!.toJson()}');
           final data = {
             'type': kFCMDeleteReminder, // >> in this case, delete old reminder
             'rid': oldTask.reminders!.rid.toString(),
@@ -330,28 +331,28 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   @override
   Future<int> countTaskList(String lid) async {
     final result = await _firestore.collection(pathToTaskLists).doc(lid).collection(pathToTasks).count().get();
-    return result.count;
+    return result.count ?? -1;
   }
 
   @override
-  Future<void> addToMyDay(String email, MyDayEntity myDay) async {
-    final collRef = _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay);
+  Future<void> addToMyDay(String uid, MyDayEntity myDay) async {
+    final collRef = _firestore.collection(pathToUsers).doc(uid).collection(pathToMyDay);
     await collRef.doc(myDay.tid).set(MyDayModel.fromEntity(myDay).toMap());
   }
 
   @override
-  Future<void> removeFromMyDay(String email, MyDayEntity myDay) async {
-    return await _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay).doc(myDay.tid).delete();
+  Future<void> removeFromMyDay(String uid, MyDayEntity myDay) async {
+    return await _firestore.collection(pathToUsers).doc(uid).collection(pathToMyDay).doc(myDay.tid).delete();
   }
 
   @override
-  SDocumentSnapshot getOneMyDayStream(String email, String tid) {
-    return _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay).doc(tid).snapshots();
+  SDocumentSnapshot getOneMyDayStream(String uid, String tid) {
+    return _firestore.collection(pathToUsers).doc(uid).collection(pathToMyDay).doc(tid).snapshots();
   }
 
   @override
-  Future<void> toggleKeepInMyDay(String email, String tid, bool isKeep) async {
-    return await _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay).doc(tid).update({
+  Future<void> toggleKeepInMyDay(String uid, String tid, bool isKeep) async {
+    return await _firestore.collection(pathToUsers).doc(uid).collection(pathToMyDay).doc(tid).update({
       'keep': isKeep,
     });
   }
@@ -367,50 +368,45 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   // }
 
   @override
-  Future<void> removeMismatchInMyDay(String email, DateTime date) async {
-    final collRef = _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay);
+  Future<void> removeMismatchInMyDay(String uid, DateTime date) async {
+    final collRef = _firestore.collection(pathToUsers).doc(uid).collection(pathToMyDay);
     collRef.get().then((querySnapshot) {
       for (var docSnapshot in querySnapshot.docs) {
         final map = docSnapshot.data();
+        // if keep set to true or created date is today, skip
         if (map['keep'] == true || map['created'] == Timestamp.fromDate(date)) continue;
         docSnapshot.reference.delete();
       }
-    }, onError: (e) => log('getAllMyDayStream Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}'));
+    }, onError: (e) => log('removeMismatchInMyDay Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}'));
   }
 
   @override
-  SQuerySnapshot getAllMyDayStream(String email) {
-    final collRef = _firestore.collection(pathToUsers).doc(email).collection(pathToMyDay);
+  SQuerySnapshot getAllMyDayStream(String uid) {
+    final collRef = _firestore.collection(pathToUsers).doc(uid).collection(pathToMyDay);
     return collRef.snapshots();
   }
 
   @override
-  Future<List<String>> getMembers(String lid) {
+  Future<List<Member>> getMembers(String lid) {
     return _firestore.collection(pathToTaskLists).doc(lid).get().then((value) {
-      final model = TaskListModel.fromMap(value.data()!);
-      return model.members ?? [];
+      return TaskListModel.fromMap(value.data()!).members!;
     });
   }
 
   @override
-  Future<List<String>> getAllMemberTokens(String lid) async {
+  Future<List<String>> getAllMemberTokens(String lid, {bool excludeCurrentDevice = true}) async {
     final tokens = <String>[];
     final members = getMembers(lid);
     return members.then((memberEmails) async {
-      for (final memberEmail in memberEmails) {
-        await _firestore.collection(pathToUsers).doc(memberEmail).get().then(
-          (value) {
-            final List<String> userTokens = (value.data()!['tokens'] as List<dynamic>)
-                .map(
-                  (token) => token.toString(),
-                )
-                .toList();
+      for (final member in memberEmails) {
+        await _firestore.collection(pathToUsers).doc(member.uid).get().then((value) {
+          final List<String> userTokens = (value.data()?['tokens'] as List<dynamic>).map((token) => token as String).toList();
 
-            tokens.addAll(userTokens);
-          },
-        );
+          tokens.addAll(userTokens);
+        });
       }
-      tokens.removeWhere((token) => token == _fcm.currentFCMToken);
+      if (excludeCurrentDevice) tokens.removeWhere((token) => token == _fcm.currentFCMToken);
+      log('getAllMemberTokens: $tokens');
       return tokens;
     });
   }

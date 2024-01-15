@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/constants.dart';
@@ -16,44 +18,49 @@ import '../models/user_model.dart';
 
 @Singleton(as: AuthRepository)
 class AuthenticationRepositoryImpl implements AuthRepository {
-  AuthenticationRepositoryImpl(this._firebaseAuthDataSource);
-  final AuthenticationDataSource _firebaseAuthDataSource;
+  AuthenticationRepositoryImpl(this._authDataSource);
+  final AuthenticationDataSource _authDataSource;
 
   @override
   ResultEither<UserEntity> signInWithGoogle() async {
     try {
-      final UserCredential credential = await _firebaseAuthDataSource.signInWithGoogle();
+      final UserCredential credential = await _authDataSource.signInWithGoogle();
       final user = UserModel.fromUserCredential(credential.user!);
-      await _firebaseAuthDataSource.updateOrCreateUserInfo(user); // update or create user in 'users' collection
+      await _authDataSource.updateOrCreateUserInfo(user); // update or create user in 'users' collection
       // add current FCM token to user in 'users' collection
-      await _firebaseAuthDataSource.addCurrentFCMTokenToUser(user.email!);
+      await _authDataSource.addCurrentFCMTokenToUser(user.uid!);
 
       return Right(user);
     } on FirebaseAuthException catch (e) {
-      log('FirebaseAuthException: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      log('signInWithGoogle FirebaseAuthException: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return Left(ServerFailure(code: e.code, message: e.message!));
     } on Exception catch (e) {
-      log('Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('signInWithGoogle Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(ServerFailure(message: e.toString()));
     } on AssertionError catch (e) {
       // login canceled
-      log('AssertionError: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('signInWithGoogle AssertionError: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return const Left(ServerFailure(message: 'Login failed'));
     }
   }
 
   @override
-  ResultEither<UserEntity> signInWithEmailAndPassword(
-    String email,
-    String password,
-  ) async {
+  ResultEither<UserEntity> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
     try {
-      final credential = await _firebaseAuthDataSource.signInWithEmailAndPassword(email, password);
+      final credential = await _authDataSource.signInWithEmailAndPassword(email, password);
       // add current FCM token
-      await _firebaseAuthDataSource.addCurrentFCMTokenToUser(credential.user!.email!);
-      return Right(UserModel.fromUserCredential(credential.user!));
+      _authDataSource.addCurrentFCMTokenToUser(credential.user!.uid);
+      final user = UserModel.fromUserCredential(credential.user!);
+      _authDataSource.updateOrCreateUserInfo(user);
+
+      return Right(user);
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
+        case 'invalid-credential':
+          return Left(ServerFailure(code: e.code, message: kAuthInvalidCredential));
         case 'invalid-email':
           return Left(ServerFailure(code: e.code, message: kAuthInvalidEmail));
         case 'user-disabled':
@@ -69,10 +76,10 @@ class AuthenticationRepositoryImpl implements AuthRepository {
         case 'network-request-failed':
           return Left(ServerFailure(code: e.code, message: kAuthNetworkRequestFailed));
       }
-      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      log('signInWithEmailAndPassword FirebaseAuthException: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return Left(ServerFailure(code: e.code, message: e.message!));
     } on Exception catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('signInWithEmailAndPassword Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(ServerFailure(message: e.toString()));
     }
   }
@@ -80,9 +87,10 @@ class AuthenticationRepositoryImpl implements AuthRepository {
   @override
   ResultVoid signOut() async {
     try {
-      await _firebaseAuthDataSource.signOut();
+      await _authDataSource.signOut();
       return const Right(null);
     } on FirebaseAuthException catch (e) {
+      log('signOut FirebaseAuthException: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return Left(ServerFailure(message: e.message!));
     }
   }
@@ -90,27 +98,28 @@ class AuthenticationRepositoryImpl implements AuthRepository {
   @override
   UserEntity? getCurrentUser() {
     try {
-      final result = _firebaseAuthDataSource.currentUser;
-
-      if (result != null) {
-        return UserModel.fromUserCredential(result);
-      } else {
-        return null;
-      }
+      final result = _authDataSource.currentUser;
+      return result != null ? UserModel.fromUserCredential(result) : null;
     } on FirebaseAuthException catch (e) {
-      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      log('getCurrentUser FirebaseAuthException: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      return null;
+    } catch (e) {
+      log('getCurrentUser Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return null;
     }
   }
 
   @override
-  ResultEither<UserEntity> signUpWithEmail(String email, String password) async {
+  ResultEither<UserEntity> signUpWithEmail({
+    required String email,
+    required String password,
+  }) async {
     try {
-      final userCredential = await _firebaseAuthDataSource.signUpWithEmail(email, password);
+      final userCredential = await _authDataSource.signUpWithEmail(email, password);
       final user = UserModel.fromUserCredential(userCredential.user!);
-      await _firebaseAuthDataSource.updateOrCreateUserInfo(user);
+      await _authDataSource.updateOrCreateUserInfo(user);
       // add current FCM token to user in 'users' collection
-      await _firebaseAuthDataSource.addCurrentFCMTokenToUser(user.email!);
+      await _authDataSource.addCurrentFCMTokenToUser(user.email!);
       return Right(user);
     } on FirebaseAuthException catch (e) {
       // not yet handle: 'email-already-in-use'
@@ -121,10 +130,10 @@ class AuthenticationRepositoryImpl implements AuthRepository {
           return Left(ServerFailure(code: e.code, message: kAuthNetworkRequestFailed));
       }
 
-      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      log('signUpWithEmail FirebaseAuthException: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return Left(ServerFailure(code: e.code, message: e.message!));
     } catch (e) {
-      log('Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      log('signUpWithEmail Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
       return Left(ServerFailure(message: e.toString()));
     }
   }
@@ -132,9 +141,9 @@ class AuthenticationRepositoryImpl implements AuthRepository {
   @override
   Future<UserEntity?> getUserByEmail(String email) async {
     try {
-      return await _firebaseAuthDataSource.getUserByEmail(email);
+      return await _authDataSource.getUserByEmail(email);
     } on FirebaseAuthException catch (e) {
-      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      log('getUserByEmail Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return null;
     }
   }
@@ -142,10 +151,43 @@ class AuthenticationRepositoryImpl implements AuthRepository {
   @override
   Future<void> updateDisplayName(String name) {
     try {
-      return _firebaseAuthDataSource.updateDisplayName(name);
+      return _authDataSource.updateDisplayName(name).then((value) => null);
     } on FirebaseAuthException catch (e) {
-      log('Specific Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      log('updateDisplayName Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
       return Future.error(e);
+    }
+  }
+
+  @override
+  Future<UserEntity?> getUserByUID(String uid) async {
+    try {
+      return await _authDataSource.getUserByUID(uid);
+    } on FirebaseAuthException catch (e) {
+      log('getUserByUID Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      return Future.error(e);
+    }
+  }
+
+  @override
+  Future<GoogleSignInAccount?> signInSilentlyWithGoogle() async {
+    try {
+      return await _authDataSource.signInSilentlyWithGoogle();
+    } on FirebaseAuthException catch (e) {
+      log('signInSilentlyWithGoogle Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      return Future.error(e);
+    }
+  }
+
+  @override
+  ResultEither updateUserAvatar(XFile imageFile) async {
+    try {
+      return Right(await _authDataSource.updateUserAvatar(imageFile));
+    } on FirebaseAuthException catch (e) {
+      log('FirebaseAuthException Exception: type: ${e.runtimeType} code: "${e.code}", message: ${e.message}');
+      return Left(FirebaseFailure(message: e.toString()));
+    } catch (e) {
+      log('updateUserAvatar Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
+      return Left(FirebaseFailure(message: e.toString()));
     }
   }
 }

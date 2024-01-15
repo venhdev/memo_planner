@@ -13,6 +13,6 @@ class GetAllTaskListStreamOfUserUC extends UseCaseWithParams<SQuerySnapshot, Use
 
   @override
   SQuerySnapshot call(UserEntity params) {
-    return _repository.getAllTaskListStreamOfUser(params.email!);
+    return _repository.getAllTaskListStreamOfUser(params.uid!);
   }
 }

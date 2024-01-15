@@ -27,16 +27,21 @@ class AuthState extends Equatable {
           message: message,
         );
 
-  const AuthState.unauthenticated({String? message}) : this._(status: AuthenticationStatus.unauthenticated, message: message, user: null);
+  const AuthState.unauthenticated({String? message})
+      : this._(
+          status: AuthenticationStatus.unauthenticated,
+          message: message,
+          user: null,
+        );
 
   final AuthenticationStatus status;
-  final UserEntity? user; // this is the user credential from firebase
+  final UserEntity? user;
   final String? message;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         status,
-        user ?? user == null,
-        message ?? message == null,
+        user,
+        message,
       ];
 }

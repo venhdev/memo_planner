@@ -53,8 +53,8 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.today.codePoint,
         iconColor: Colors.amber,
         onTap: () {
-          final currentUserEmail = context.read<AuthBloc>().state.user!.email!;
-          context.go('/myday', extra: currentUserEmail);
+          final currentUserUID = context.read<AuthBloc>().state.user!.uid!;
+          context.go('/myday', extra: currentUserUID);
         },
       );
 

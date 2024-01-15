@@ -9,18 +9,6 @@ sealed class AuthEvent extends Equatable {
 
 class AuthInitial extends AuthEvent {}
 
-class StatusChanged extends AuthEvent {
-  const StatusChanged({
-    required this.status,
-    required this.user,
-  });
-  final AuthenticationStatus status;
-  final UserEntity? user;
-
-  @override
-  List<Object> get props => [status, user ?? ''];
-}
-
 class SignInWithEmail extends AuthEvent {
   const SignInWithEmail({
     required this.email,
@@ -57,4 +45,14 @@ class UpdateDisplayName extends AuthEvent {
 
   @override
   List<Object> get props => [name];
+}
+
+class UpdateAvatar extends AuthEvent {
+  const UpdateAvatar({
+    required this.imageFile,
+  });
+  final XFile imageFile;
+
+  @override
+  List<Object> get props => [imageFile];
 }

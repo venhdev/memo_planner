@@ -4,9 +4,9 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/enum.dart';
 import '../../../../core/constants/typedef.dart';
-import '../../../authentication/domain/usecase/get_current_user.dart';
-import '../../domain/usecase/get_all_task_list_stream.dart';
-import '../../domain/usecase/load_all_reminder.dart';
+import '../../../authentication/domain/repository/authentication_repository.dart';
+import '../../domain/repository/task_list_repository.dart';
+import '../../domain/repository/task_repository.dart';
 
 part 'task_event.dart';
 part 'task_state.dart';
@@ -14,16 +14,16 @@ part 'task_state.dart';
 @injectable
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
   TaskBloc(
-    this._getAllTaskStreamOfUserUC,
-    this._getCurrentUserUC,
-    this._loadAllReminderUC,
+    this._taskRepository,
+    this._taskListRepository,
+    this._authRepository,
   ) : super(const TaskState.initial()) {
     on<TaskInitial>(_onInitial);
   }
 
-  final GetAllTaskListStreamOfUserUC _getAllTaskStreamOfUserUC;
-  final GetCurrentUserUC _getCurrentUserUC;
-  final LoadAllReminderUC _loadAllReminderUC;
+  final TaskRepository _taskRepository;
+  final TaskListRepository _taskListRepository;
+  final AuthRepository _authRepository;
 
   Future<void> _onInitial(
     TaskInitial event,
@@ -31,15 +31,22 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   ) async {
     emit(const TaskState.loading());
 
-    final user = _getCurrentUserUC();
-    if (user != null) {
-      // test: load all reminder and notification to local notification manager
-      _loadAllReminderUC(user.email!);
+    final currentUser = _authRepository.getCurrentUser();
+    if (currentUser != null) {
+      //> load all reminder
+      final listsEither = await _taskListRepository.getAllTaskListOfUser(currentUser.uid!);
+      if (listsEither.isRight()) {
+        final lists = listsEither.getOrElse(() => []);
+        if (lists.isEmpty) return; // there is no task list >> do nothing
+        final lids = lists.map((e) => e.lid!).toList();
+        _taskRepository.loadAllRemindersInMultiLists(lids);
+      }
+      //> end all reminder
 
-      final taskListStream = _getAllTaskStreamOfUserUC(user);
+      final taskListStream = _taskListRepository.getAllTaskListStreamOfUser(currentUser.uid!);
       emit(TaskState.loaded(taskListStream));
     } else {
-      emit(const TaskState.error('Please login to continue!'));
+      emit(const TaskState.error('Please login to use this feature'));
     }
   }
 }

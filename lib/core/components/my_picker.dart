@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../utils/helpers.dart';
 
@@ -21,6 +22,11 @@ Future<TimeOfDay?> showMyTimePicker(
       context: context,
       initialTime: initTime,
     );
+Future<XFile?> showMyImagePicker() async {
+  final picker = ImagePicker();
+  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  return pickedFile;
+}
 
 class MyDatePicker extends StatelessWidget {
   const MyDatePicker({

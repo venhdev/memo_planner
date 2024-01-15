@@ -37,7 +37,7 @@ class TaskState extends Equatable {
   final String? message;
 
   @override
-  List<Object> get props => [status, stream, message ?? ''];
+  List<Object?> get props => [status, stream, message];
 
   TaskState copyWith({
     BlocStatus? status,

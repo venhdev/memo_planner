@@ -4,6 +4,7 @@ enum Code { unknown, unauthorized, unauthenticated, notFound }
 
 // General failure message
 const String failureMessage = 'Something went wrong !!!';
+const String userFailureFailureMessage = failureMessage;
 const String serverFailureFailureMessage = 'Server Failure';
 const String cacheCacheFailureMessage = 'Cache Failure';
 const String networkFailureMessage = 'Network Failure';
@@ -22,6 +23,13 @@ class Failure extends Equatable {
 }
 
 // General failure message
+class UserFailure extends Failure {
+  const UserFailure({
+    String code = 'user-failure',
+    String message = userFailureFailureMessage,
+  }) : super(code: code, message: message);
+}
+
 class ServerFailure extends Failure {
   const ServerFailure({
     String code = 'server-failure',

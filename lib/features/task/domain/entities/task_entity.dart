@@ -17,7 +17,7 @@ class TaskEntity extends Equatable {
   final Reminder? reminders;
 
   final UserEntity? creator;
-  final List<String>? assignedMembers;
+  final List<String>? assignedMembers; // List of uid
 
   final DateTime? created;
   final DateTime? updated;

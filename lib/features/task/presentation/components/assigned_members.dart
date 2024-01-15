@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 import '../../../../config/dependency_injection.dart';
+import '../../../../core/components/avatar.dart';
 import '../../../../core/components/common_screen.dart';
 import '../../../authentication/domain/repository/authentication_repository.dart';
 import '../../data/models/task_list_model.dart';
@@ -29,7 +28,7 @@ class AssignedMembersList extends StatelessWidget {
         shrinkWrap: true,
         itemCount: assignedMembers.length,
         itemBuilder: (context, index) => FutureBuilder(
-          future: di<AuthRepository>().getUserByEmail(assignedMembers[index]),
+          future: di<AuthRepository>().getUserByUID(assignedMembers[index]),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final member = snapshot.data!;
@@ -87,18 +86,16 @@ class AssignMemberDialog extends StatelessWidget {
           final members = TaskListModel.fromMap(map).members!;
           return SimpleDialog(
             children: [
-              GestureDetector(
-                onTap: () => log('task.assignedMembers: ${task.assignedMembers}'),
-                child: const Text(
-                  'Select Member',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                ),
+              // NOTE: for testing
+              const Text(
+                'Select Member',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
               ),
-              for (final memberEmail in members)
+              for (final member in members)
                 MemberItem(
-                  memberEmail: memberEmail,
-                  avatar: Avatar(memberEmail: memberEmail),
+                  memberUID: member.uid,
+                  avatar: Avatar(userUID: member.uid),
                   assignedMembers: task.assignedMembers!, // when add/remove member, this will be updated
                   valueChanged: valueChanged,
                 ),
@@ -117,13 +114,13 @@ class AssignMemberDialog extends StatelessWidget {
 class MemberItem extends StatefulWidget {
   const MemberItem({
     super.key,
-    required this.memberEmail,
+    required this.memberUID,
     required this.avatar,
     required this.assignedMembers,
     required this.valueChanged,
   });
 
-  final String memberEmail;
+  final String memberUID;
   final Avatar avatar;
   final List<String> assignedMembers;
   final ValueChanged<List<String>> valueChanged;
@@ -134,73 +131,46 @@ class MemberItem extends StatefulWidget {
 
 class _MemberItemState extends State<MemberItem> {
   late List<String> _assignedMembers;
+  String? _memberInfo;
 
   @override
   void initState() {
     super.initState();
     _assignedMembers = widget.assignedMembers;
+    di<AuthRepository>().getUserByUID(widget.memberUID).then((value) {
+      if (value == null) {
+        _memberInfo = 'not found...';
+      } else {
+        _memberInfo = value.email;
+      }
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(widget.memberEmail, maxLines: 1, overflow: TextOverflow.ellipsis),
+      title: Builder(builder: (context) {
+        return Text(_memberInfo ?? 'loading...', maxLines: 1, overflow: TextOverflow.ellipsis);
+      }),
       leading: CircleAvatar(
         backgroundColor: Colors.green.shade100,
         child: widget.avatar,
       ),
       trailing: Checkbox(
-        value: _assignedMembers.contains(widget.memberEmail),
+        value: _assignedMembers.contains(widget.memberUID),
         onChanged: (value) {
           setState(() {
             if (value!) {
               // will update assignedMembers in AssignMemberDialog because in dart object is passed by reference
-              _assignedMembers.add(widget.memberEmail);
+              _assignedMembers.add(widget.memberUID);
             } else {
-              _assignedMembers.remove(widget.memberEmail);
+              _assignedMembers.remove(widget.memberUID);
             }
           });
           widget.valueChanged(List.from(_assignedMembers));
         },
       ),
-    );
-  }
-}
-
-class Avatar extends StatelessWidget {
-  const Avatar({
-    super.key,
-    required this.memberEmail,
-  });
-
-  final String memberEmail;
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: di<AuthRepository>().getUserByEmail(memberEmail),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-          final member = snapshot.data!;
-          return Builder(
-            builder: (context) {
-              if (member.photoURL != null) {
-                return CircleAvatar(
-                  backgroundColor: Colors.green.shade100,
-                  backgroundImage: NetworkImage(member.photoURL!),
-                );
-              } else {
-                return CircleAvatar(
-                  backgroundColor: Colors.green.shade100,
-                  child: const Icon(Icons.person),
-                );
-              }
-            },
-          );
-        } else {
-          return const Icon(Icons.person);
-        }
-      },
     );
   }
 }

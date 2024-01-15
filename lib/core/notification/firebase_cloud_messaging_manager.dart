@@ -117,7 +117,7 @@ class FirebaseCloudMessagingManager {
               ),
               'projects/$projectId',
             )
-            .then((value) => log('finished send DataMessage: ${value.data.toString()}'));
+            .then((value) => log('finished sendDataMessageToMultipleDevices msg[${value.data.toString()}]'));
       }
 
       client.close();
@@ -145,7 +145,7 @@ class FirebaseCloudMessagingManager {
             ),
             'projects/$projectId',
           )
-          .then((value) => log('finished send DataMessage: ${value.data.toString()}'));
+          .then((value) => log('finished sendDataMessage: msg[${value.data.toString()}]'));
 
       client.close();
     } catch (e) {

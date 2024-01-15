@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/components/avatar.dart';
 import '../../core/components/widgets.dart';
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../features/authentication/presentation/screens/about_screen.dart';
@@ -39,30 +40,20 @@ class AppNavigationDrawer extends StatelessWidget {
             return Column(
               children: [
                 const SizedBox(height: 24.0),
-                Builder(builder: (context) {
-                  if (state.user!.photoURL != null) {
-                    return CircleAvatar(
-                      radius: 52.0,
-                      backgroundColor: Colors.green.shade100,
-                      backgroundImage: NetworkImage(state.user!.photoURL!),
-                    );
-                  } else {
-                    // random image <assets/images/avatars> in case of no image --> no use for now
-                    // use the first letter of email instead
-                    return CircleAvatar(
-                      radius: 52.0,
-                      backgroundColor: Colors.green.shade100,
-                      child: Text(
-                        state.user!.email!.substring(0, 1),
-                        style: const TextStyle(
-                          fontSize: 52.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
-                    // return getRandomAvatar();
-                  }
-                }),
+                GestureDetector(
+                  onTap: () async {
+                    showMyImagePicker().then((value) {
+                      if (value != null) {
+                        context.read<AuthBloc>().add(UpdateAvatar(imageFile: value));
+                      }
+                    });
+                  },
+                  child: Avatar.photoURL(
+                    photoURL: state.user?.photoURL,
+                    placeholder: state.user!.email!,
+                    radius: 48.0,
+                  ),
+                ),
                 const SizedBox(height: 12.0),
                 ListTile(
                   title: Text(

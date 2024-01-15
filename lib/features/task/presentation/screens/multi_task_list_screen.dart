@@ -4,11 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:memo_planner/core/constants/typedef.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/widgets.dart';
 import '../../../../core/constants/enum.dart';
+import '../../../../core/constants/typedef.dart';
 import '../../../../core/utils/helpers.dart';
 import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../data/models/task_list_model.dart';
@@ -23,7 +23,7 @@ enum MultiListMenuItem { hide }
 class MultiTaskListScreen extends StatefulWidget {
   const MultiTaskListScreen({super.key, required this.type});
 
-  final GroupType type;
+  final String type;
 
   @override
   State<MultiTaskListScreen> createState() => _MultiTaskListScreenState();
@@ -53,11 +53,11 @@ class _MultiTaskListScreenState extends State<MultiTaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    log('render [MultiTaskListScreen] with type: ${widget.type.name}');
+    log('render [MultiTaskListScreen] with type: ${widget.type}');
     if (isEmpty) return _buildEmpty();
     return StreamBuilder(
       stream: di<TaskListRepository>().getAllTaskListStreamOfUser(
-        context.read<AuthBloc>().state.user!.email!,
+        context.read<AuthBloc>().state.user!.uid!,
       ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
@@ -66,6 +66,7 @@ class _MultiTaskListScreenState extends State<MultiTaskListScreen> {
             if (maps.isEmpty) return _buildEmpty(); // user has no task list
 
             final taskLists = maps.map((e) => TaskListModel.fromMap(e)).toList();
+            log('test length ${taskLists.length}');
             listStateEmpty = List.generate(taskLists.length, (index) => null);
 
             return Scaffold(
@@ -110,7 +111,7 @@ class _MultiTaskListScreenState extends State<MultiTaskListScreen> {
           richText: 'You have no task in ',
           spanChildren: [
             TextSpan(
-              text: widget.type.name.toUpperCase(),
+              text: widget.type.toUpperCase(),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -128,14 +129,14 @@ class _MultiTaskListScreenState extends State<MultiTaskListScreen> {
   }
 
   AppBar _buildAppBar() => AppBar(
-        title: Text(widget.type.name.toUpperCase()),
+        title: Text(widget.type.toUpperCase()),
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
         actions: [
           // PopupMenu
-          if (widget.type != GroupType.done)
+          if (widget.type != GroupType.done.name)
             PopupMenuButton<MultiListMenuItem>(
               // Callback that sets the selected popup menu item.
               onSelected: (MultiListMenuItem result) {
@@ -177,7 +178,7 @@ class TaskListFilter extends StatefulWidget {
   });
   final int index;
   final TaskListModel taskList;
-  final GroupType type;
+  final String type;
   final bool hideDone;
 
   final ValueChanged<int> onEmpty;
@@ -199,8 +200,6 @@ class _TaskListFilterState extends State<TaskListFilter> {
     stream = di<TaskRepository>().getAllTaskStream(widget.taskList.lid!);
     currentUserEmail = context.read<AuthBloc>().state.user!.email!;
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +234,8 @@ class _TaskListFilterState extends State<TaskListFilter> {
                 showCount: false,
                 showSuffixIcon: true,
                 onTextTap: () {
-                  context.go('/task-list/single-list/${widget.taskList.lid}');
+                  // context.go('/task-list/single-list/${widget.taskList.lid}');
+                  context.go('/single-list/${widget.taskList.lid}');
                 },
                 suffixIcon: isOpen ? const Icon(Icons.arrow_drop_up) : const Icon(Icons.arrow_drop_down),
                 onTap: () {
@@ -253,7 +253,7 @@ class _TaskListFilterState extends State<TaskListFilter> {
                   itemBuilder: (context, index) {
                     return TaskItem(
                       task: tasks[index],
-                      currentUserEmail: currentUserEmail,
+                      currentUID: currentUserEmail,
                     );
                   },
                 )
@@ -271,25 +271,25 @@ class _TaskListFilterState extends State<TaskListFilter> {
 
   void filter(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs, BuildContext context) {
     switch (widget.type) {
-      case GroupType.assign:
+      case 'assign':
         docs.removeWhere(
           (task) {
-            final currentUserEmail = context.read<AuthBloc>().state.user!.email!;
+            final currentUserUID = context.read<AuthBloc>().state.user!.uid!;
             final assignedMembers = task.data()['assignedMembers'] as List<dynamic>;
-            if (assignedMembers.contains(currentUserEmail)) return false;
+            if (assignedMembers.contains(currentUserUID)) return false;
             return true;
           },
         );
         break;
-      case GroupType.all:
+      case 'all':
         break;
-      case GroupType.scheduled:
+      case 'scheduled':
         docs.removeWhere((task) => task.data()['dueDate'] == null);
         break;
-      case GroupType.done:
+      case 'done':
         docs.removeWhere((task) => task.data()['completed'] == false);
         break;
-      case GroupType.today:
+      case 'today':
         final today = Timestamp.fromDate(getToday());
         // this removeWhere more efficient than filter where ? remove directly from the list
         docs.removeWhere(

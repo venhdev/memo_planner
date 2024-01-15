@@ -12,15 +12,15 @@ import '../components/task_item.dart';
 
 /// Show only the tasks of a single list
 class MyDayScreen extends StatelessWidget {
-  const MyDayScreen({super.key, required this.currentUserEmail});
+  const MyDayScreen({super.key, required this.currentUserUID});
 
-  final String currentUserEmail;
+  final String currentUserUID;
 
   //stream builder + type => filter
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: di<TaskRepository>().getAllMyDayStream(currentUserEmail, getToday()),
+      stream: di<TaskRepository>().getAllMyDayStream(currentUserUID, getToday()),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           if (snapshot.hasData) {
@@ -35,12 +35,12 @@ class MyDayScreen extends StatelessWidget {
               );
             }
             final myDays = maps.map((e) => MyDayModel.fromMap(e)).toList();
-            final currentUserEmail = context.read<AuthBloc>().state.user!.email!;
+            final currentUserUID = context.read<AuthBloc>().state.user!.uid!;
             return Scaffold(
               appBar: AppBar(
                 title: const Text('My Day'),
               ),
-              body: _build(myDays, currentUserEmail),
+              body: _build(myDays, currentUserUID),
             );
           } else if (snapshot.hasError) {
             return MessageScreen(message: snapshot.error.toString());
@@ -58,7 +58,7 @@ class MyDayScreen extends StatelessWidget {
     );
   }
 
-  Widget _build(List<MyDayModel> myDays, String currentUserEmail) => ListView.builder(
+  Widget _build(List<MyDayModel> myDays, String currentUserUID) => ListView.builder(
         itemCount: myDays.length,
         itemBuilder: (context, index) => StreamBuilder(
           stream: di<TaskRepository>().getOneTaskStream(myDays[index].lid, myDays[index].tid),
@@ -68,7 +68,7 @@ class MyDayScreen extends StatelessWidget {
               if (map == null) return const SizedBox.shrink();
               return TaskItem(
                 task: TaskModel.fromMap(map),
-                currentUserEmail: currentUserEmail,
+                currentUID: currentUserUID,
                 showListName: true,
               );
             } else {
