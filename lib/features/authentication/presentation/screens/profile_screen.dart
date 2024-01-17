@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/components/widgets.dart';
 import '../../domain/entities/user_entity.dart';
 import '../components/profile_menu.dart';
-import 'about_screen.dart';
+import '../../../../core/screens/about_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -20,7 +20,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
-    // var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return Scaffold(
       // appBar: AppBar(
       //   actions: [
@@ -46,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 label: const Text('Sign Out'),
                 onPressed: () {
                   // show dialog to confirm sign out
-                  showMyDialogConfirmSignOut(context);
+                  // showMyDialogConfirmSignOut(context);
                 },
                 icon: const Icon(Icons.logout),
               ),
@@ -55,56 +54,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SliverList(
             delegate: SliverChildListDelegate(
               [
-                Center(
-                  child: SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: widget.user.photoURL != null
-                          ? Image.network(
-                              widget.user.photoURL!,
-                              fit: BoxFit.cover,
-                            )
-                          : CircleAvatar(
-                              radius: 52.0,
-                              backgroundColor: Colors.green.shade100,
-                              child: Text(
-                                widget.user.email!.substring(0, 1),
-                                style: const TextStyle(
-                                  fontSize: 52.0,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                    ),
-                  ),
-                ),
+                _buildAvatar(),
                 const SizedBox(height: 8.0),
-                ListTile(
-                  title: Text(
-                    widget.user.displayName ?? widget.user.email!.split('@')[0],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      color: Colors.black,
-                    ),
-                  ),
-                  subtitle: const Text(
-                    'Tap to edit',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
-                  onTap: () {
-                    // show dialog to edit name
-                    showDialogForEditName(
-                      context,
-                      widget.user.displayName ?? widget.user.email!.split('@')[0],
-                    );
-                  },
-                ),
+                _buildUserName(context),
 
                 const SizedBox(height: 12.0),
 
@@ -116,8 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
 
                 const Divider(),
-
-                /// -- MENU
+                // MENU
                 SettingMenuItem(
                   title: 'Settings',
                   icon: Icons.settings,
@@ -153,6 +104,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  ListTile _buildUserName(BuildContext context) {
+    return ListTile(
+      title: Text(
+        widget.user.displayName ?? widget.user.email!.split('@')[0],
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 24,
+          color: Colors.black,
+        ),
+      ),
+      subtitle: const Text(
+        'Tap to edit',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Colors.grey,
+        ),
+      ),
+      onTap: () {
+        // show dialog to edit name
+        showDialogForEditName(
+          context,
+          widget.user.displayName ?? widget.user.email!.split('@')[0],
+        );
+      },
+    );
+  }
+
+  Center _buildAvatar() {
+    return Center(
+      child: SizedBox(
+        width: 100,
+        height: 100,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(50),
+          child: widget.user.photoURL != null
+              ? Image.network(
+                  widget.user.photoURL!,
+                  fit: BoxFit.cover,
+                )
+              : CircleAvatar(
+                  radius: 52.0,
+                  backgroundColor: Colors.green.shade100,
+                  child: Text(
+                    widget.user.email!.substring(0, 1),
+                    style: const TextStyle(
+                      fontSize: 52.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
 }
-
-

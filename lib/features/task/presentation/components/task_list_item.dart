@@ -64,7 +64,7 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.today.codePoint,
         iconColor: Colors.red,
         onTap: () {
-          context.go(_route, extra: GroupType.today);
+          context.go(_route, extra: GroupType.today.name);
         },
       );
 
@@ -74,7 +74,7 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.pending_actions.codePoint,
         iconColor: Colors.green,
         onTap: () {
-          context.go(_route, extra: GroupType.scheduled);
+          context.go(_route, extra: GroupType.scheduled.name);
         },
       );
 
@@ -84,7 +84,7 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.list.codePoint,
         iconColor: Colors.blue,
         onTap: () {
-          context.go(_route, extra: GroupType.all);
+          context.go(_route, extra: GroupType.all.name);
         },
       );
   factory TaskListItem.done(BuildContext context) => TaskListItem(
@@ -93,7 +93,7 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.check_circle.codePoint,
         iconColor: Colors.green,
         onTap: () {
-          context.go(_route, extra: GroupType.done);
+          context.go(_route, extra: GroupType.done.name);
         },
       );
 
@@ -103,7 +103,7 @@ class TaskListItem extends StatelessWidget {
         codePoint: Icons.person.codePoint,
         iconColor: Colors.blue,
         onTap: () {
-          context.go(_route, extra: GroupType.assign);
+          context.go(_route, extra: GroupType.assign.name);
         },
       );
 
@@ -116,32 +116,36 @@ class TaskListItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         margin: margin,
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: Theme.of(context).colorScheme.onInverseSurface,
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Row(
           children: [
             Icon(
-              color: iconColor ?? Colors.black,
               isDefault
                   ? IconData(
                       codePoint!,
                       fontFamily: 'MaterialIcons',
                     )
                   : taskList!.iconData!,
+              color: iconColor ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
             ),
             const SizedBox(width: 8.0),
-            GestureDetector(
-              onTap: onTextTap,
-              child: Text(
-                isDefault ? listName! : taskList!.listName!,
-                style: const TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
+            Expanded(
+              child: GestureDetector(
+                onTap: onTextTap,
+                child: Text(
+                  isDefault ? listName! : taskList!.listName!,
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.fade,
+                  maxLines: 2,
                 ),
               ),
             ),
-            const Spacer(),
+            // const Spacer(),
 
             // count item
             if (!isDefault && showCount)

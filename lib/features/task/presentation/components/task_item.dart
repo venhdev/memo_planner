@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../../../../config/dependency_injection.dart';
@@ -13,11 +15,11 @@ import '../screens/task_detail_screen.dart';
 import 'assigned_members.dart';
 
 class TaskItem extends StatelessWidget {
-  const TaskItem({super.key, required this.task, this.showListName = false, required this.currentUID});
+  const TaskItem({super.key, required this.task, this.showListName = false, required this.currentUserUID});
 
   final TaskEntity task;
   final bool showListName;
-  final String currentUID;
+  final String currentUserUID;
 
   ({bool isMyDay, bool isKeep}) getMyDayRecord(AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
@@ -35,7 +37,7 @@ class TaskItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: di<TaskRepository>().getOneMyDayStream(currentUID, task.tid!),
+        stream: di<TaskRepository>().getOneMyDayStream(currentUserUID, task.tid!),
         builder: (context, snapshot) {
           return Dismissible(
             key: Key(task.tid!),
@@ -46,13 +48,13 @@ class TaskItem extends StatelessWidget {
               if (direction == DismissDirection.startToEnd) {
                 getMyDayRecord(snapshot).isMyDay
                     ? await di<TaskRepository>()
-                        .removeFromMyDay(currentUID, MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()))
+                        .removeFromMyDay(currentUserUID, MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()))
                         .then((value) => value.fold(
                               (l) => showMySnackbar(context, message: l.message),
                               (r) => showMySnackbar(context, message: 'Removed from MyDay'),
                             ))
                     : await di<TaskRepository>()
-                        .addToMyDay(currentUID, MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()))
+                        .addToMyDay(currentUserUID, MyDayEntity(lid: task.lid!, tid: task.tid!, created: getToday()))
                         .then(
                           (value) => value.fold(
                             (l) => showMySnackbar(context, message: l.message),
@@ -63,11 +65,8 @@ class TaskItem extends StatelessWidget {
                 // ? Just call Add to MyDay Function, if true it will dismiss the item
                 return false;
               } else if (direction == DismissDirection.endToStart) {
-                return showMyDialogToConfirm(
-                  context,
-                  title: 'Delete Task?',
-                  content: 'Are you sure you want to delete this task?',
-                );
+                return showMyDialogToConfirm(context,
+                    title: 'Delete Task?', content: 'Are you sure you want to delete this task?', onConfirm: null);
               }
               return null;
             },
@@ -77,11 +76,15 @@ class TaskItem extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Colors.grey.withOpacity(0.5)),
+                  bottom: BorderSide(color: Colors.grey.shade400),
                 ),
               ),
               child: ListTile(
                 onTap: () => openTaskDetailScreen(context, task),
+                onLongPress: () {
+                  log('ListTile assignedMembers: ${task.assignedMembers}');
+                  log('ListTile assignedMembers hashCode: ${task.assignedMembers.hashCode}');
+                },
                 leading: Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
@@ -98,7 +101,7 @@ class TaskItem extends StatelessWidget {
                     decoration: task.completed! ? TextDecoration.lineThrough : null,
                   ),
                 ),
-                subtitle: moreTaskInfo(task, currentUID),
+                subtitle: moreTaskInfo(task, currentUserUID, context: context),
                 trailing: assignedInfo(task),
               ),
             ),
@@ -122,7 +125,7 @@ class TaskItem extends StatelessWidget {
         )
       : null;
 
-  Widget? moreTaskInfo(TaskEntity task, String email) {
+  Widget? moreTaskInfo(TaskEntity task, String email, {required BuildContext context}) {
     if (task.dueDate == null &&
         task.priority == null &&
         task.description!.trim() == '' &&
@@ -141,12 +144,12 @@ class TaskItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             decoration: BoxDecoration(
-              color: AppColors.priorityColor(task.priority!),
+              color: AppColors.getColorByPriority(task.priority!, isDark(context)),
               borderRadius: BorderRadius.circular(4.0),
             ),
             child: Text(
-              AppConstant.priorityLabel(task.priority!),
-              style: const TextStyle(color: Colors.white, fontSize: 12.0),
+              AppConstant.getPriorityLabel(task.priority!),
+              style: TextStyle(color: AppColors.getBrightnessColor(context), fontSize: 12.0),
             ),
           ),
           const SizedBox(width: 8.0),
@@ -155,9 +158,9 @@ class TaskItem extends StatelessWidget {
         // Due Date
         if (task.dueDate != null) ...[
           Text(
-            convertDateTimeToString(task.dueDate!, pattern: 'dd-MM'),
+            convertDateTimeToString(task.dueDate!, pattern: 'dd-MM', useTextValue: true),
             style: TextStyle(
-              color: task.dueDate!.isBefore(DateTime.now()) ? Colors.red : Colors.black,
+              color: AppColors.dueDateColor(task.dueDate!, targetDateTime: getToday()),
             ),
           ),
           const SizedBox(width: 8.0),
@@ -222,10 +225,7 @@ class TaskItem extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => TaskDetailScreen(
-        task: task,
-        currentUID: currentUID,
-      ),
+      builder: (context) => TaskDetailScreen(task: task, currentUserUID: currentUserUID),
     );
   }
 

@@ -1,35 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 class AppTheme {
-  static final ThemeData lightMode = ThemeData(
-    buttonTheme: const ButtonThemeData(
-      highlightColor: Colors.black,
-    ),
-    primarySwatch: Colors.lightGreen,
-    visualDensity: VisualDensity.adaptivePlatformDensity,
-    useMaterial3: true,
-  );
+  AppTheme._(this.colorSchemeSeed);
 
-  static final ThemeData darkMode = ThemeData(
-    buttonTheme: const ButtonThemeData(
-      highlightColor: Colors.lightGreen,
-    ),
-    primarySwatch: Colors.lightGreen,
-    visualDensity: VisualDensity.adaptivePlatformDensity,
-    useMaterial3: true,
-  );
+  factory AppTheme.fromColorSchemeSeed(Color colorSchemeSeed) {
+    return AppTheme._(colorSchemeSeed);
+  }
 
-  static final ThemeData defaultTheme = ThemeData(
-    buttonTheme: const ButtonThemeData(
-      highlightColor: Colors.lightGreen,
-    ),
-    primarySwatch: Colors.blue,
-    textTheme: GoogleFonts.robotoTextTheme(
-      ThemeData.light().textTheme,
-    ),
-    visualDensity: VisualDensity.adaptivePlatformDensity,
-    
-    useMaterial3: true,
-  );
+  ThemeData get light => ThemeData(
+        brightness: Brightness.light,
+        colorSchemeSeed: colorSchemeSeed,
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: Colors.black),
+        ),
+      );
+
+  ThemeData get dark => ThemeData(
+        brightness: Brightness.dark,
+        colorSchemeSeed: colorSchemeSeed,
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: Colors.white),
+        ),
+      );
+
+  final Color colorSchemeSeed;
 }

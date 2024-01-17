@@ -32,13 +32,14 @@ class MultiTaskListScreen extends StatefulWidget {
 class _MultiTaskListScreenState extends State<MultiTaskListScreen> {
   bool hideDone = false;
   bool isEmpty = false;
+  // a list that store state of each task list: true if empty, false if contains task
+  // >> if all task list is empty, show empty screen
   var listStateEmpty = <bool?>[];
 
   void _checkEmpty(int index) {
     listStateEmpty[index] = true;
     if (listStateEmpty.every((element) => element == true)) {
-      log('all empty');
-      // delay to show empty screen
+      // delay to show empty screen, without delay, it goes error
       Future.delayed(Duration.zero, () {
         setState(() {
           isEmpty = true;
@@ -47,9 +48,7 @@ class _MultiTaskListScreenState extends State<MultiTaskListScreen> {
     }
   }
 
-  void _checkNotEmpty(int index) {
-    listStateEmpty[index] = false;
-  }
+  void _checkNotEmpty(int index) => listStateEmpty[index] = false;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +65,6 @@ class _MultiTaskListScreenState extends State<MultiTaskListScreen> {
             if (maps.isEmpty) return _buildEmpty(); // user has no task list
 
             final taskLists = maps.map((e) => TaskListModel.fromMap(e)).toList();
-            log('test length ${taskLists.length}');
             listStateEmpty = List.generate(taskLists.length, (index) => null);
 
             return Scaffold(
@@ -105,7 +103,7 @@ class _MultiTaskListScreenState extends State<MultiTaskListScreen> {
   Scaffold _buildEmpty() {
     return Scaffold(
       appBar: _buildAppBar(),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(children: [
         EmptyScreen(
           richText: 'You have no task in ',
@@ -235,6 +233,8 @@ class _TaskListFilterState extends State<TaskListFilter> {
                 showSuffixIcon: true,
                 onTextTap: () {
                   // context.go('/task-list/single-list/${widget.taskList.lid}');
+                  // pop out of multi-list screen and then go to myday screen
+                  context.pop();
                   context.go('/single-list/${widget.taskList.lid}');
                 },
                 suffixIcon: isOpen ? const Icon(Icons.arrow_drop_up) : const Icon(Icons.arrow_drop_down),
@@ -253,7 +253,7 @@ class _TaskListFilterState extends State<TaskListFilter> {
                   itemBuilder: (context, index) {
                     return TaskItem(
                       task: tasks[index],
-                      currentUID: currentUserEmail,
+                      currentUserUID: currentUserEmail,
                     );
                   },
                 )

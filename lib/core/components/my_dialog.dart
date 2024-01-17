@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../config/theme/text_style.dart';
 
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 
@@ -32,34 +31,11 @@ void showDialogForEditName(BuildContext context, String prevName) async {
   );
 }
 
-void showMyDialogConfirmSignOut(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Sign Out'),
-      content: const Text('Are you sure to sign out?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () {
-            BlocProvider.of<AuthBloc>(context).add(SignOutEvent());
-            Navigator.pop(context);
-          },
-          child: const Text('Sign Out'),
-        ),
-      ],
-    ),
-  );
-}
-
 Future<T?> showMyDialogToConfirm<T>(
   BuildContext context, {
   required String title,
   required String content,
-  VoidCallback? onConfirm,
+  required VoidCallback? onConfirm,
 }) async {
   return await showDialog(
     context: context,
@@ -72,14 +48,14 @@ Future<T?> showMyDialogToConfirm<T>(
             onPressed: () {
               Navigator.of(context).pop(false);
             },
-            child: Text('No', style: MyTextStyle.blueTextDialog),
+            child: const Text('No'),
           ),
           TextButton(
             onPressed: () async {
               onConfirm?.call();
               Navigator.of(context).pop(true);
             },
-            child: Text('Yes', style: MyTextStyle.redTextDialog),
+            child: const Text('Yes'),
           ),
         ],
       );

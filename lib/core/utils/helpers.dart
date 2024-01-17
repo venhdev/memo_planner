@@ -8,6 +8,11 @@ import '../constants/constants.dart';
 
 part 'converter.dart';
 
+
+bool isDark(BuildContext context) {
+  return Theme.of(context).brightness == Brightness.dark;
+}
+
 DateTime getToday() {
   DateTime now = DateTime.now();
   return DateTime(now.year, now.month, now.day);

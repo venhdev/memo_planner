@@ -1,5 +1,5 @@
-import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -19,11 +19,11 @@ class TaskDetailScreen extends StatelessWidget {
   const TaskDetailScreen({
     super.key,
     required this.task,
-    required this.currentUID,
+    required this.currentUserUID,
   });
 
   final TaskEntity task;
-  final String currentUID;
+  final String currentUserUID;
 
   @override
   Widget build(BuildContext context) => DraggableScrollableSheet(
@@ -32,44 +32,9 @@ class TaskDetailScreen extends StatelessWidget {
         minChildSize: 0.9,
         builder: (context, scrollController) => TaskDetailBody(
           scrollController: scrollController,
-          oldTask: task,
-          currentUserEmail: currentUID,
+          oldTask: task.copyWith(),
+          currentUserUID: currentUserUID,
         ),
-        // builder: (context, scrollController) => StreamBuilder(
-        //   stream: di<TaskRepository>().getOneTaskStream(task.lid!, task.tid!),
-        //   builder: (context, snapshot) {
-        //     log('render TaskDetailScreen with ${snapshot.connectionState}');
-        //     // if (snapshot.connectionState == ConnectionState.active) {
-        //       if (snapshot.hasData) {
-        //         final map = snapshot.data?.data();
-        //         if (map == null) {
-        //           return Container(
-        //             color: Colors.white,
-        //             child: const MessageScreen(message: 'Not found'),
-        //           );
-        //         }
-        //         if (map.isEmpty) {
-        //           return Container(
-        //             color: Colors.white,
-        //             child: const MessageScreen(message: 'Empty'),
-        //           );
-        //         }
-        //         final TaskEntity task = TaskModel.fromMap(map);
-        //         return TaskDetailBody(
-        //           scrollController: scrollController,
-        //           task: task,
-        //           currentUserEmail: currentUserEmail,
-        //         );
-        //       } else if (snapshot.hasError) {
-        //         return MessageScreen(message: snapshot.error.toString());
-        //       } else {
-        //         return const LoadingScreen();
-        //       }
-        //     // } else {
-        //     //   return const LoadingScreen();
-        //     // }
-        //   },
-        // ),
       );
 }
 
@@ -78,13 +43,13 @@ class TaskDetailBody extends StatefulWidget {
     super.key,
     required this.scrollController,
     required this.oldTask,
-    required this.currentUserEmail,
+    required this.currentUserUID,
   });
 
   final ScrollController scrollController;
 
   final TaskEntity oldTask;
-  final String currentUserEmail;
+  final String currentUserUID;
 
   @override
   State<TaskDetailBody> createState() => _TaskDetailBodyState();
@@ -137,7 +102,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
     _dueDate = widget.oldTask.dueDate;
     _assignedMembers = widget.oldTask.assignedMembers!;
     _description = widget.oldTask.description;
-    stream = di<TaskRepository>().getOneMyDayStream(widget.currentUserEmail, widget.oldTask.tid!);
+    stream = di<TaskRepository>().getOneMyDayStream(widget.currentUserUID, widget.oldTask.tid!);
   }
 
   @override
@@ -150,21 +115,18 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
 
   @override
   Widget build(BuildContext context) {
-    log('render TaskDetailBody');
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
         left: 8.0,
         right: 8.0,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-      ),
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: ListView(
         controller: widget.scrollController,
         children: [
           SizedBox(height: MediaQuery.of(context).padding.top + 16.0),
-          // Arrow icon and text 'Drag down to close' with grey color
+          // Drag down to close and save
           const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -197,6 +159,14 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
           // Assign To
           const SizedBox(height: 16.0),
           _buildAssignToButton(),
+
+          ElevatedButton(
+            onPressed: () {
+              debugPrint('test assign');
+              _assignedMembers.add('test');
+            },
+            child: const Text('test assign'),
+          ),
 
           // Task description
           const SizedBox(height: 16.0),
@@ -235,13 +205,13 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
           children: [
             Icon(
               Icons.person_outline,
-              color: _assignedMembers.isNotEmpty ? AppColors.kActiveTextColor : Colors.black,
+              color: _assignedMembers.isNotEmpty ? AppColors.kActiveTextColor : null,
             ),
             const SizedBox(width: 8),
             Text(
               'Assign to ',
               style: TextStyle(
-                color: _assignedMembers.isNotEmpty ? AppColors.kActiveTextColor : Colors.black,
+                color: _assignedMembers.isNotEmpty ? AppColors.kActiveTextColor : null,
               ),
             ),
             _assignedMembers.isNotEmpty
@@ -260,6 +230,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
       onPressed: () async {
         await showMyDatePicker(context, initDate: _dueDate ?? DateTime.now()).then(
           (value) {
+            if (value == null) return; // user dismiss the dialog
             // if the picked date different from the original date
             if (value != widget.oldTask.dueDate) {
               setState(() {
@@ -278,11 +249,28 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
       },
       child: Row(
         children: [
-          Icon(Icons.calendar_today, color: AppColors.dueDateColor(_dueDate)),
+          Icon(
+            _dueDate != null ? Icons.calendar_today : Icons.calendar_today_outlined,
+            color: AppColors.dueDateColor(
+              _dueDate,
+              targetDateTime: getToday(),
+              colorWhenDateTimeNull: AppColors.getBrightnessColor(context),
+            ),
+          ),
           const SizedBox(width: 8),
           Text(
-            convertDateTimeToString(_dueDate, defaultValue: 'Set due date'),
-            style: TextStyle(color: AppColors.dueDateColor(_dueDate)),
+            convertDateTimeToString(
+              _dueDate,
+              defaultValue: 'Set due date',
+              useTextValue: true,
+            ),
+            style: TextStyle(
+              color: AppColors.dueDateColor(
+                _dueDate,
+                targetDateTime: getToday(),
+                colorWhenDateTimeNull: AppColors.getBrightnessColor(context),
+              ),
+            ),
           ),
           const Spacer(), //> to push the icon to the right
           _dueDate != null
@@ -343,33 +331,43 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         );
 
         // > the reminder date time must be in the future
+        // the picked reminder is before the current time >> show toast
         if (pickedDateTime.isBefore(DateTime.now().add(const Duration(minutes: 1)))) {
-          Fluttertoast.showToast(msg: 'Reminder must later than 1 minute from now!');
+          Fluttertoast.showToast(
+            msg: 'Reminder must later than 1 minute from now!',
+            backgroundColor: Colors.red,
+          );
         } else {
-          // > if the picked reminder is different from the current reminder
+          // > the picked reminder is different from the current reminder
           if (pickedDateTime != _reminder?.scheduledTime) {
-            setState(
-              () {
-                // > if the current reminder is null > create new reminder
-                if (widget.oldTask.reminders == null) {
-                  final newReminder = Reminder(
-                    rid: generateNotificationId(pickedDateTime),
-                    scheduledTime: pickedDateTime,
-                  );
-                  setState(() {
-                    _reminder = newReminder;
-                    unSavedReminder = true;
-                  });
-                } else {
-                  // the current reminder is different from the picked reminder
-                  setState(() {
-                    _reminder = _reminder?.copyWith(scheduledTime: pickedDateTime);
-                    unSavedReminder = true;
-                  });
-                }
-              },
-            );
+            // > the current & old reminder is null >> new reminder
+            if (widget.oldTask.reminders == null && _reminder == null) {
+              final newReminder = Reminder(
+                rid: generateNotificationId(pickedDateTime),
+                scheduledTime: pickedDateTime,
+              );
+              setState(() {
+                _reminder = newReminder;
+                unSavedReminder = true;
+              });
+            } else if (widget.oldTask.reminders != null && _reminder == null) {
+              // > the current reminder is null but the old reminder is not null
+              // >> set new scheduled time base on old reminder
+              final updatedReminder = widget.oldTask.reminders!.copyWith(scheduledTime: pickedDateTime);
+              setState(() {
+                _reminder = updatedReminder;
+                unSavedReminder = true;
+              });
+            } else {
+              //> sure that _reminder is not null
+              // the current reminder is different from the picked reminder
+              setState(() {
+                _reminder = _reminder?.copyWith(scheduledTime: pickedDateTime);
+                unSavedReminder = true;
+              });
+            }
           } else {
+            // > the picked reminder is the same as the current reminder >> no change
             setState(() {
               _reminder = _reminder?.copyWith(scheduledTime: pickedDateTime);
               unSavedReminder = false;
@@ -379,7 +377,11 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
       },
       child: Row(
         children: [
-          Icon(Icons.notifications, color: AppColors.dueDateColor(_reminder?.scheduledTime)),
+          Icon(Icons.notifications,
+              color: AppColors.dueDateColor(
+                _reminder?.scheduledTime,
+                colorWhenDateTimeNull: AppColors.getBrightnessColor(context),
+              )),
           const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,9 +390,8 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                 convertDateTimeToString(
                   _reminder?.scheduledTime,
                   defaultValue: 'Set reminder',
-                  pattern: 'dd/MM - HH:mm',
+                  pattern: 'dd/MM - hh:mm aa',
                 ),
-                style: const TextStyle(color: Colors.black),
               ),
               if (_reminder != null)
                 Text(
@@ -399,11 +400,11 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                 ),
             ],
           ),
-          const Spacer(), //> to push the icon to the right
+          const Spacer(), // >> push the icon to the right
+          // close button >> remove the reminder
           _reminder != null
               ? IconButton(
                   onPressed: () {
-                    log('test');
                     setState(() {
                       _reminder = null;
                       // if before reminder is not null >> there is a change
@@ -422,57 +423,6 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
     );
   }
 
-  // Widget _buildMyDayButton() {
-  //   return TextButton(
-  //     onPressed: () {
-  //       setState(() {
-  //         if (_myDay == null) {
-  //           _myDay = MyDayEntity(
-  //             lid: widget.task.lid!,
-  //             tid: widget.task.tid!,
-  //             created: getToday(),
-  //           );
-  //         } else {
-  //           _myDay = null;
-  //         }
-  //       });
-  //     },
-  //     child: Row(
-  //       children: [
-  //         if (_myDay == null) ...[
-  //           const Icon(Icons.wb_sunny_outlined, color: AppColors.kDeactivateTextColor),
-  //           const SizedBox(width: 8),
-  //           const Text('Add to My Day', style: TextStyle(color: AppColors.kDeactivateTextColor)),
-  //           const Spacer(),
-  //         ] else ...[
-  //           const Icon(Icons.wb_sunny, color: AppColors.kActiveTextColor),
-  //           const SizedBox(width: 8),
-  //           const Text('Remove from My Day', style: TextStyle(color: AppColors.kActiveTextColor)),
-  //           const Spacer(), //> to push the icon to the right
-  //           TextButton(
-  //             onPressed: () {
-  //               setState(() {
-  //                 _myDay = _myDay!.copyWith(keep: !_myDay!.keep);
-  //               });
-  //             },
-  //             child: Row(
-  //               mainAxisSize: MainAxisSize.min,
-  //               children: [
-  //                 const Text(
-  //                   'Keep in My Day',
-  //                   style: TextStyle(color: AppColors.kDeactivateTextColor),
-  //                 ),
-  //                 const SizedBox(width: 4.0),
-  //                 Icon(_myDay!.keep ? Icons.star : Icons.star_border, color: Colors.amber),
-  //               ],
-  //             ),
-  //           ),
-  //         ],
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget _buildMyDayButton() {
     return StreamBuilder(
       stream: stream,
@@ -487,13 +437,13 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                   tid: widget.oldTask.tid!,
                   created: getToday(),
                 );
-                di<TaskRepository>().addToMyDay(widget.currentUserEmail, myDay);
+                di<TaskRepository>().addToMyDay(widget.currentUserUID, myDay);
               },
               child: const Row(
                 children: [
-                  Icon(Icons.wb_sunny_outlined, color: AppColors.kDeactivateTextColor),
+                  Icon(Icons.wb_sunny_outlined),
                   SizedBox(width: 8),
-                  Text('Add to My Day', style: TextStyle(color: AppColors.kDeactivateTextColor)),
+                  Text('Add to My Day'),
                   Spacer(),
                 ],
               ),
@@ -502,25 +452,22 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
             final myday = MyDayModel.fromMap(map);
             return TextButton(
               onPressed: () {
-                di<TaskRepository>().removeFromMyDay(widget.currentUserEmail, myday);
+                di<TaskRepository>().removeFromMyDay(widget.currentUserUID, myday);
               },
               child: Row(
                 children: [
                   const Icon(Icons.wb_sunny, color: AppColors.kActiveTextColor),
                   const SizedBox(width: 8),
-                  const Text('Remove from My Day', style: TextStyle(color: AppColors.kActiveTextColor)),
+                  const Text('Remove from My Day'),
                   const Spacer(), //> to push the icon to the right
                   TextButton(
                     onPressed: () {
-                      di<TaskRepository>().toggleKeepInMyDay(widget.currentUserEmail, widget.oldTask.tid!, !myday.keep);
+                      di<TaskRepository>().toggleKeepInMyDay(widget.currentUserUID, widget.oldTask.tid!, !myday.keep);
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'Keep in My Day',
-                          style: TextStyle(color: AppColors.kDeactivateTextColor),
-                        ),
+                        const Text('Keep in My Day'),
                         const SizedBox(width: 4.0),
                         Icon(myday.keep ? Icons.star : Icons.star_border, color: Colors.amber),
                       ],
@@ -612,7 +559,8 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
               },
               style: ElevatedButton.styleFrom(
                 elevation: 0.0,
-                backgroundColor: Colors.red.shade50,
+                foregroundColor: Theme.of(context).textTheme.labelSmall?.color,
+                backgroundColor: Theme.of(context).colorScheme.errorContainer,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -644,11 +592,6 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                 unSavedCompleted = false;
               }
             });
-            // di<TaskRepository>().toggleTask(
-            //   widget.oldTask.tid!,
-            //   widget.oldTask.lid!,
-            //   value!,
-            // );
           },
         ),
       ),
@@ -677,12 +620,17 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
     return showDialog(
       context: context,
       builder: (context) => AssignMemberDialog(
-        task: widget.oldTask,
+        lid: widget.oldTask.lid!,
+        //? to make a copy prevent changing the original, without toList() it will the same location
+        assignedMembers: _assignedMembers.toList(),
         valueChanged: (value) {
-          // the same location between _assignedMembers and widget.oldTask.assignedMembers
           setState(() {
             _assignedMembers = value;
-            if (_assignedMembers != widget.oldTask.assignedMembers) unSavedAssignTo = true;
+            if (listEquals(_assignedMembers, widget.oldTask.assignedMembers)) {
+              unSavedAssignTo = false;
+            } else {
+              unSavedAssignTo = true;
+            }
           });
         },
       ),

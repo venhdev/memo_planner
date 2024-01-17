@@ -36,7 +36,8 @@ if (flutterVersionName == null) {
 
 android {
     namespace "vn.io.memo.planner"
-    compileSdkVersion flutter.compileSdkVersion
+    // compileSdkVersion flutter.compileSdkVersion // flutter 3.16.7 = 33
+    compileSdkVersion 34 // required by the dependencies of flutter_local_notifications
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -90,5 +91,8 @@ flutter {
 }
 
 dependencies {
+    // flutter_local_notifications required
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
+    implementation 'androidx.window:window:1.2.0'
+    implementation 'androidx.window:window-java:1.2.0' // For Java-friendly APIs to register and unregister callbacks
 }

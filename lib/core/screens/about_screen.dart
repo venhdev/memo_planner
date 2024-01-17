@@ -3,8 +3,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../config/dependency_injection.dart';
-import '../../../../core/notification/local_notification_manager.dart';
+import '../../config/dependency_injection.dart';
+import '../notification/local_notification_manager.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({

@@ -5,16 +5,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../config/routes/app_navigation_drawer.dart';
+import '../../../../core/components/avatar.dart';
 import '../../../../core/components/common_screen.dart';
 import '../../../../core/constants/enum.dart';
 import '../../../../core/utils/helpers.dart';
+import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../data/models/task_list_model.dart';
 import '../../domain/entities/task_list_entity.dart';
 import '../bloc/task_bloc.dart';
 import '../components/add_or_edit_task_list_dialog.dart';
 import '../components/task_list_item.dart';
 
-// show all list of tasks
 class TaskHomeScreen extends StatelessWidget {
   const TaskHomeScreen({super.key});
 
@@ -24,6 +25,7 @@ class TaskHomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: _buildAppBar(context),
       drawer: const AppNavigationDrawer(),
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: BlocBuilder<TaskBloc, TaskState>(
         builder: (context, state) {
           if (state.status == BlocStatus.loaded) {
@@ -60,29 +62,36 @@ class TaskHomeScreen extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text(
-        convertDateTimeToString(getToday(), pattern: 'dd/MM'),
-        style: const TextStyle(color: Colors.black87, fontStyle: FontStyle.italic),
+        convertDateTimeToString(getToday(), pattern: 'EEEE, dd-MM-yyyy'),
+        style: const TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold),
+      ),
+      // open drawer when user click on avatar
+      leading: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          return Avatar(
+            photoURL: (context.read<AuthBloc>().state.user?.photoURL ?? ''),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          );
+        },
       ),
       actions: [
-        // IconButton(
-        //   onPressed: () {
-        //     // onTapFilter(context);
-        //   },
-        //   icon: const Icon(Icons.sort),
-        // ),
         Padding(
-          padding: const EdgeInsets.only(right: 8.0),
+          padding: const EdgeInsets.only(right: 14.0),
           child: TextButton.icon(
-            label: const Text('New List', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
-            icon: const Icon(Icons.add, color: Colors.black87),
-            style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.greenAccent.shade100)),
-            onPressed: () => showDialog(
-              context: context,
-              builder: (context) => AddOrEditTaskListDialog(controller: TextEditingController(), isAdd: true),
-            ),
+            label: const Text('Create', style: TextStyle(fontWeight: FontWeight.bold)),
+            icon: const Icon(Icons.add),
+            style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primaryContainer)),
+            onPressed: () => _showDialogForAddTaskList(context),
           ),
         ),
       ],
+    );
+  }
+
+  Future<dynamic> _showDialogForAddTaskList(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) => AddOrEditTaskListDialog(controller: TextEditingController()),
     );
   }
 

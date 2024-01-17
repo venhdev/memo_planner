@@ -17,6 +17,7 @@ import '../../domain/repository/task_list_repository.dart';
 import '../../domain/repository/task_repository.dart';
 import '../components/add_or_edit_task_list_dialog.dart';
 import '../components/add_task_modal.dart';
+import '../components/member_modal.dart';
 import '../components/task_item.dart';
 
 // enum TaskFilter { done }
@@ -45,8 +46,8 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
     // return tasks;
   }
 
-  bool _isMemberOfList(String currentUID, List<Member> members) {
-    return members.any((member) => member.uid == currentUID);
+  bool _isMemberOfList(String currentUserUID, List<Member> members) {
+    return members.any((member) => member.uid == currentUserUID);
   }
 
   @override
@@ -107,8 +108,8 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
                     //         );
                     //       }).toList(),
                     //     ),
-                    String currentUID = context.read<AuthBloc>().state.user!.uid!;
-                    return _buildListTaskItem(context, tasks, currentUID);
+                    String currentUserUID = context.read<AuthBloc>().state.user!.uid!;
+                    return _buildListTaskItem(context, tasks, currentUserUID);
                   } else if (snapshot.hasError) {
                     return MessageScreen.error(snapshot.error.toString());
                   } else {
@@ -199,13 +200,13 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
   Widget _buildListTaskItem(
     BuildContext context,
     List<TaskEntity> tasks,
-    String currentUID,
+    String currentUserUID,
   ) =>
       ListView.builder(
         itemCount: tasks.length,
         shrinkWrap: true,
         itemBuilder: (context, index) {
-          return TaskItem(task: tasks[index], currentUID: currentUID);
+          return TaskItem(task: tasks[index], currentUserUID: currentUserUID);
         },
       );
 
@@ -217,8 +218,8 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
     );
   }
 
-  Future<void> openMemberModal(BuildContext context, String lid) {
-    return showModalBottomSheet<void>(
+  void openMemberModal(BuildContext context, String lid) {
+    showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -227,70 +228,7 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
         ),
       ),
       builder: (BuildContext context) {
-        return StreamBuilder(
-          stream: di<TaskListRepository>().getOneTaskListStream(lid),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final map = snapshot.data!.data();
-
-              // > To avoid error when the list has been deleted -> "operator ! on null value"
-              // > Notify user that the list has been deleted if they are still in this screen
-              if (map == null) {
-                Navigator.of(context).pop(); // [SingleListScreen] is open this modal > close this modal
-                return const MessageScreen(message: 'This list has been permanently deleted');
-              }
-
-              final taskList = TaskListModel.fromMap(map);
-              return Center(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('List Members', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
-                          ElevatedButton.icon(
-                            label: const Text('Add Member'),
-                            icon: const Icon(Icons.add),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange.shade100,
-                            ),
-                            onPressed: () {
-                              showMyDialogToAddMember(
-                                context,
-                                controller: TextEditingController(),
-                                onSubmitted: (value) async {
-                                  // REVIEW: need refactor
-                                  di<TaskListRepository>().inviteMemberViaEmail(taskList.lid!, value!.trim());
-                                },
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: taskList.members?.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return MemberItem(
-                            lid: taskList.lid!,
-                            renderMember: taskList.members![index],
-                            ownerUID: taskList.creator!.uid!,
-                          );
-                        },
-                      ),
-                    )
-                  ],
-                ),
-              );
-            } else {
-              return const LoadingScreen();
-            }
-          },
-        );
+        return MemberModal(lid: lid);
       },
     );
   }

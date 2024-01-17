@@ -1,7 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:injectable/injectable.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../features/task/domain/entities/task_entity.dart';
 import '../constants/constants.dart';
@@ -144,15 +144,15 @@ class LocalNotificationManager {
         )
         .onError((error, stackTrace) => Fluttertoast.showToast(msg: error.toString()));
   }
-
-  // > Retrieving pending notification requests
-  // <https://pub.dev/packages/flutter_local_notifications#retrieving-pending-notification-requests>
-  // Future<List<PendingNotificationRequest>> pendingNotificationRequests() async {
-  //   return await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
-  // }
-  // > Retrieving active notifications #
-  // <https://pub.dev/packages/flutter_local_notifications#retrieving-active-notifications>
-  // Future<List<ActiveNotification>> activeNotifications() async {
-  //   return await _flutterLocalNotificationsPlugin.getActiveNotifications();
-  // }
 }
+
+// > Retrieving pending notification requests
+// <https://pub.dev/packages/flutter_local_notifications#retrieving-pending-notification-requests>
+// Future<List<PendingNotificationRequest>> pendingNotificationRequests() async {
+//   return await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+// }
+// > Retrieving active notifications #
+// <https://pub.dev/packages/flutter_local_notifications#retrieving-active-notifications>
+// Future<List<ActiveNotification>> activeNotifications() async {
+//   return await _flutterLocalNotificationsPlugin.getActiveNotifications();
+// }

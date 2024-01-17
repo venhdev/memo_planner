@@ -9,7 +9,6 @@ import '../../domain/entities/task_entity.dart';
 import '../../domain/repository/task_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
-import '../../../../config/theme/text_style.dart';
 import '../../../../core/components/widgets.dart';
 import 'priority_table.dart';
 
@@ -80,7 +79,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Set Priority', style: MyTextStyle.blackBold87),
+              const Text('Set Priority'),
               Switch(
                 thumbIcon: thumbIcon,
                 value: isSetPriority,

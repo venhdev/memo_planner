@@ -19,11 +19,11 @@ class ScaffoldWithNavBar extends StatelessWidget {
       listener: (context, state) {
         if (state.status == AuthenticationStatus.authenticated) {
           if (state.message != null) Fluttertoast.showToast(msg: state.message!);
-            // showMyAlertDialogMessage(
-            //   context: context,
-            //   message: state.message!,
-            //   icon: const Icon(Icons.check),
-            // );
+          // showMyAlertDialogMessage(
+          //   context: context,
+          //   message: state.message!,
+          //   icon: const Icon(Icons.check),
+          // );
 
           // call initial event on each branch to load data according to user
           // context.read<HabitBloc>().add(HabitInitial());
@@ -32,7 +32,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
           //? because when user sign out, maybe in user branch
           // context.go('/task-list');
         } else if (state.status == AuthenticationStatus.unauthenticated) {
-          Fluttertoast.showToast(msg: state.message!);
+          if (state.message != null) Fluttertoast.showToast(msg: state.message!);
           // showMyAlertDialogMessage(
           //   context: context,
           //   message: state.message!,

@@ -94,7 +94,7 @@ class FirebaseCloudMessagingManager {
     // background message handler
     FirebaseMessaging.onBackgroundMessage(_backgroundMessageHandler);
 
-    // log('init MessagingManager success! with currentFCMToken: $currentFCMToken');
+    log('[Messaging] init success!');
   }
 
   Future<void> sendDataMessageToMultipleDevices({

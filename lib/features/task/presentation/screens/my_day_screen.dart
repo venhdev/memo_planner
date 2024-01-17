@@ -68,7 +68,7 @@ class MyDayScreen extends StatelessWidget {
               if (map == null) return const SizedBox.shrink();
               return TaskItem(
                 task: TaskModel.fromMap(map),
-                currentUID: currentUserUID,
+                currentUserUID: currentUserUID,
                 showListName: true,
               );
             } else {

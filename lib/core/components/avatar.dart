@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:memo_planner/core/components/common_screen.dart';
 
 import '../../config/dependency_injection.dart';
 import '../../features/authentication/domain/repository/authentication_repository.dart';
+import 'common_screen.dart';
 
 /// if both memberUID and photoURL are provided, photoURL will be used
 class Avatar extends StatelessWidget {
@@ -23,6 +23,7 @@ class Avatar extends StatelessWidget {
     this.photoURL,
     this.placeHolder,
     this.radius,
+    this.onPressed,
   });
   //: assert(memberUID != null || photoURL != null, 'memberUID or photoURL must be provided');
 
@@ -31,9 +32,14 @@ class Avatar extends StatelessWidget {
   final String? userUID;
 
   final double? radius;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
+    return IconButton(onPressed: onPressed, icon: _build());
+  }
+
+  Widget _build() {
     if (photoURL == null && placeHolder == null && userUID == null) {
       return CircleAvatar(
         radius: radius,

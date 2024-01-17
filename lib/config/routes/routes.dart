@@ -3,11 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/components/widgets.dart';
+import '../../core/screens/screens.dart';
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../features/authentication/presentation/screens/screens.dart';
 import '../../features/task/presentation/bloc/task_bloc.dart';
 import '../../features/task/presentation/screens/screens.dart';
+import 'app_navigation_drawer.dart';
 
 part 'app_scaffold_navigation_bar.dart';
 
@@ -39,13 +40,15 @@ class AppRouters {
               return MultiTaskListScreen(type: type);
             },
           ),
-          GoRoute(
+          GoRoute(  
             path: 'myday',
             builder: (context, state) {
               final String email = GoRouterState.of(context).extra! as String;
               return MyDayScreen(currentUserUID: email);
             },
           ),
+          GoRoute(path: 'settings', builder: (context, state) => const SettingsScreen()),
+          GoRoute(path: 'about', builder: (context, state) => const AboutScreen()),
         ],
       ),
       // bottomRoute(),
@@ -194,21 +197,21 @@ class AppRouters {
 //   );
 // }
 
-GoRoute authenticationRoutes() {
-  return GoRoute(
-    path: '/authentication',
-    builder: (context, state) => const AuthScreen(),
-    routes: [
-      GoRoute(
-        path: 'sign-in',
-        builder: (context, state) => const SignInScreen(),
-      ),
-      GoRoute(
-        path: 'sign-up',
-        builder: (context, state) => const SignUpScreen(),
-      ),
-    ],
-  );
-}
+// GoRoute authenticationRoutes() {
+//   return GoRoute(
+//     path: '/authentication',
+//     builder: (context, state) => const AuthScreen(),
+//     routes: [
+//       GoRoute(
+//         path: 'sign-in',
+//         builder: (context, state) => const SignInScreen(),
+//       ),
+//       GoRoute(
+//         path: 'sign-up',
+//         builder: (context, state) => const SignUpScreen(),
+//       ),
+//     ],
+//   );
+// }
 
 // https://pub.dev/documentation/go_router/latest/go_router/StatefulShellRoute-class.html

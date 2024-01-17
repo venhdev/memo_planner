@@ -246,8 +246,6 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   @override
   Future<void> editTask(TaskEntity updatedTask, TaskEntity oldTask) async {
     final docRef = _firestore.collection(pathToTaskLists).doc(updatedTask.lid).collection(pathToTasks).doc(updatedTask.tid);
-    log('updatedTask reminders: ${updatedTask.reminders.toString()}');
-    log('oldTask reminders: ${oldTask.reminders.toString()}');
 
     await docRef.update(TaskModel.fromEntity(updatedTask).toMap()).then(
       (_) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/utils/helpers.dart';
 
 class PriorityTable extends StatelessWidget {
   const PriorityTable({super.key, required this.callBack, required this.priority});
@@ -45,9 +46,9 @@ class PriorityTable extends StatelessWidget {
             ),
             // Important & Urgent
             ChoiceChip(
-              label: Text(AppConstant.priorityLabel(3)),
+              label: Text(AppConstant.getPriorityLabel(3)),
               selected: priority == 3,
-              selectedColor: AppColors.kLevel3Color,
+              selectedColor: AppColors.getColorByPriority(3, isDark(context)),
               onSelected: (value) {
                 if (value) {
                   callBack(3);
@@ -58,9 +59,9 @@ class PriorityTable extends StatelessWidget {
             ),
             // Important & Not Urgent
             ChoiceChip(
-              label: Text(AppConstant.priorityLabel(2)),
+              label: Text(AppConstant.getPriorityLabel(2)),
               selected: priority == 2,
-              selectedColor: AppColors.kLevel2Color,
+              selectedColor: AppColors.getColorByPriority(2, isDark(context)),
               onSelected: (value) {
                 if (value) {
                   callBack(2);
@@ -84,9 +85,9 @@ class PriorityTable extends StatelessWidget {
             ),
             // Not Important & Urgent
             ChoiceChip(
-              label: Text(AppConstant.priorityLabel(1)),
+              label: Text(AppConstant.getPriorityLabel(1)),
               selected: priority == 1,
-              selectedColor: AppColors.kLevel1Color,
+              selectedColor: AppColors.getColorByPriority(1, isDark(context)),
               onSelected: (value) {
                 if (value) {
                   callBack(1);
@@ -97,9 +98,9 @@ class PriorityTable extends StatelessWidget {
             ),
             // Not Important & Not Urgent
             ChoiceChip(
-              label: Text(AppConstant.priorityLabel(0)),
+              label: Text(AppConstant.getPriorityLabel(0)),
               selected: priority == 0,
-              selectedColor: AppColors.kLevel0Color,
+              selectedColor: AppColors.getColorByPriority(0, isDark(context)),
               onSelected: (value) {
                 if (value) {
                   callBack(0);

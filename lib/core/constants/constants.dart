@@ -73,7 +73,7 @@ const String kDefaultReminderTitle = 'Reminder';
 const String kDefaultReminderBody = 'Hey, you have a task to do!';
 
 class AppConstant {
-  static priorityLabel(int priority) {
+  static getPriorityLabel(int priority) {
     switch (priority) {
       case 0:
         return 'Eliminate';
