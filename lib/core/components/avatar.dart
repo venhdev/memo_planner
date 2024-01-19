@@ -24,11 +24,18 @@ class Avatar extends StatelessWidget {
     this.placeHolder,
     this.radius,
     this.onPressed,
-  });
-  //: assert(memberUID != null || photoURL != null, 'memberUID or photoURL must be provided');
+  }) : assert(
+          userUID == null || photoURL == null,
+          'You can only provide either userUID or photoURL',
+        );
 
+  /// The URL of the photo
   final String? photoURL;
+
+  /// The Character to show if photoURL is null
   final String? placeHolder;
+
+  /// The UID of the user to get the photoURL from
   final String? userUID;
 
   final double? radius;
@@ -47,6 +54,7 @@ class Avatar extends StatelessWidget {
         child: const Icon(Icons.person),
       );
     }
+
     if (photoURL != null) {
       return CircleAvatar(
         radius: radius,

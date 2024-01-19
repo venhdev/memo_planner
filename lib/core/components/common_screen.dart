@@ -118,47 +118,11 @@ class MessageScreen extends StatelessWidget {
   }
 }
 
-class MessageScreenWithAction extends StatelessWidget {
-  factory MessageScreenWithAction.unauthenticated(VoidCallback onPressed) => MessageScreenWithAction(
-        message: 'You are not authenticated. Please login to continue.',
-        buttonText: 'Sign in',
-        onPressed: onPressed,
-      );
-  const MessageScreenWithAction({
-    super.key,
-    this.message,
-    this.buttonText = 'Button',
-    required this.onPressed,
-  });
-
-  final String? message;
-  final String? buttonText;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(message ?? 'Something went wrong'),
-          ElevatedButton(
-            onPressed: () {
-              onPressed();
-            },
-            child: Text(buttonText!),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class DividerWithText extends StatelessWidget {
   const DividerWithText({
     super.key,
-    this.color,
     required this.text,
+    this.color,
     this.fontSize,
   });
 

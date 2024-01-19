@@ -2,9 +2,9 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/constants/typedef.dart';
-import 'package:memo_planner/features/task/domain/entities/myday_entity.dart';
-import 'package:memo_planner/features/task/domain/entities/task_entity.dart';
+import '../../../../core/constants/typedef.dart';
+import '../../domain/entities/myday_entity.dart';
+import '../../domain/entities/task_entity.dart';
 
 import '../../../../core/constants/enum.dart';
 import '../../../../core/error/failures.dart';

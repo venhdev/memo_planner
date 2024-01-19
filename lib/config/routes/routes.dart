@@ -17,7 +17,7 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(de
 
 class AppRouters {
   static final GoRouter router = GoRouter(
-    debugLogDiagnostics: true, // NOTE only set to true if you need to debug
+    // debugLogDiagnostics: true, // note for debug
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/',
     routes: <RouteBase>[

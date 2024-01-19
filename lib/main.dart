@@ -10,8 +10,9 @@ import 'config/bloc_config.dart';
 import 'config/dependency_injection.dart';
 import 'config/firebase_options.dart';
 import 'config/theme/theme_provider.dart';
-import 'core/notification/firebase_cloud_messaging_manager.dart';
-import 'core/notification/local_notification_manager.dart';
+import 'core/service/firebase_cloud_messaging_service.dart';
+import 'core/service/local_notification_service.dart';
+import 'core/service/shared_preferences_service.dart';
 import 'features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import 'features/task/presentation/bloc/task_bloc.dart';
 
@@ -23,22 +24,24 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   Bloc.observer = GlobalBlocObserver();
 
-  configureDependencies();
+  await configureDependencies();
 
-  await di<LocalNotificationManager>().init();
-  await di<FirebaseCloudMessagingManager>().init();
+  await di<LocalNotificationService>().init();
+  await di<FirebaseCloudMessagingService>().init();
+
+  final SharedPreferencesService pref = di<SharedPreferencesService>();
 
   FlutterNativeSplash.remove(); // remove splash screen when app is initialized
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(
-        create: (context) => ThemeProvider(Colors.green, ThemeMode.dark),
+        create: (_) => ThemeProvider(pref),
       ),
       BlocProvider(
-        create: (context) => di<AuthBloc>()..add(AuthInitial()),
+        create: (_) => di<AuthBloc>()..add(AuthInitial()),
       ),
       BlocProvider(
-        create: (context) => di<TaskBloc>()..add(const TaskInitial()),
+        create: (_) => di<TaskBloc>()..add(const TaskInitial()),
       ),
     ],
     child: const MemoPlannerApp(),

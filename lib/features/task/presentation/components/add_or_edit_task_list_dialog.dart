@@ -4,7 +4,7 @@ import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../../../config/dependency_injection.dart';
-import '../../../../core/components/my_snackbar.dart';
+import '../../../../core/components/snackbar.dart';
 import '../../../../core/entities/member.dart';
 import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../domain/entities/task_list_entity.dart';

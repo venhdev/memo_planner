@@ -8,10 +8,10 @@ import 'package:googleapis_auth/auth_io.dart';
 import 'package:injectable/injectable.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 
-import '../../config/credentials.dart';
-import '../../features/task/data/models/task_model.dart';
+import '../../../config/credentials.dart';
+import '../../../features/task/data/models/task_model.dart';
 import '../constants/constants.dart';
-import 'local_notification_manager.dart';
+import 'local_notification_service.dart';
 
 // Use service account credentials to get an authenticated and auto refreshing client.
 Future<AuthClient> obtainAuthenticatedClient() async {
@@ -24,7 +24,7 @@ Future<AuthClient> obtainAuthenticatedClient() async {
 
   AuthClient client = await clientViaServiceAccount(accountCredentials, scopes);
 
-  return client; // NOTE: close client when done
+  return client; // remember to close client when done
 }
 
 // foreground message handler
@@ -53,8 +53,8 @@ Future<void> _backgroundMessageHandler(RemoteMessage message) async {
 }
 
 @singleton
-class FirebaseCloudMessagingManager {
-  FirebaseCloudMessagingManager(this._firebaseMessaging);
+class FirebaseCloudMessagingService {
+  FirebaseCloudMessagingService(this._firebaseMessaging);
 
   final FirebaseMessaging _firebaseMessaging;
   get I => _firebaseMessaging;
@@ -173,12 +173,12 @@ void syncNotification(RemoteMessage message) {
 Future<void> handleAddOrUpdateReminder(Map<String, dynamic> data) async {
   final TaskModel task = TaskModel.fromJson(data['task']!);
 
-  LocalNotificationManager(notification.FlutterLocalNotificationsPlugin()).setScheduleNotificationFromTask(task);
+  LocalNotificationService(notification.FlutterLocalNotificationsPlugin()).setScheduleNotificationFromTask(task);
 }
 
 Future<void> handleDeleteReminder(Map<String, dynamic> data) async {
   final int rid = int.parse(data['rid']! as String);
-  LocalNotificationManager(notification.FlutterLocalNotificationsPlugin()).I.cancel(rid);
+  LocalNotificationService(notification.FlutterLocalNotificationsPlugin()).I.cancel(rid);
 }
 
 // POST https://fcm.googleapis.com/v1/projects/{projectId}/messages:send

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/utils/helpers.dart';
-import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
-import '../../data/models/myday_model.dart';
-import '../../domain/repository/task_repository.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/widgets.dart';
+import '../../../../core/utils/helpers.dart';
+import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
+import '../../data/models/myday_model.dart';
 import '../../data/models/task_model.dart';
+import '../../domain/repository/task_repository.dart';
 import '../components/task_item.dart';
 
 /// Show only the tasks of a single list

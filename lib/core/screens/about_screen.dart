@@ -3,9 +3,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../config/dependency_injection.dart';
-import '../notification/local_notification_manager.dart';
-
 class AboutScreen extends StatefulWidget {
   const AboutScreen({
     super.key,
@@ -36,19 +33,18 @@ class _AboutScreenState extends State<AboutScreen> {
       body: Center(
         child: Column(
           children: [
-            GestureDetector(
-              onLongPress: () async {
-                final pending = await di<LocalNotificationManager>().I.pendingNotificationRequests();
-                final activate = await di<LocalNotificationManager>().I.getActiveNotifications();
+            // note for test
+            // onLongPress: () async {
+            //   final pending = await di<LocalNotificationService>().I.pendingNotificationRequests();
+            //   final activate = await di<LocalNotificationService>().I.getActiveNotifications();
 
-                testNotification(pending, activate);
-              },
-              child: const Image(
-                alignment: Alignment.center,
-                image: AssetImage('assets/images/logo/logo_rmbg.png'),
-                height: 64,
-                semanticLabel: 'Memo Planner Logo',
-              ),
+            //   testNotification(pending, activate);
+            // },
+            const Image(
+              alignment: Alignment.center,
+              image: AssetImage('assets/images/logo/logo_rmbg.png'),
+              height: 64,
+              semanticLabel: 'logo',
             ),
             Text(
               myPackageData['appName'] ?? '',

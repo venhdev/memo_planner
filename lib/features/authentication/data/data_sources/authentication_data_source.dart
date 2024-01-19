@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/constants.dart';
-import '../../../../core/notification/firebase_cloud_messaging_manager.dart';
+import '../../../../core/service/firebase_cloud_messaging_service.dart';
 import '../../domain/entities/user_entity.dart';
 import '../models/user_model.dart';
 
@@ -65,7 +65,7 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
   final GoogleSignIn _googleSignIn;
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;
-  final FirebaseCloudMessagingManager _messagingManager;
+  final FirebaseCloudMessagingService _messagingManager;
 
   @override
   Future<UserCredential> signInWithEmailAndPassword(
@@ -85,8 +85,7 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
     await removeCurrentFCMTokenFromUser(_auth.currentUser!.uid);
     // remove current FCM token
     if (_googleSignIn.currentUser != null) {
-      log('Signing out from Google');
-      await _googleSignIn.signOut();
+      await _googleSignIn.signOut().then((_) => log('signOut from Google Success'));
     }
     await _auth.signOut();
   }
@@ -112,7 +111,7 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
     );
 
     final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-    log('signInWithGoogle accessToken: ${userCredential.credential?.accessToken}');
+    log('Sign in with Google Success');
 
     // Once signed in, return the UserCredential
     return userCredential;
@@ -120,15 +119,10 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
 
   @override
   Future<UserCredential> signUpWithEmail(String email, String password) {
-    try {
-      return _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } catch (e) {
-      log('rethrow --> Summary Exception: type: ${e.runtimeType.toString()} -- ${e.toString()}');
-      rethrow;
-    }
+    return _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
   @override
@@ -165,7 +159,7 @@ class AuthenticationDataSourceImpl implements AuthenticationDataSource {
     });
   }
 
-  // NOTE: going to deprecated
+  //@ deprecated
   @override
   Future<UserEntity?> getUserByEmail(String email) async {
     final result = await _firestore.collection(pathToUsers).where('email', isEqualTo: email).get();

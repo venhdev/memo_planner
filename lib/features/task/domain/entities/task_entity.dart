@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
 
-import '../../../../core/notification/reminder.dart';
+import '../../../../core/entities/reminder.dart';
 import '../../../authentication/domain/entities/user_entity.dart';
 
 class TaskEntity extends Equatable {

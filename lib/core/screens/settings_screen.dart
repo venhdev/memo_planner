@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../config/theme/theme_provider.dart';
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
-import '../components/my_dialog.dart';
+import '../components/dialog.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -136,12 +136,12 @@ class SettingItemBox extends StatelessWidget {
 
 const _appColors = [
   DropdownMenuItem(
-    value: Colors.red,
-    child: Text('Red '),
-  ),
-  DropdownMenuItem(
     value: Colors.green,
     child: Text('Green '),
+  ),
+  DropdownMenuItem(
+    value: Colors.red,
+    child: Text('Red '),
   ),
   DropdownMenuItem(
     value: Colors.blue,

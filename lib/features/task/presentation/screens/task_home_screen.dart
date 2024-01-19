@@ -69,7 +69,8 @@ class TaskHomeScreen extends StatelessWidget {
       leading: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           return Avatar(
-            photoURL: (context.read<AuthBloc>().state.user?.photoURL ?? ''),
+            photoURL: (context.read<AuthBloc>().state.user?.photoURL),
+            placeHolder: (context.read<AuthBloc>().state.user?.email!),
             onPressed: () => Scaffold.of(context).openDrawer(),
           );
         },

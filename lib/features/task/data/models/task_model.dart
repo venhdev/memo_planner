@@ -1,7 +1,8 @@
 import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../../core/notification/reminder.dart';
+import '../../../../core/entities/reminder.dart';
 import '../../../authentication/data/models/user_model.dart';
 import '../../domain/entities/task_entity.dart';
 

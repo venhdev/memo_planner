@@ -1,12 +1,11 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../../../config/dependency_injection.dart';
-import '../../../../core/components/my_picker.dart';
+import '../../../../core/components/picker.dart';
 import '../../../../core/constants/colors.dart';
-import '../../../../core/notification/reminder.dart';
+import '../../../../core/entities/reminder.dart';
 import '../../../../core/utils/helpers.dart';
 import '../../data/models/myday_model.dart';
 import '../../domain/entities/myday_entity.dart';
@@ -159,14 +158,6 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
           // Assign To
           const SizedBox(height: 16.0),
           _buildAssignToButton(),
-
-          ElevatedButton(
-            onPressed: () {
-              debugPrint('test assign');
-              _assignedMembers.add('test');
-            },
-            child: const Text('test assign'),
-          ),
 
           // Task description
           const SizedBox(height: 16.0),
@@ -331,10 +322,10 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         );
 
         // > the reminder date time must be in the future
-        // the picked reminder is before the current time >> show toast
+        // the picked reminder is (in past) before the current time >> show toast
         if (pickedDateTime.isBefore(DateTime.now().add(const Duration(minutes: 1)))) {
           Fluttertoast.showToast(
-            msg: 'Reminder must later than 1 minute from now!',
+            msg: 'Reminder must be in the future',
             backgroundColor: Colors.red,
           );
         } else {
@@ -359,20 +350,15 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                 unSavedReminder = true;
               });
             } else {
-              //> sure that _reminder is not null
+              //> _reminder is not null surely
               // the current reminder is different from the picked reminder
               setState(() {
                 _reminder = _reminder?.copyWith(scheduledTime: pickedDateTime);
                 unSavedReminder = true;
               });
             }
-          } else {
-            // > the picked reminder is the same as the current reminder >> no change
-            setState(() {
-              _reminder = _reminder?.copyWith(scheduledTime: pickedDateTime);
-              unSavedReminder = false;
-            });
           }
+          // > the picked reminder is the same as the current reminder -- no change >> do nothing
         }
       },
       child: Row(

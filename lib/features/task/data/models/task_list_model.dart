@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import '../../../../core/entities/icon_data.dart';
+import '../../../../core/entities/icon.dart';
 import '../../../../core/entities/member.dart';
 import '../../../authentication/data/models/user_model.dart';
 import '../../domain/entities/task_list_entity.dart';
@@ -31,7 +31,7 @@ class TaskListModel extends TaskListEntity {
       if (lid != null) 'lid': lid,
       if (gid != null) 'gid': gid,
       if (listName != null) 'listName': listName,
-      if (iconData != null) 'iconData': IconDataModel.fromIconData(iconData!).toMap(),
+      if (iconData != null) 'iconData': IconDataEntity.fromIconData(iconData!).toMap(),
       if (creator != null) 'creator': UserModel.fromEntity(creator!).toDocument(),
       if (members != null) 'members': Member.toMapList(members!),
     };
@@ -42,7 +42,7 @@ class TaskListModel extends TaskListEntity {
       lid: map['lid'] != null ? map['lid'] as String : null,
       gid: map['gid'] != null ? map['gid'] as String : null,
       listName: map['listName'] != null ? map['listName'] as String : null,
-      iconData: map['iconData'] != null ? IconDataModel.fromMap(map['iconData']) : null,
+      iconData: map['iconData'] != null ? IconDataEntity.fromMap(map['iconData']).toIconData() : null,
       creator: UserModel.fromDocument(map['creator']),
       members: Member.fromMapList(map['members'] as List<dynamic>),
     );

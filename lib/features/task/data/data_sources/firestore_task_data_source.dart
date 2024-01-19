@@ -7,8 +7,8 @@ import '../../../../core/constants/constants.dart';
 import '../../../../core/constants/enum.dart';
 import '../../../../core/constants/typedef.dart';
 import '../../../../core/entities/member.dart';
-import '../../../../core/notification/firebase_cloud_messaging_manager.dart';
-import '../../../../core/notification/local_notification_manager.dart';
+import '../../../../core/service/firebase_cloud_messaging_service.dart';
+import '../../../../core/service/local_notification_service.dart';
 import '../../domain/entities/myday_entity.dart';
 import '../../domain/entities/task_entity.dart';
 import '../../domain/entities/task_list_entity.dart';
@@ -67,8 +67,8 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
   FireStoreTaskDataSourceImpl(this._firestore, this._localNotification, this._fcm);
 
   final FirebaseFirestore _firestore;
-  final LocalNotificationManager _localNotification;
-  final FirebaseCloudMessagingManager _fcm;
+  final LocalNotificationService _localNotification;
+  final FirebaseCloudMessagingService _fcm;
 
   @override
   SQuerySnapshot getAllTaskListStreamOfUser(String uid) {
@@ -441,7 +441,6 @@ class FireStoreTaskDataSourceImpl implements FireStoreTaskDataSource {
 
   @override
   Future<void> loadAllRemindersInSingleList(String lid) async {
-    // tasks: incomplete tasks
     final tasks = await getAllTaskInSingleList(lid, filterCompleted: true);
     final now = DateTime.now();
     for (final task in tasks) {

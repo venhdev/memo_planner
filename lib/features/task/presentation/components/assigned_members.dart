@@ -37,7 +37,7 @@ class AssignMemberDialog extends StatelessWidget {
           final members = TaskListModel.fromMap(map).members!;
           final List<Avatar> memberAvatars = members.map((member) => Avatar(userUID: member.uid)).toList();
           return SimpleDialog(
-            title: const Text('Assign Member'),
+            title: const Text('Assign to'),
             children: [
               const SizedBox(height: 8.0),
               ListMemberToAssign(
@@ -128,6 +128,7 @@ class _ListMemberToAssignState extends State<ListMemberToAssign> {
               },
               child: const Text('Assign'),
             ),
+            SizedBox(width: 12.0),
           ],
         ),
       ],

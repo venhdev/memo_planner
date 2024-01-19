@@ -3,13 +3,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:injectable/injectable.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-import '../../features/task/domain/entities/task_entity.dart';
+import '../../../features/task/domain/entities/task_entity.dart';
 import '../constants/constants.dart';
 
 // <https://pub.dev/packages/flutter_local_notifications>
 @singleton
-class LocalNotificationManager {
-  LocalNotificationManager(this._flutterLocalNotificationsPlugin);
+class LocalNotificationService {
+  LocalNotificationService(this._flutterLocalNotificationsPlugin);
 
   // get instance of flutter_local_notifications
   FlutterLocalNotificationsPlugin get I => _flutterLocalNotificationsPlugin;

@@ -2,17 +2,23 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 
-class IconDataModel extends IconData {
-  const IconDataModel(
-    super.codePoint, {
-    super.fontFamily,
-    super.fontPackage,
-    super.matchTextDirection,
-    super.fontFamilyFallback,
+class IconDataEntity {
+  final int codePoint;
+  final String? fontFamily;
+  final String? fontPackage;
+  final bool matchTextDirection;
+  final List<String>? fontFamilyFallback;
+
+  const IconDataEntity(
+    this.codePoint, {
+    this.fontFamily,
+    this.fontPackage,
+    this.matchTextDirection = false,
+    this.fontFamilyFallback,
   });
 
-  factory IconDataModel.fromIconData(IconData iconData) {
-    return IconDataModel(
+  factory IconDataEntity.fromIconData(IconData iconData) {
+    return IconDataEntity(
       iconData.codePoint,
       fontFamily: iconData.fontFamily,
       fontPackage: iconData.fontPackage,
@@ -31,8 +37,8 @@ class IconDataModel extends IconData {
     };
   }
 
-  factory IconDataModel.fromMap(Map<String, dynamic> map) {
-    return IconDataModel(
+  factory IconDataEntity.fromMap(Map<String, dynamic> map) {
+    return IconDataEntity(
       map['codePoint'] as int,
       fontFamily: map['fontFamily'] != null ? map['fontFamily'] as String : null,
       fontPackage: map['fontPackage'] != null ? map['fontPackage'] as String : null,
@@ -43,7 +49,17 @@ class IconDataModel extends IconData {
     );
   }
 
+  IconData toIconData() {
+    return IconData(
+      codePoint,
+      fontFamily: fontFamily,
+      fontPackage: fontPackage,
+      matchTextDirection: matchTextDirection,
+      fontFamilyFallback: fontFamilyFallback,
+    );
+  }
+
   String toJson() => json.encode(toMap());
 
-  factory IconDataModel.fromJson(String source) => IconDataModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory IconDataEntity.fromJson(String source) => IconDataEntity.fromMap(json.decode(source) as Map<String, dynamic>);
 }

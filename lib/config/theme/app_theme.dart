@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._(this.colorSchemeSeed);
 
-  factory AppTheme.fromColorSchemeSeed(Color colorSchemeSeed) {
+  factory AppTheme.withColorScheme(Color colorSchemeSeed) {
     return AppTheme._(colorSchemeSeed);
   }
 

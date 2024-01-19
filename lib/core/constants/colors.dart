@@ -6,6 +6,8 @@ final List<Color> topStreakColors = [
   Colors.green.shade200,
 ];
 
+const defaultColorSchemeSeed = Colors.green;
+
 class AppColors {
   static const kDefaultTextColor = Colors.black;
 
@@ -39,7 +41,8 @@ class AppColors {
     return Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white;
   }
 
-  static Color? dueDateColor(DateTime? sourceDateTime, {DateTime? targetDateTime, Color? colorWhenDateTimeNull = kDefaultTextColor}) {
+  static Color? dueDateColor(DateTime? sourceDateTime,
+      {DateTime? targetDateTime, Color? colorWhenDateTimeNull = kDefaultTextColor}) {
     if (sourceDateTime != null) {
       Duration duration = sourceDateTime.difference(targetDateTime ?? DateTime.now());
       if (duration >= Duration.zero) {

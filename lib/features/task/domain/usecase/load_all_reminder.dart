@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import 'package:memo_planner/core/usecase/usecase.dart';
 
+import '../../../../core/usecase/usecase.dart';
 import '../repository/task_list_repository.dart';
 import '../repository/task_repository.dart';
 

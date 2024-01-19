@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/notification/reminder.dart';
+import '../../../../core/entities/reminder.dart';
 import '../../../../core/utils/helpers.dart';
 import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../domain/entities/task_entity.dart';
@@ -130,14 +130,14 @@ class _AddTaskModalState extends State<AddTaskModal> {
           ),
           label: const Text('Quick Add'),
         ),
-        // Create Task
+        // Create Task Button in Header Bar
         TextButton.icon(
           onPressed: () {
             if (_controller.text.trim().isNotEmpty) {
               handleAdd(context, _controller.text.trim(), _priority);
             } else {
               setState(() {
-                errorText = '*Please enter task name';
+                errorText = '* Enter task name';
               });
             }
           },
@@ -163,7 +163,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
           handleAdd(context, value.trim(), _priority);
         } else {
           setState(() {
-            errorText = '*Please enter task name';
+            errorText = '* Enter task name';
           });
         }
       },
