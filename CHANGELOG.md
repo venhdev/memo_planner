@@ -18,11 +18,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Assign Member rerender + same location
 
-### Changed
-
-- Upgrade dependencies: Ruby 3.2.1, Middleman, etc.
-
-
 ## [1.1.1-beta] - 16-01-2024
 
 ### Added
