@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/components/widgets.dart';
 import '../bloc/authentication/authentication_bloc.dart';
-import 'sign_up_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -47,7 +47,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 16.0),
                 _buildGoogleIconButton(),
                 const SizedBox(height: 16.0),
-                _buildRegisterButton(),
+                _buildSignUpButton(),
               ],
             ),
           ),
@@ -56,45 +56,12 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  TextButton _buildRegisterButton() {
+  TextButton _buildSignUpButton() {
     return TextButton(
-      // NOTE: for testing
-      // onLongPress: () async {
-      //   final pending = await di<LocalNotificationService>().I.pendingNotificationRequests();
-      //   final activate = await di<LocalNotificationService>().I.getActiveNotifications();
-
-      //   // ignore: use_build_context_synchronously
-      //   await showDialog(
-      //     context: context,
-      //     builder: (_) {
-      //       return SimpleDialog(
-      //         children: [
-      //           Text('pending: ${pending.length}'),
-      //           for (int i = 0; i < pending.length; i++)
-      //             Text(
-      //               '${pending[i].id} - ${pending[i].title} - ${pending[i].body}',
-      //               maxLines: 2,
-      //               overflow: TextOverflow.ellipsis,
-      //             ),
-      //           Text('activate: ${activate.length}'),
-      //           for (int i = 0; i < activate.length; i++)
-      //             Text(
-      //               '${activate[i].id} - ${activate[i].title} - ${activate[i].body}',
-      //               maxLines: 2,
-      //               overflow: TextOverflow.ellipsis,
-      //             ),
-      //         ],
-      //       );
-      //     },
-      //   );
-      // },
       onPressed: () {
-        // context.go('/authentication/sign-up');
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const SignUpScreen(),
-            ));
+        _emailController.clear();
+        _passwordController.clear();
+        context.go('/auth/sign-up');
       },
       child: const Text(
         'Don\'t have an account? Register now',

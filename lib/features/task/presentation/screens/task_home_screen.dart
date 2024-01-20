@@ -62,18 +62,17 @@ class TaskHomeScreen extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text(
-        convertDateTimeToString(getToday(), pattern: 'EEEE, dd-MM-yyyy'),
+        convertDateTimeToString(getToday(), pattern: 'EEEE, dd-MM'),
         style: const TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold),
       ),
       // open drawer when user click on avatar
-      leading: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          return Avatar(
-            photoURL: (context.read<AuthBloc>().state.user?.photoURL),
-            placeHolder: (context.read<AuthBloc>().state.user?.email!),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          );
-        },
+      leading: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Avatar(
+          photoURL: (context.read<AuthBloc>().state.user?.photoURL),
+          placeHolder: (context.read<AuthBloc>().state.user?.email!),
+          onPressed: () => Scaffold.of(context).openDrawer(),
+        ),
       ),
       actions: [
         Padding(

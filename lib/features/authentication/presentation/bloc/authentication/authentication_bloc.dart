@@ -40,7 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final userEntityEither = await _authRepository.signInWithGoogle();
     userEntityEither.fold(
       (failure) => emit(AuthState.unauthenticated(message: failure.message)),
-      (userEntity) => emit(AuthState.authenticated(userEntity, message: 'Welcome back ${userEntity.displayName}')),
+      (userEntity) => emit(AuthState.authenticated(userEntity, message: 'Hi ${userEntity.displayName ?? userEntity.email}')),
     );
   }
 
@@ -53,7 +53,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     userEntityEither.fold(
       (failure) => emit(AuthState.unauthenticated(message: failure.message)),
-      (userEntity) => emit(AuthState.authenticated(userEntity, message: 'Welcome back ${userEntity.displayName}')),
+      (userEntity) => emit(AuthState.authenticated(userEntity, message: 'Hi ${userEntity.displayName ?? userEntity.email}')),
     );
   }
 
@@ -76,7 +76,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _authRepository.signUpWithEmail(email: event.email, password: event.password);
     result.fold(
       (failure) => emit(AuthState.unauthenticated(message: failure.message)),
-      (userEntity) => emit(AuthState.authenticated(userEntity)),
+      (userEntity) => emit(AuthState.authenticated(userEntity, message: 'Sign up success')),
     );
   }
 

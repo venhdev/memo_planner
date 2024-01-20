@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/constants/colors.dart';
 import '../../../../core/entities/reminder.dart';
 import '../../../../core/utils/helpers.dart';
 import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
@@ -29,7 +30,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
   final TextEditingController _controller = TextEditingController();
 
   String dueDateLabel = 'Set Due Date';
-  Color dueDateColor = Colors.black;
+  Color? dueDateColor;
   DateTime? _dueDate;
 
   String reminderLabel = 'Set Reminder';
@@ -179,16 +180,16 @@ class _AddTaskModalState extends State<AddTaskModal> {
           avatar: Icon(Icons.calendar_today, color: dueDateColor),
           label: Text(dueDateLabel, style: TextStyle(color: dueDateColor)),
           onPressed: () async {
-            final pickedDate = await showMyDatePicker(context, initDate: DateTime.now());
+            final pickedDate = await showMyDatePicker(context, initDate: _dueDate ?? DateTime.now());
             if (pickedDate != null) {
               // > change color to red if date is in the past
               if (pickedDate.isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
-                dueDateColor = Colors.red;
+                dueDateColor = AppColors.kOverdueColor;
               } else {
-                dueDateColor = Colors.blue;
+                dueDateColor = AppColors.kRemainingColor;
               }
               setState(() {
-                dueDateLabel = convertDateTimeToString(pickedDate, pattern: 'dd/MM');
+                dueDateLabel = convertDateTimeToString(pickedDate, useTextValue: true);
                 _dueDate = pickedDate;
               });
             }
@@ -197,8 +198,8 @@ class _AddTaskModalState extends State<AddTaskModal> {
         ), // Button Set Due Date
         // Button Set Reminder
         ActionChip(
-          avatar: const Icon(Icons.lock_clock, color: Colors.black),
-          label: Text(reminderLabel, style: const TextStyle(color: Colors.black)),
+          avatar: const Icon(Icons.lock_clock),
+          label: Text(reminderLabel),
           onPressed: () async {
             final date = await pickDate();
             if (date == null) return;
@@ -339,7 +340,7 @@ class _AddTaskModalState extends State<AddTaskModal> {
       _priority = null;
 
       dueDateLabel = 'Set Due Date';
-      dueDateColor = Colors.black;
+      dueDateColor = null;
       _dueDate = null;
 
       reminderLabel = 'Set Reminder';

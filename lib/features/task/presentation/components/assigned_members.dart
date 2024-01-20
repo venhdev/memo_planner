@@ -1,12 +1,14 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../config/dependency_injection.dart';
 import '../../../../core/components/avatar.dart';
 import '../../../../core/components/common_screen.dart';
 import '../../../../core/entities/member.dart';
 import '../../../authentication/domain/repository/authentication_repository.dart';
+import '../../../authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../data/models/task_list_model.dart';
 import '../../domain/repository/task_list_repository.dart';
 
@@ -92,7 +94,7 @@ class _ListMemberToAssignState extends State<ListMemberToAssign> {
     return Column(
       children: [
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.7,
+          width: MediaQuery.of(context).size.width,
           height: 200,
           child: ListView.builder(
             itemCount: widget.members.length,
@@ -158,14 +160,15 @@ class AssignMemberItem extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final member = snapshot.data!;
-            return Text(member.email!, maxLines: 1, overflow: TextOverflow.ellipsis);
+            final currentUserUID = context.read<AuthBloc>().state.user!.uid!;
+            return Text('${member.displayName ?? member.email!} ${member.uid == currentUserUID ? '(You)' : ''}',
+                maxLines: 1, overflow: TextOverflow.ellipsis);
           } else {
             return const Text('loading...');
           }
         },
       ),
       leading: CircleAvatar(
-        backgroundColor: Colors.green.shade100,
         child: avatar,
       ),
       trailing: Checkbox(
@@ -176,8 +179,8 @@ class AssignMemberItem extends StatelessWidget {
   }
 }
 
-class AssignedMembersList extends StatelessWidget {
-  const AssignedMembersList({
+class AssignedMemberIconsList extends StatelessWidget {
+  const AssignedMemberIconsList({
     super.key,
     this.height = 48.0,
     required this.assignedMembers,
@@ -200,27 +203,14 @@ class AssignedMembersList extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final member = snapshot.data!;
-              return Builder(
-                builder: (context) {
-                  if (member.photoURL != null) {
-                    return CircleAvatar(
-                      maxRadius: height / 2,
-                      backgroundColor: Colors.green.shade100,
-                      backgroundImage: NetworkImage(member.photoURL!),
-                    );
-                  } else {
-                    return CircleAvatar(
-                      maxRadius: height / 2,
-                      backgroundColor: Colors.green.shade100,
-                      child: const Icon(Icons.person),
-                    );
-                  }
-                },
+              return Avatar(
+                photoURL: member.photoURL,
+                placeHolder: member.displayName ?? member.email!,
+                maxRadius: height / 2,
               );
             } else {
               return CircleAvatar(
                 maxRadius: height / 2,
-                backgroundColor: Colors.green.shade100,
                 child: const Icon(Icons.person),
               );
             }

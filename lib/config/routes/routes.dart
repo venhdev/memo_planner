@@ -49,6 +49,8 @@ class AppRouters {
           ),
           GoRoute(path: 'settings', builder: (context, state) => const SettingsScreen()),
           GoRoute(path: 'about', builder: (context, state) => const AboutScreen()),
+          GoRoute(path: 'auth/sign-in', builder: (context, state) => const SignInScreen()),
+          GoRoute(path: 'auth/sign-up', builder: (context, state) => const SignUpScreen()),
         ],
       ),
       // bottomRoute(),

@@ -308,7 +308,7 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
       return;
     }
     return showMyDialogToConfirm(
-      context,
+      context: context,
       title: 'Delete List',
       content: 'This list will be deleted permanently!',
       onConfirm: () {

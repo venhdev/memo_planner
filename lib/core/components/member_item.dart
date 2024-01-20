@@ -8,7 +8,9 @@ import '../../features/authentication/domain/repository/authentication_repositor
 import '../../features/authentication/presentation/bloc/authentication/authentication_bloc.dart';
 import '../../features/task/domain/repository/task_list_repository.dart';
 import '../entities/member.dart';
+import 'avatar.dart';
 import 'common_screen.dart';
+import 'dialog.dart';
 
 class MemberItem extends StatelessWidget {
   /// only pass hid or lid, not both
@@ -45,14 +47,14 @@ class MemberItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 12.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Avatar
-          _buildAvatar(renderUser),
+          _buildAvatar(renderUser.photoURL, renderUser.email!),
           // Name + Email
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,10 +68,7 @@ class MemberItem extends StatelessWidget {
               ),
               Text(
                 renderUser.email!,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 12),
               ),
             ],
           ),
@@ -105,33 +104,10 @@ class MemberItem extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(UserEntity memberInfo) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Builder(
-        builder: (context) {
-          if (memberInfo.photoURL != null) {
-            return CircleAvatar(
-              radius: 24.0,
-              backgroundColor: Colors.green.shade100,
-              backgroundImage: NetworkImage(memberInfo.photoURL!),
-            );
-          } else {
-            // use the first letter of email instead
-            return CircleAvatar(
-              radius: 24.0,
-              backgroundColor: Colors.green.shade100,
-              child: Text(
-                memberInfo.email!.substring(0, 1),
-                style: const TextStyle(
-                  fontSize: 32.0,
-                  color: Colors.white,
-                ),
-              ),
-            );
-          }
-        },
-      ),
+  Widget _buildAvatar(String? photoURL, String placeholder) {
+    return Avatar.photoURL(
+      photoURL: photoURL,
+      placeHolder: placeholder,
     );
   }
 
@@ -140,16 +116,26 @@ class MemberItem extends StatelessWidget {
     required UserEntity renderUser,
     required BuildContext context,
   }) {
-    return ownerUID == currentUser.uid //` current user is owner
-        ? renderMember.uid == currentUser.uid //` current render member is owner & current user is owner
+    return ownerUID == currentUser.uid //> current user is owner
+        ? renderMember.uid == currentUser.uid //> current render member is owner
             ? null // cannot remove owner itself
-            : () => di<TaskListRepository>().removeMember(lid!, renderUser.uid!) // remove other member
-        : renderMember.uid == currentUser.uid //` current render member is member & current user isn't owner
+            : () => showMyDialogToConfirm(
+                  context: context,
+                  title: 'Remove member',
+                  content: 'Are you sure to remove this member? This action will remove unassign the member from all task.',
+                  onConfirm: () => di<TaskListRepository>().removeMember(lid!, renderUser.uid!),
+                ) // remove other member
+        : renderMember.uid == currentUser.uid //> current render member is member
             ? () {
-                di<TaskListRepository>().removeMember(lid!, renderUser.uid!); // remove self
-                // redirect to home
-                // context.go('/task-list');
-                context.go('/');
+                showMyDialogToConfirm(
+                    context: context,
+                    title: 'Leave List',
+                    content: 'Are you sure to leave this list? This action will remove unassign you from all task.',
+                    onConfirm: () {
+                      di<TaskListRepository>().removeMember(lid!, renderUser.uid!); // remove self
+                      // redirect to home
+                      context.go('/');
+                    });
               }
             : null; // cannot remove other member
   }

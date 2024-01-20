@@ -119,7 +119,7 @@ class AuthenticationRepositoryImpl implements AuthRepository {
       final user = UserModel.fromUserCredential(userCredential.user!);
       await _authDataSource.updateOrCreateUserInfo(user);
       // add current FCM token to user in 'users' collection
-      await _authDataSource.addCurrentFCMTokenToUser(user.email!);
+      await _authDataSource.addCurrentFCMTokenToUser(user.uid!);
       return Right(user);
     } on FirebaseAuthException catch (e) {
       // not yet handle: 'email-already-in-use'

@@ -65,8 +65,12 @@ class TaskItem extends StatelessWidget {
                 // ? Just call Add to MyDay Function, if true it will dismiss the item
                 return false;
               } else if (direction == DismissDirection.endToStart) {
-                return showMyDialogToConfirm(context,
-                    title: 'Delete Task?', content: 'Are you sure you want to delete this task?', onConfirm: null);
+                return showMyDialogToConfirm(
+                  context: context,
+                  title: 'Delete Task?',
+                  content: 'Are you sure you want to delete this task?',
+                  onConfirm: null,
+                );
               }
               return null;
             },
@@ -112,14 +116,15 @@ class TaskItem extends StatelessWidget {
   Widget? assignedInfo(TaskEntity task) => (task.assignedMembers!.isNotEmpty)
       ? SizedBox(
           width: 64.0,
-          height: 28.0,
+          height: 24.0,
           child: ListView(
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
             children: [
               // How many members are assigned to this task
               if (task.assignedMembers!.isNotEmpty) Text('${task.assignedMembers!.length}'),
-              AssignedMembersList(assignedMembers: task.assignedMembers!, height: 28.0),
+              // Assigned Members
+              AssignedMemberIconsList(assignedMembers: task.assignedMembers!, height: 24.0),
             ],
           ),
         )

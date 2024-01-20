@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/authentication/authentication_bloc.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+  const SignUpScreen({super.key});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -27,8 +27,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: MyAppBar.goalAppBar(context: context, title: 'Sign Up'),
-      appBar: AppBar(title: const Text('Sign Up'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Sign Up'),
+        centerTitle: true,
+        leading: null,
+      ),
       // drawer: const AppNavigationDrawer(),
       body: SingleChildScrollView(
         child: Padding(
@@ -83,32 +86,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   },
                 ),
                 const SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      BlocProvider.of<AuthBloc>(context).add(SignUpWithEmail(
-                        email: _emailController.text,
-                        password: _passwordController.text,
-                      ));
-
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: const Text('Sign Up'),
-                ),
+                _buildSignUpButton(context),
                 const SizedBox(height: 16.0),
-                TextButton(
-                  onPressed: () {
-                    // context.go('/authentication/sign-in');
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Already have an account? Log in'),
-                ),
+                _buildSignInButton(),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  ElevatedButton _buildSignUpButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        if (_formKey.currentState!.validate()) {
+          BlocProvider.of<AuthBloc>(context).add(SignUpWithEmail(
+            email: _emailController.text,
+            password: _passwordController.text,
+          ));
+        }
+      },
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          if (state == const AuthState.authenticating()) return const CircularProgressIndicator();
+          return const Text('Sign Up');
+        },
+      ),
+    );
+  }
+
+  TextButton _buildSignInButton() {
+    return TextButton(
+      onPressed: () {
+        // context.go('/auth/sign-in');
+        Navigator.of(context).pop();
+      },
+      child: const Text('Already have an account? Log in'),
     );
   }
 }

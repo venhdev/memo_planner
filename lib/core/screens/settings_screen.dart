@@ -19,7 +19,7 @@ class SettingsScreen extends StatelessWidget {
             icon: const Icon(Icons.logout, color: Colors.red),
             onPressed: () async {
               await showMyDialogToConfirm(
-                context,
+                context: context,
                 title: 'Sign Out',
                 content: 'Are you sure to sign out?',
                 onConfirm: () {
@@ -57,8 +57,8 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           alignment: Alignment.centerRight,
-          value: context.watch<ThemeProvider>().colorSchemeSeed,
           borderRadius: BorderRadius.circular(12.0),
+          // value: context.watch<ThemeProvider>().colorSchemeSeed, // this will cause error
           // remove underline of dropdown button
           underline: Container(),
           items: _appColors,
@@ -113,6 +113,57 @@ class SettingsScreen extends StatelessWidget {
       ],
     );
   }
+
+  static const _appColors = [
+    DropdownMenuItem(
+      value: Colors.green,
+      child: Text('Green '),
+    ),
+    DropdownMenuItem(
+      value: Colors.red,
+      child: Text('Red '),
+    ),
+    DropdownMenuItem(
+      value: Colors.blue,
+      child: Text('Blue '),
+    ),
+    DropdownMenuItem(
+      value: Colors.purple,
+      child: Text('Purple '),
+    ),
+    DropdownMenuItem(
+      value: Colors.orange,
+      child: Text('Orange '),
+    ),
+    DropdownMenuItem(
+      value: Colors.pink,
+      child: Text('Pink '),
+    ),
+    DropdownMenuItem(
+      value: Colors.teal,
+      child: Text('Teal '),
+    ),
+    DropdownMenuItem(
+      value: Colors.amber,
+      child: Text('Amber '),
+    ),
+    DropdownMenuItem(
+      value: Colors.indigo,
+      child: Text('Indigo '),
+    ),
+    DropdownMenuItem(
+      value: Colors.cyan,
+      child: Text('Cyan '),
+    ),
+    DropdownMenuItem(
+      value: Colors.lime,
+      child: Text('Lime '),
+    ),
+    DropdownMenuItem(
+      value: Colors.brown,
+      child: Text('Brown '),
+    ),
+  ];
 }
 
 class SettingItemBox extends StatelessWidget {
@@ -133,54 +184,3 @@ class SettingItemBox extends StatelessWidget {
     );
   }
 }
-
-const _appColors = [
-  DropdownMenuItem(
-    value: Colors.green,
-    child: Text('Green '),
-  ),
-  DropdownMenuItem(
-    value: Colors.red,
-    child: Text('Red '),
-  ),
-  DropdownMenuItem(
-    value: Colors.blue,
-    child: Text('Blue '),
-  ),
-  DropdownMenuItem(
-    value: Colors.purple,
-    child: Text('Purple '),
-  ),
-  DropdownMenuItem(
-    value: Colors.orange,
-    child: Text('Orange '),
-  ),
-  DropdownMenuItem(
-    value: Colors.pink,
-    child: Text('Pink '),
-  ),
-  DropdownMenuItem(
-    value: Colors.teal,
-    child: Text('Teal '),
-  ),
-  DropdownMenuItem(
-    value: Colors.amber,
-    child: Text('Amber '),
-  ),
-  DropdownMenuItem(
-    value: Colors.indigo,
-    child: Text('Indigo '),
-  ),
-  DropdownMenuItem(
-    value: Colors.cyan,
-    child: Text('Cyan '),
-  ),
-  DropdownMenuItem(
-    value: Colors.lime,
-    child: Text('Lime '),
-  ),
-  DropdownMenuItem(
-    value: Colors.brown,
-    child: Text('Brown '),
-  ),
-];

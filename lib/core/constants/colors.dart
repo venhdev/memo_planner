@@ -11,8 +11,8 @@ const defaultColorSchemeSeed = Colors.green;
 class AppColors {
   static const kDefaultTextColor = Colors.black;
 
-  static const kRemainingTextColor = Colors.green;
-  static const kOverdueTextColor = Colors.red;
+  static const kRemainingColor = Colors.green;
+  static const kOverdueColor = Colors.red;
 
   static const kActiveTextColor = Colors.green;
   static const kDeactivateTextColor = Color(0xFFC4C4C4);
@@ -46,9 +46,9 @@ class AppColors {
     if (sourceDateTime != null) {
       Duration duration = sourceDateTime.difference(targetDateTime ?? DateTime.now());
       if (duration >= Duration.zero) {
-        return kRemainingTextColor; // green
+        return kRemainingColor; // green
       } else {
-        return kOverdueTextColor;
+        return kOverdueColor;
       }
     } else {
       return colorWhenDateTimeNull;

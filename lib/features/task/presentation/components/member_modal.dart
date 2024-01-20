@@ -32,45 +32,8 @@ class MemberModal extends StatelessWidget {
           return Center(
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('List Members', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
-                      ElevatedButton.icon(
-                        label: const Text('Add Member'),
-                        icon: const Icon(Icons.add),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                        ),
-                        onPressed: () {
-                          showMyDialogToAddMember(
-                            context,
-                            controller: TextEditingController(),
-                            onSubmitted: (value) async {
-                              // REVIEW: need refactor
-                              di<TaskListRepository>().inviteMemberViaEmail(taskList.lid!, value!.trim());
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: taskList.members?.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return MemberItem(
-                        lid: taskList.lid!,
-                        renderMember: taskList.members![index],
-                        ownerUID: taskList.creator!.uid!,
-                      );
-                    },
-                  ),
-                )
+                _buildHeaderBar(context, taskList),
+                _buildListMember(taskList),
               ],
             ),
           );
@@ -78,6 +41,51 @@ class MemberModal extends StatelessWidget {
           return const LoadingScreen();
         }
       },
+    );
+  }
+
+  Expanded _buildListMember(TaskListModel taskList) {
+    return Expanded(
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: taskList.members?.length,
+        itemBuilder: (BuildContext context, int index) {
+          return MemberItem(
+            lid: taskList.lid!,
+            renderMember: taskList.members![index],
+            ownerUID: taskList.creator!.uid!,
+          );
+        },
+      ),
+    );
+  }
+
+  Padding _buildHeaderBar(BuildContext context, TaskListModel taskList) {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('List Members', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
+          ElevatedButton.icon(
+            label: const Text('Add Member'),
+            icon: const Icon(Icons.add),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+            ),
+            onPressed: () {
+              showMyDialogToAddMember(
+                context,
+                controller: TextEditingController(),
+                onSubmitted: (value) async {
+                  // REVIEW: need refactor
+                  di<TaskListRepository>().inviteMemberViaEmail(taskList.lid!, value!.trim());
+                },
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

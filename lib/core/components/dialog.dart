@@ -31,8 +31,8 @@ void showDialogForEditName(BuildContext context, String prevName) async {
   );
 }
 
-Future<T?> showMyDialogToConfirm<T>(
-  BuildContext context, {
+Future<T?> showMyDialogToConfirm<T>({
+  required BuildContext context,
   required String title,
   required String content,
   required VoidCallback? onConfirm,

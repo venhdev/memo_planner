@@ -34,17 +34,19 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     final currentUser = _authRepository.getCurrentUser();
     //> user is logged in >> load all task reminder
     if (currentUser != null) {
-      //> load all reminder
+      //` begin load all reminder
       final resultEither = await _taskListRepository.getAllTaskListOfUser(currentUser.uid!);
       if (resultEither.isRight()) {
         final taskLists = resultEither.getOrElse(() => []);
-        if (taskLists.isEmpty) return; // there is no task list >> do nothing
-        //> get all lid of task list
-        final lids = taskLists.map((e) => e.lid!).toList();
-        _taskRepository.loadAllRemindersInMultiLists(lids);
+        //> exist task list
+        if (taskLists.isNotEmpty) {
+          // get all lid of task list
+          final lids = taskLists.map((e) => e.lid!).toList();
+          _taskRepository.loadAllRemindersInMultiLists(lids);
+        }
       }
-      //> end all reminder
-
+      //` end all reminder
+      
       final taskListStream = _taskListRepository.getAllTaskListStreamOfUser(currentUser.uid!);
       emit(TaskState.loaded(taskListStream));
     } else {

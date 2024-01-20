@@ -116,15 +116,15 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
+        top: 25.0,
         bottom: MediaQuery.of(context).viewInsets.bottom,
         left: 8.0,
         right: 8.0,
       ),
-      color: Theme.of(context).scaffoldBackgroundColor,
+      color: Theme.of(context).colorScheme.background,
       child: ListView(
         controller: widget.scrollController,
         children: [
-          SizedBox(height: MediaQuery.of(context).padding.top + 16.0),
           // Drag down to close and save
           const Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -205,11 +205,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                 color: _assignedMembers.isNotEmpty ? AppColors.kActiveTextColor : null,
               ),
             ),
-            _assignedMembers.isNotEmpty
-                ? AssignedMembersList(
-                    assignedMembers: _assignedMembers,
-                  )
-                : const SizedBox.shrink(),
+            _assignedMembers.isNotEmpty ? AssignedMemberIconsList(assignedMembers: _assignedMembers) : const SizedBox.shrink(),
           ],
         ),
       ),

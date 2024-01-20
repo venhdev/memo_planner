@@ -19,18 +19,13 @@ class ScaffoldWithNavBar extends StatelessWidget {
       listener: (context, state) {
         if (state.status == AuthenticationStatus.authenticated) {
           if (state.message != null) Fluttertoast.showToast(msg: state.message!);
-          // showMyAlertDialogMessage(
-          //   context: context,
-          //   message: state.message!,
-          //   icon: const Icon(Icons.check),
-          // );
 
           // call initial event on each branch to load data according to user
           // context.read<HabitBloc>().add(HabitInitial());
           context.read<TaskBloc>().add(const TaskInitial());
 
-          //? because when user sign out, maybe in user branch
-          // context.go('/task-list');
+          //? when user sign up successfully >> redirect to home
+          context.go('/');
         } else if (state.status == AuthenticationStatus.unauthenticated) {
           if (state.message != null) Fluttertoast.showToast(msg: state.message!);
           // showMyAlertDialogMessage(

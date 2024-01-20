@@ -48,8 +48,9 @@ class AppNavigationDrawer extends StatelessWidget {
                   },
                   child: Avatar.photoURL(
                     photoURL: state.user?.photoURL,
-                    placeholder: state.user!.email!,
+                    placeHolder: state.user!.email!,
                     radius: 48.0,
+                    backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
                   ),
                 ),
                 const SizedBox(height: 12.0),

@@ -25,35 +25,35 @@ class Failure extends Equatable {
 // General failure message
 class UserFailure extends Failure {
   const UserFailure({
-    String code = 'user-failure',
-    String message = userFailureFailureMessage,
-  }) : super(code: code, message: message);
+    super.code = 'user-failure',
+    super.message,
+  });
 }
 
 class ServerFailure extends Failure {
   const ServerFailure({
-    String code = 'server-failure',
-    String message = serverFailureFailureMessage,
-  }) : super(code: code, message: message);
+    super.code = 'server-failure',
+    super.message = serverFailureFailureMessage,
+  });
 }
 
 class FirebaseFailure extends Failure {
   const FirebaseFailure({
-    String code = 'firebase-failure',
-    String message = serverFailureFailureMessage,
-  }) : super(code: code, message: message);
+    super.code = 'firebase-failure',
+    super.message = serverFailureFailureMessage,
+  });
 }
 
 class CacheFailure extends Failure {
   const CacheFailure({
-    String code = 'cache-failure',
-    String message = cacheCacheFailureMessage,
-  }) : super(code: code, message: message);
+    super.code = 'cache-failure',
+    super.message = cacheCacheFailureMessage,
+  });
 }
 
 class NetworkFailure extends Failure {
   const NetworkFailure({
-    String code = 'network-failure',
-    String message = networkFailureMessage,
-  }) : super(code: code, message: message);
+    super.code = 'network-failure',
+    super.message = networkFailureMessage,
+  });
 }
