@@ -2,6 +2,10 @@
 
 MemoPlanner help you track your habits and plan your tasks
 
+## Screenshots
+
+<img src="https://memo.io.vn/img/mobile2.png" alt="screenshot" width=400>
+
 ## Features
 
 - Habit tracking: Keep track of your daily habits and monitor your progress.
@@ -10,7 +14,7 @@ MemoPlanner help you track your habits and plan your tasks
 
 ## Technologies Used
 
-- Clean Architecture: The app follows the principles of Clean Architecture for modular and scalable code.
+- Clean Architecture: Follows the principles of Clean Architecture.
 - Programming Language: Dart
 - Framework: Flutter
 - Other: FireBase
@@ -19,4 +23,4 @@ MemoPlanner help you track your habits and plan your tasks
 
 If you have any questions or suggestions regarding MemoPlanner, please feel free to reach out to us at [venh.ha@gmail.com].
 
-Happy planning and habit tracking!
+Happy planning your task!

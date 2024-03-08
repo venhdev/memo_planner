@@ -49,7 +49,7 @@ class _AddOrEditTaskListDialogState extends State<AddOrEditTaskListDialog> {
           border: const OutlineInputBorder(),
           prefixIcon: IconButton(
             onPressed: () async {
-              final iconData = await FlutterIconPicker.showIconPicker(context, iconPackModes: [IconPack.cupertino]);
+              final iconData = await showIconPicker(context, iconPackModes: [IconPack.cupertino]);
               if (iconData != null) {
                 setState(() {
                   icon = Icon(iconData);
