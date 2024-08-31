@@ -49,10 +49,10 @@ class _AddOrEditTaskListDialogState extends State<AddOrEditTaskListDialog> {
           border: const OutlineInputBorder(),
           prefixIcon: IconButton(
             onPressed: () async {
-              final iconData = await showIconPicker(context, iconPackModes: [IconPack.cupertino]);
-              if (iconData != null) {
+              final iconPicker = await showIconPicker(context, iconPackModes: [IconPack.cupertino]);
+              if (iconPicker != null) {
                 setState(() {
-                  icon = Icon(iconData);
+                  icon = Icon(iconPicker.data);
                 });
               }
             },

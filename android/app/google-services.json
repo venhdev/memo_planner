@@ -14,6 +14,38 @@
       },
       "oauth_client": [
         {
+          "client_id": "502543521894-47cji6okkqcftha50j3r8oav3800nffq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.io.memo.planner",
+            "certificate_hash": "b18a01d6aa87a72fc69efae06014fdea1da9d51a"
+          }
+        },
+        {
+          "client_id": "502543521894-fue33gnaubim0ju2c5akcb34n98uta1o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.io.memo.planner",
+            "certificate_hash": "f0d64d622cb2a953c8f1c97c4faf73e352168b64"
+          }
+        },
+        {
+          "client_id": "502543521894-lcf1gn4pacfj5q9r8jqmou88bd1409fs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.io.memo.planner",
+            "certificate_hash": "80edaf6043587026efbe61f75f8ee2ad436f8b18"
+          }
+        },
+        {
+          "client_id": "502543521894-npta7ouf136nb5rb1gcis2tvarcg9cv2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.io.memo.planner",
+            "certificate_hash": "6c07a10843ae791f4d619d0c773af10a12a446dd"
+          }
+        },
+        {
           "client_id": "502543521894-ngkisaavknp2urb66c7vo4e8nkldsluj.apps.googleusercontent.com",
           "client_type": 3
         }

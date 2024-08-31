@@ -8,118 +8,123 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:cloud_firestore/cloud_firestore.dart' as _i4;
-import 'package:firebase_auth/firebase_auth.dart' as _i3;
-import 'package:firebase_messaging/firebase_messaging.dart' as _i5;
-import 'package:firebase_storage/firebase_storage.dart' as _i6;
+import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
+import 'package:firebase_auth/firebase_auth.dart' as _i59;
+import 'package:firebase_messaging/firebase_messaging.dart' as _i892;
+import 'package:firebase_storage/firebase_storage.dart' as _i457;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    as _i7;
-import 'package:get_it/get_it.dart' as _i1;
-import 'package:google_sign_in/google_sign_in.dart' as _i8;
-import 'package:injectable/injectable.dart' as _i2;
-import 'package:memo_planner/config/dependency_injection.dart' as _i27;
+    as _i163;
+import 'package:get_it/get_it.dart' as _i174;
+import 'package:google_sign_in/google_sign_in.dart' as _i116;
+import 'package:injectable/injectable.dart' as _i526;
+import 'package:memo_planner/config/dependency_injection.dart' as _i890;
 import 'package:memo_planner/core/service/firebase_cloud_messaging_service.dart'
-    as _i12;
+    as _i1025;
 import 'package:memo_planner/core/service/local_notification_service.dart'
-    as _i9;
+    as _i311;
 import 'package:memo_planner/core/service/shared_preferences_service.dart'
-    as _i11;
+    as _i751;
 import 'package:memo_planner/features/authentication/data/data_sources/authentication_data_source.dart'
-    as _i13;
+    as _i436;
 import 'package:memo_planner/features/authentication/data/repository/authentication_repository_impl.dart'
-    as _i22;
+    as _i530;
 import 'package:memo_planner/features/authentication/domain/repository/authentication_repository.dart'
-    as _i21;
+    as _i1044;
 import 'package:memo_planner/features/authentication/presentation/bloc/authentication/authentication_bloc.dart'
-    as _i26;
+    as _i239;
 import 'package:memo_planner/features/task/data/data_sources/firestore_task_data_source.dart'
-    as _i14;
+    as _i902;
 import 'package:memo_planner/features/task/data/repository/group_repository_impl.dart'
-    as _i16;
+    as _i481;
 import 'package:memo_planner/features/task/data/repository/task_list_repository_impl.dart'
-    as _i18;
+    as _i680;
 import 'package:memo_planner/features/task/data/repository/task_repository_impl.dart'
-    as _i20;
+    as _i983;
 import 'package:memo_planner/features/task/domain/repository/group_repository.dart'
-    as _i15;
+    as _i100;
 import 'package:memo_planner/features/task/domain/repository/task_list_repository.dart'
-    as _i17;
+    as _i364;
 import 'package:memo_planner/features/task/domain/repository/task_repository.dart'
-    as _i19;
+    as _i103;
 import 'package:memo_planner/features/task/domain/usecase/get_all_task_list_stream.dart'
-    as _i23;
+    as _i402;
 import 'package:memo_planner/features/task/domain/usecase/load_all_reminder.dart'
-    as _i24;
+    as _i860;
 import 'package:memo_planner/features/task/presentation/bloc/task_bloc.dart'
-    as _i25;
-import 'package:shared_preferences/shared_preferences.dart' as _i10;
+    as _i594;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
-extension GetItInjectableX on _i1.GetIt {
+extension GetItInjectableX on _i174.GetIt {
 // initializes the registration of main-scope dependencies inside of GetIt
-  Future<_i1.GetIt> init({
+  Future<_i174.GetIt> init({
     String? environment,
-    _i2.EnvironmentFilter? environmentFilter,
+    _i526.EnvironmentFilter? environmentFilter,
   }) async {
-    final gh = _i2.GetItHelper(
+    final gh = _i526.GetItHelper(
       this,
       environment,
       environmentFilter,
     );
     final registerModule = _$RegisterModule();
-    gh.singleton<_i3.FirebaseAuth>(registerModule.firebaseAuth);
-    gh.singleton<_i4.FirebaseFirestore>(registerModule.firestore);
-    gh.singleton<_i5.FirebaseMessaging>(registerModule.firebaseMessaging);
-    gh.singleton<_i6.FirebaseStorage>(registerModule.storage);
-    gh.singleton<_i7.FlutterLocalNotificationsPlugin>(
-        registerModule.flutterLocalNotificationsPlugin);
-    gh.singleton<_i8.GoogleSignIn>(registerModule.googleSignIn);
-    gh.singleton<_i9.LocalNotificationService>(_i9.LocalNotificationService(
-        gh<_i7.FlutterLocalNotificationsPlugin>()));
-    await gh.factoryAsync<_i10.SharedPreferences>(
+    await gh.factoryAsync<_i460.SharedPreferences>(
       () => registerModule.prefs,
       preResolve: true,
     );
-    gh.singleton<_i11.SharedPreferencesService>(
-        _i11.SharedPreferencesServiceImpl(gh<_i10.SharedPreferences>()));
-    gh.singleton<_i12.FirebaseCloudMessagingService>(
-        _i12.FirebaseCloudMessagingService(gh<_i5.FirebaseMessaging>()));
-    gh.singleton<_i13.AuthenticationDataSource>(
-        _i13.AuthenticationDataSourceImpl(
-      gh<_i3.FirebaseAuth>(),
-      gh<_i8.GoogleSignIn>(),
-      gh<_i4.FirebaseFirestore>(),
-      gh<_i12.FirebaseCloudMessagingService>(),
-      gh<_i6.FirebaseStorage>(),
-    ));
-    gh.singleton<_i14.FireStoreTaskDataSource>(_i14.FireStoreTaskDataSourceImpl(
-      gh<_i4.FirebaseFirestore>(),
-      gh<_i9.LocalNotificationService>(),
-      gh<_i12.FirebaseCloudMessagingService>(),
-    ));
-    gh.singleton<_i15.GroupRepository>(
-        _i16.GroupRepositoryImpl(gh<_i14.FireStoreTaskDataSource>()));
-    gh.singleton<_i17.TaskListRepository>(_i18.TaskListRepositoryImpl(
-      gh<_i14.FireStoreTaskDataSource>(),
-      gh<_i13.AuthenticationDataSource>(),
-    ));
-    gh.singleton<_i19.TaskRepository>(
-        _i20.TaskRepositoryImpl(gh<_i14.FireStoreTaskDataSource>()));
-    gh.singleton<_i21.AuthRepository>(
-        _i22.AuthenticationRepositoryImpl(gh<_i13.AuthenticationDataSource>()));
-    gh.singleton<_i23.GetAllTaskListStreamOfUserUC>(
-        _i23.GetAllTaskListStreamOfUserUC(gh<_i17.TaskListRepository>()));
-    gh.singleton<_i24.LoadAllReminderUC>(_i24.LoadAllReminderUC(
-      gh<_i19.TaskRepository>(),
-      gh<_i17.TaskListRepository>(),
-    ));
-    gh.factory<_i25.TaskBloc>(() => _i25.TaskBloc(
-          gh<_i19.TaskRepository>(),
-          gh<_i17.TaskListRepository>(),
-          gh<_i21.AuthRepository>(),
+    gh.singleton<_i116.GoogleSignIn>(() => registerModule.googleSignIn);
+    gh.singleton<_i59.FirebaseAuth>(() => registerModule.firebaseAuth);
+    gh.singleton<_i974.FirebaseFirestore>(() => registerModule.firestore);
+    gh.singleton<_i163.FlutterLocalNotificationsPlugin>(
+        () => registerModule.flutterLocalNotificationsPlugin);
+    gh.singleton<_i892.FirebaseMessaging>(
+        () => registerModule.firebaseMessaging);
+    gh.singleton<_i457.FirebaseStorage>(() => registerModule.storage);
+    gh.singleton<_i311.LocalNotificationService>(() =>
+        _i311.LocalNotificationService(
+            gh<_i163.FlutterLocalNotificationsPlugin>()));
+    gh.singleton<_i751.SharedPreferencesService>(() =>
+        _i751.SharedPreferencesServiceImpl(gh<_i460.SharedPreferences>()));
+    gh.singleton<_i1025.FirebaseCloudMessagingService>(() =>
+        _i1025.FirebaseCloudMessagingService(gh<_i892.FirebaseMessaging>()));
+    gh.singleton<_i436.AuthenticationDataSource>(
+        () => _i436.AuthenticationDataSourceImpl(
+              gh<_i59.FirebaseAuth>(),
+              gh<_i116.GoogleSignIn>(),
+              gh<_i974.FirebaseFirestore>(),
+              gh<_i1025.FirebaseCloudMessagingService>(),
+              gh<_i457.FirebaseStorage>(),
+            ));
+    gh.singleton<_i902.FireStoreTaskDataSource>(
+        () => _i902.FireStoreTaskDataSourceImpl(
+              gh<_i974.FirebaseFirestore>(),
+              gh<_i311.LocalNotificationService>(),
+              gh<_i1025.FirebaseCloudMessagingService>(),
+            ));
+    gh.singleton<_i364.TaskListRepository>(() => _i680.TaskListRepositoryImpl(
+          gh<_i902.FireStoreTaskDataSource>(),
+          gh<_i436.AuthenticationDataSource>(),
         ));
-    gh.factory<_i26.AuthBloc>(() => _i26.AuthBloc(gh<_i21.AuthRepository>()));
+    gh.singleton<_i1044.AuthRepository>(() =>
+        _i530.AuthenticationRepositoryImpl(
+            gh<_i436.AuthenticationDataSource>()));
+    gh.factory<_i239.AuthBloc>(
+        () => _i239.AuthBloc(gh<_i1044.AuthRepository>()));
+    gh.singleton<_i100.GroupRepository>(
+        () => _i481.GroupRepositoryImpl(gh<_i902.FireStoreTaskDataSource>()));
+    gh.singleton<_i103.TaskRepository>(
+        () => _i983.TaskRepositoryImpl(gh<_i902.FireStoreTaskDataSource>()));
+    gh.singleton<_i402.GetAllTaskListStreamOfUserUC>(() =>
+        _i402.GetAllTaskListStreamOfUserUC(gh<_i364.TaskListRepository>()));
+    gh.factory<_i594.TaskBloc>(() => _i594.TaskBloc(
+          gh<_i103.TaskRepository>(),
+          gh<_i364.TaskListRepository>(),
+          gh<_i1044.AuthRepository>(),
+        ));
+    gh.singleton<_i860.LoadAllReminderUC>(() => _i860.LoadAllReminderUC(
+          gh<_i103.TaskRepository>(),
+          gh<_i364.TaskListRepository>(),
+        ));
     return this;
   }
 }
 
-class _$RegisterModule extends _i27.RegisterModule {}
+class _$RegisterModule extends _i890.RegisterModule {}
