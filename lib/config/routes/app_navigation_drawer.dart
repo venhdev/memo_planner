@@ -41,7 +41,7 @@ class AppNavigationDrawer extends StatelessWidget {
                 GestureDetector(
                   onTap: () async {
                     showMyImagePicker().then((value) {
-                      if (value != null) {
+                      if (value != null && context.mounted) {
                         context.read<AuthBloc>().add(UpdateAvatar(imageFile: value));
                       }
                     });

@@ -93,26 +93,28 @@ class MessageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     log('render MessageScreen with message: $message');
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GestureDetector(
-              child: Text(
-                message,
-                style: textStyle,
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+                child: Text(
+                  message,
+                  style: textStyle,
+                ),
+                onTap: () => log(message)),
+            Visibility(
+              visible: enableBack,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('< Back'),
               ),
-              onTap: () => log(message)),
-          Visibility(
-            visible: enableBack,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('< Back'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

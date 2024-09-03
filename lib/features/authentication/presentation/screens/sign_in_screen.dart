@@ -97,7 +97,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  ElevatedButton _buildSignInButton(BuildContext context) {
+  Widget _buildSignInButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
         if (_formKey.currentState!.validate()) {
@@ -112,19 +112,16 @@ class _SignInScreenState extends State<SignInScreen> {
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           if (state.status == AuthenticationStatus.authenticating) {
-            return const SizedBox(
-              height: 16.0,
-              width: 16.0,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.0,
-              ),
+            return const Text(
+              'Logging in...',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.black54),
             );
           }
+
           return const Text(
             'Sign In',
-            style: TextStyle(
-              fontSize: 16.0,
-            ),
+            style: TextStyle(fontSize: 16.0),
           );
         },
       ),

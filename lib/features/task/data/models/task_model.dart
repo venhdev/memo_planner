@@ -20,6 +20,7 @@ class TaskModel extends TaskEntity {
     super.assignedMembers,
     super.created,
     super.updated,
+    super.refLinks,
   });
 
   factory TaskModel.fromEntity(TaskEntity entity) {
@@ -34,6 +35,7 @@ class TaskModel extends TaskEntity {
       reminders: entity.reminders,
       creator: entity.creator,
       assignedMembers: entity.assignedMembers,
+      refLinks: entity.refLinks,
       created: entity.created,
       updated: entity.updated,
     );
@@ -51,6 +53,7 @@ class TaskModel extends TaskEntity {
       'reminders': toJson ? reminders?.toJson() : reminders?.toMap(),
       'creator': creator != null ? UserModel.fromEntity(creator!).toMap() : null,
       'assignedMembers': assignedMembers,
+      'refLinks': refLinks,
       'created': created != null ? (toJson ? created?.toIso8601String() : created) : null,
       'updated': updated != null ? (toJson ? updated?.toIso8601String() : updated) : null,
     };
@@ -78,6 +81,9 @@ class TaskModel extends TaskEntity {
       assignedMembers: map['assignedMembers'] != null
           ? (map['assignedMembers'] as List<dynamic>).map((assigner) => assigner.toString()).toList()
           : null,
+      refLinks: map['refLinks'] != null
+          ? (map['refLinks'] as List<dynamic>).map((refLink) => refLink.toString()).toList()
+          : null,
       created: map['created'] != null
           ? fromJson
               ? DateTime.parse(map['created'] as String)
@@ -97,7 +103,7 @@ class TaskModel extends TaskEntity {
 
   @override
   String toString() {
-    return 'TaskModel(tid: $tid, lid: $lid, taskName: $taskName, description: $description, priority: $priority, completed: $completed, dueDate: $dueDate, reminders: $reminders, creator: $creator, assignedMembers: $assignedMembers, created: $created, updated: $updated)';
+    return 'TaskModel(tid: $tid, lid: $lid, taskName: $taskName, description: $description, priority: $priority, completed: $completed, dueDate: $dueDate, reminders: $reminders, creator: $creator, assignedMembers: $assignedMembers, created: $created, updated: $updated, refLinks: $refLinks)';
   }
 
   @override
@@ -111,6 +117,7 @@ class TaskModel extends TaskEntity {
         dueDate,
         reminders,
         assignedMembers,
+        refLinks,
         created,
         updated,
       ];

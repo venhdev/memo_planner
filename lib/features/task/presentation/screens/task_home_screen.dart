@@ -25,7 +25,7 @@ class TaskHomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: _buildAppBar(context),
       drawer: const AppNavigationDrawer(),
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: BlocBuilder<TaskBloc, TaskState>(
         builder: (context, state) {
           if (state.status == BlocStatus.loaded) {
@@ -80,7 +80,7 @@ class TaskHomeScreen extends StatelessWidget {
           child: TextButton.icon(
             label: const Text('Create', style: TextStyle(fontWeight: FontWeight.bold)),
             icon: const Icon(Icons.add),
-            style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primaryContainer)),
+            style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).colorScheme.primaryContainer)),
             onPressed: () => _showDialogForAddTaskList(context),
           ),
         ),

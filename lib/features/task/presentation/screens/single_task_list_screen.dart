@@ -68,7 +68,16 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
           //? because user may be deleted from this list by the owner while they are still in this screen
           final taskList = TaskListModel.fromMap(map);
           if (!_isMemberOfList(context.read<AuthBloc>().state.user!.uid!, taskList.members!)) {
-            return const MessageScreen(message: 'You are not a member of this list');
+            Future.delayed(const Duration(seconds: 3), () {
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            });
+            return const Center(
+              child: MessageScreen(
+                message: 'You are not a member of this list\n(back to home in a few seconds)',
+              ),
+            );
           }
           return Scaffold(
             appBar: _buildAppBar(context, taskList),
@@ -304,7 +313,9 @@ class _SingleTaskListScreenState extends State<SingleTaskListScreen> {
 
     if (taskList.creator!.email != context.read<AuthBloc>().state.user?.email) {
       showMySnackbarWithAwesome(context,
-          title: 'Unauthorized', message: 'You must be the owner to delete this list', contentType: ContentType.failure);
+          title: 'Unauthorized',
+          message: 'You must be the owner to delete this list',
+          contentType: ContentType.failure);
       return;
     }
     return showMyDialogToConfirm(

@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_iconpicker/extensions/string_extensions.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../../../config/dependency_injection.dart';
@@ -121,7 +124,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         left: 8.0,
         right: 8.0,
       ),
-      color: Theme.of(context).colorScheme.background,
+      color: Theme.of(context).colorScheme.surface,
       child: ListView(
         controller: widget.scrollController,
         children: [
@@ -163,6 +166,10 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
           const SizedBox(height: 16.0),
           _buildTaskDescription(),
 
+          // Task reference links
+          const SizedBox(height: 16.0),
+          _buildTaskReferenceLinks(),
+
           // Last updated
           const SizedBox(height: 16.0),
           Text(
@@ -170,20 +177,127 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
               widget.oldTask.updated,
               pattern: 'dd/MM/yyyy - hh:mm aa',
             )}',
-            style: const TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey, fontSize: 12.0),
           ),
 
           // Created At and Created By
-          const SizedBox(height: 16.0),
+          const SizedBox(height: 4.0),
           Text(
             'createdAt: ${convertDateTimeToString(
               widget.oldTask.created,
               pattern: 'dd/MM/yyyy - HH:mm',
             )} by ${widget.oldTask.creator?.displayName ?? 'unknown'}',
-            style: const TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey, fontSize: 12.0),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTaskReferenceLinks() {
+    return Column(
+      children: [
+        if (widget.oldTask.refLinks != null)
+          for (final link in widget.oldTask.refLinks!)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Row(
+                children: [
+                  const Icon(Icons.link),
+                  const SizedBox(width: 8.0),
+                  Expanded(
+                    child: Text(
+                      link,
+                      style: const TextStyle(color: Colors.blue),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+        // Add link button (dialog)
+        TextButton(
+          onPressed: () async {
+            String? newLink = await showDialog<String>(
+              context: context,
+              builder: (context) => SimpleDialog(
+                title: const Text('Add link'),
+                contentPadding: const EdgeInsets.all(16.0),
+                children: [
+                  TextField(
+                    decoration: const InputDecoration(
+                      hintText: 'https://example.com',
+                      border: OutlineInputBorder(),
+                    ),
+                    onSubmitted: (value) {
+                      Navigator.pop(context, value);
+                    },
+                  ),
+
+                  // Actions
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, null);
+                        },
+                        child: const Text('Clear'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, 'https://example.com');
+                        },
+                        child: const Text('Add'),
+                      ),
+                    ],
+                  ),
+                ],
+                // actions: [
+                //   TextButton(
+                //     onPressed: () {
+                //       Navigator.pop(context);
+                //     },
+                //     child: const Text('Cancel'),
+                //   ),
+                //   TextButton(
+                //     onPressed: () {
+                //       Navigator.pop(context, null);
+                //     },
+                //     child: const Text('Clear'),
+                //   ),
+                //   ElevatedButton(
+                //     onPressed: () {
+                //       Navigator.pop(context, 'https://example.com');
+                //     },
+                //     child: const Text('Add'),
+                //   ),
+                // ],
+              ),
+            );
+
+            if (newLink?.isNotBlank ?? false) {
+              log('New link: $newLink');
+            } else {
+              log('No new link');
+            }
+          },
+          child: const Row(
+            children: [
+              Icon(Icons.add_link),
+              SizedBox(width: 8.0),
+              Text('Add link'),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -205,7 +319,9 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                 color: _assignedMembers.isNotEmpty ? AppColors.kActiveTextColor : null,
               ),
             ),
-            _assignedMembers.isNotEmpty ? AssignedMemberIconsList(assignedMembers: _assignedMembers) : const SizedBox.shrink(),
+            _assignedMembers.isNotEmpty
+                ? AssignedMemberIconsList(assignedMembers: _assignedMembers)
+                : const SizedBox.shrink(),
           ],
         ),
       ),

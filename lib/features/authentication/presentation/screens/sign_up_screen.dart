@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../bloc/authentication/authentication_bloc.dart';
 
@@ -97,7 +98,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  ElevatedButton _buildSignUpButton(BuildContext context) {
+  Widget _buildSignUpButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
         if (_formKey.currentState!.validate()) {
@@ -105,12 +106,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
             email: _emailController.text,
             password: _passwordController.text,
           ));
+        } else {
+          Fluttertoast.showToast(msg: 'Please enter valid email and password');
         }
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
-          if (state == const AuthState.authenticating()) return const CircularProgressIndicator();
-          return const Text('Sign Up');
+          if (state.status == AuthenticationStatus.authenticating) {
+            return const Text(
+              'Signing up...',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.black54),
+            );
+          }
+
+          return const Text(
+            'Sign Up',
+            style: TextStyle(fontSize: 16.0),
+          );
         },
       ),
     );

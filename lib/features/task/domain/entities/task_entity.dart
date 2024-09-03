@@ -18,6 +18,7 @@ class TaskEntity extends Equatable {
 
   final UserEntity? creator;
   final List<String>? assignedMembers; // List of uid
+  final List<String>? refLinks; // List of uid
 
   final DateTime? created;
   final DateTime? updated;
@@ -35,6 +36,7 @@ class TaskEntity extends Equatable {
     this.assignedMembers,
     this.created,
     this.updated,
+    this.refLinks,
   });
 
   TaskEntity copyWith({
@@ -48,6 +50,7 @@ class TaskEntity extends Equatable {
     Reminder? reminders,
     UserEntity? creator,
     List<String>? assignedMembers,
+    List<String>? refLinks,
     DateTime? created,
     DateTime? updated,
     bool allowDueDateNull = false,
@@ -65,6 +68,7 @@ class TaskEntity extends Equatable {
       reminders: allowRemindersNull ? reminders : reminders ?? this.reminders,
       creator: creator ?? this.creator,
       assignedMembers: assignedMembers ?? this.assignedMembers,
+      refLinks: refLinks ?? this.refLinks,
       created: created ?? this.created,
       updated: updated ?? this.updated,
     );
@@ -81,6 +85,7 @@ class TaskEntity extends Equatable {
         dueDate,
         reminders,
         assignedMembers,
+        refLinks,
         created,
         updated,
       ];

@@ -51,28 +51,30 @@ class MemberItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Avatar
           _buildAvatar(renderUser.photoURL, renderUser.email!),
           // Name + Email
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                renderUser.displayName ?? renderUser.email!,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  renderUser.displayName ?? renderUser.email!,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Text(
-                renderUser.email!,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
+                Text(
+                  renderUser.email!,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
           ),
-          // Remove button
+          // role
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
@@ -86,16 +88,17 @@ class MemberItem extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                renderMember.role == UserRole.admin
-                    ? const SizedBox.shrink()
-                    : IconButton(
-                        onPressed: handleRemoveMember(
-                          currentUser: currentUser,
-                          renderUser: renderUser,
-                          context: context,
-                        ),
-                        icon: const Icon(Icons.remove_circle_outline),
-                      ),
+                //! Remove button has been moved to member_modal.dart
+                // renderMember.role == UserRole.admin
+                //     ? const SizedBox.shrink()
+                //     : IconButton(
+                //         onPressed: handleRemoveMember(
+                //           currentUser: currentUser,
+                //           renderUser: renderUser,
+                //           context: context,
+                //         ),
+                //         icon: const Icon(Icons.remove_circle_outline),
+                //       ),
               ],
             ),
           ),
@@ -122,7 +125,8 @@ class MemberItem extends StatelessWidget {
             : () => showMyDialogToConfirm(
                   context: context,
                   title: 'Remove member',
-                  content: 'Are you sure to remove this member? This action will remove unassign the member from all task.',
+                  content:
+                      'Are you sure to remove this member? This action will remove unassign the member from all task.',
                   onConfirm: () => di<TaskListRepository>().removeMember(lid!, renderUser.uid!),
                 ) // remove other member
         : renderMember.uid == currentUser.uid //> current render member is member
