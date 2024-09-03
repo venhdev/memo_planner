@@ -1,7 +1,6 @@
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_iconpicker/extensions/string_extensions.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -34,7 +33,7 @@ class TaskDetailScreen extends StatelessWidget {
         minChildSize: 0.9,
         builder: (context, scrollController) => TaskDetailBody(
           scrollController: scrollController,
-          oldTask: task.copyWith(),
+          oldTask: task.clone(),
           currentUserUID: currentUserUID,
         ),
       );
@@ -60,6 +59,7 @@ class TaskDetailBody extends StatefulWidget {
 class _TaskDetailBodyState extends State<TaskDetailBody> {
   final taskNameController = TextEditingController();
   final taskDescriptionController = TextEditingController();
+  final taskRefController = TextEditingController();
   bool isDismiss = false;
 
   bool isUnSavedChanges() =>
@@ -70,6 +70,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
       unSavedReminder ||
       unSavedDueDate ||
       unSavedAssignTo ||
+      unSavedRef ||
       unSavedDescription;
 
   bool unSavedCompleted = false;
@@ -79,6 +80,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
   bool unSavedReminder = false;
   bool unSavedDueDate = false;
   bool unSavedDescription = false;
+  bool unSavedRef = false;
   bool unSavedAddToMyDay = false;
   bool unSavedAssignTo = false;
 
@@ -88,6 +90,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
   Reminder? _reminder;
   DateTime? _dueDate;
   late List<String> _assignedMembers;
+  late List<String>? _refLinks;
   String? _description;
 
   late Stream stream;
@@ -98,12 +101,15 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
     _completed = widget.oldTask.completed!;
     taskNameController.text = widget.oldTask.taskName!;
     taskDescriptionController.text = widget.oldTask.description!;
+    taskRefController.text = '';
     _taskName = widget.oldTask.taskName!;
     _priority = widget.oldTask.priority;
     _reminder = widget.oldTask.reminders;
     _dueDate = widget.oldTask.dueDate;
     _assignedMembers = widget.oldTask.assignedMembers!;
     _description = widget.oldTask.description;
+    _refLinks = widget.oldTask.refLinks?.toList();
+
     stream = di<TaskRepository>().getOneMyDayStream(widget.currentUserUID, widget.oldTask.tid!);
   }
 
@@ -197,13 +203,18 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
   Widget _buildTaskReferenceLinks() {
     return Column(
       children: [
-        if (widget.oldTask.refLinks != null)
-          for (final link in widget.oldTask.refLinks!)
+        if (_refLinks?.isNotEmpty ?? false)
+          for (final link in _refLinks!)
             Padding(
               padding: const EdgeInsets.only(bottom: 4.0),
               child: Row(
                 children: [
-                  const Icon(Icons.link),
+                  IconButton(
+                    icon: const Icon(Icons.link),
+                    onPressed: () async {
+                      await tryLaunchUrl(link);
+                    },
+                  ),
                   const SizedBox(width: 8.0),
                   Expanded(
                     child: Text(
@@ -212,6 +223,21 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+
+                  // remove link button
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _refLinks!.remove(link);
+                        if (listEquals(_refLinks, widget.oldTask.refLinks ?? [])) {
+                          unSavedRef = false;
+                        } else {
+                          unSavedRef = true;
+                        }
+                      });
+                    },
+                    icon: const Icon(Icons.close, color: Colors.grey),
+                  ),
                 ],
               ),
             ),
@@ -219,26 +245,41 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         // Add link button (dialog)
         TextButton(
           onPressed: () async {
+            taskRefController.clear();
+
             String? newLink = await showDialog<String>(
               context: context,
               builder: (context) => SimpleDialog(
-                title: const Text('Add link'),
-                contentPadding: const EdgeInsets.all(16.0),
+                title: const Text('New link'),
+                contentPadding: const EdgeInsets.all(12.0),
                 children: [
                   TextField(
+                    controller: taskRefController,
+                    maxLines: null,
+                    autofocus: true,
                     decoration: const InputDecoration(
                       hintText: 'https://example.com',
                       border: OutlineInputBorder(),
                     ),
-                    onSubmitted: (value) {
-                      Navigator.pop(context, value);
-                    },
                   ),
 
                   // Actions
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      // paste from clipboard
+                      IconButton(
+                        icon: const Icon(Icons.paste),
+                        onPressed: () async {
+                          final clipboardData = await Clipboard.getData('text/plain');
+                          if (clipboardData?.text?.isNotBlank ?? false) {
+                            taskRefController.text = clipboardData!.text!;
+                          }
+                        },
+                      ),
+                      const Spacer(),
+
+                      // buttons
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context);
@@ -247,49 +288,35 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context, null);
+                          taskRefController.clear();
                         },
                         child: const Text('Clear'),
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context, 'https://example.com');
+                          Navigator.pop(context, taskRefController.text);
                         },
                         child: const Text('Add'),
                       ),
                     ],
                   ),
                 ],
-                // actions: [
-                //   TextButton(
-                //     onPressed: () {
-                //       Navigator.pop(context);
-                //     },
-                //     child: const Text('Cancel'),
-                //   ),
-                //   TextButton(
-                //     onPressed: () {
-                //       Navigator.pop(context, null);
-                //     },
-                //     child: const Text('Clear'),
-                //   ),
-                //   ElevatedButton(
-                //     onPressed: () {
-                //       Navigator.pop(context, 'https://example.com');
-                //     },
-                //     child: const Text('Add'),
-                //   ),
-                // ],
               ),
             );
 
             if (newLink?.isNotBlank ?? false) {
-              log('New link: $newLink');
-            } else {
-              log('No new link');
+              setState(() {
+                _refLinks!.add(newLink!);
+                if (listEquals(_refLinks, widget.oldTask.refLinks ?? [])) {
+                  unSavedRef = false;
+                } else {
+                  unSavedRef = true;
+                }
+              });
             }
           },
           child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.add_link),
               SizedBox(width: 8.0),
@@ -634,6 +661,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                         unSavedDueDate = false;
                         unSavedDescription = false;
                         unSavedAssignTo = false;
+                        unSavedRef = false;
                       },
                     );
                   },
@@ -767,6 +795,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
         reminders: _reminder,
         dueDate: _dueDate,
         assignedMembers: _assignedMembers,
+        refLinks: _refLinks,
         description: _description,
         allowDueDateNull: true,
         allowRemindersNull: true,

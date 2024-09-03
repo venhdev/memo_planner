@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:memo_planner/core/utils/helpers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -72,7 +73,7 @@ class _AboutScreenState extends State<AboutScreen> {
                     size: 32.0,
                   ),
                   onPressed: () {
-                    _launchUrl('https://www.facebook.com/page.MemoPlanner');
+                    tryLaunchUrl('https://www.facebook.com/page.MemoPlanner');
                   },
                 ),
               ],
@@ -126,14 +127,6 @@ class _AboutScreenState extends State<AboutScreen> {
         );
       },
     );
-  }
-}
-
-Future<void> _launchUrl(String url) async {
-  final Uri uri = Uri.parse(url);
-
-  if (!await launchUrl(uri)) {
-    throw Exception('Could not launch $uri');
   }
 }
 

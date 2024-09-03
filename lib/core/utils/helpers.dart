@@ -1,13 +1,35 @@
 // import 'dart:developer' as dev;
 import 'dart:math';
+import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/constants.dart';
 
 part 'converter.dart';
 
+Future<void> tryLaunchUrl(String url) async {
+  if (!url.startsWith('http') && !url.startsWith('https')) {
+    url = 'https://$url';
+  }
+  final Uri uri = Uri.parse(url);
+
+  try {
+    if (!await launchUrl(uri)) {
+      // throw Exception('Could not launch $uri');
+      dev.log('Could not launch $uri');
+      Fluttertoast.showToast(msg: 'Could not launch $uri');
+    } else {
+      dev.log('launch $uri');
+    }
+  } catch (e) {
+    dev.log('Could not launch $uri || error: $e');
+    Fluttertoast.showToast(msg: 'Could not launch $uri');
+  }
+}
 
 bool isDark(BuildContext context) {
   return Theme.of(context).brightness == Brightness.dark;

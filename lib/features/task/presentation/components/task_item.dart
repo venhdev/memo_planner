@@ -190,6 +190,15 @@ class TaskItem extends StatelessWidget {
           const SizedBox(width: 8.0),
         ],
 
+        // Has Reference links
+        if (task.refLinks?.isNotEmpty ?? false) ...[
+          const Icon(
+            Icons.link,
+            size: 16.0,
+          ),
+          const SizedBox(width: 8.0),
+        ],
+
         if (showListName) ...[
           const SizedBox(width: 8.0),
           StreamBuilder(

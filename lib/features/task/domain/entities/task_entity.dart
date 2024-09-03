@@ -39,6 +39,24 @@ class TaskEntity extends Equatable {
     this.refLinks,
   });
 
+  TaskEntity clone() {
+    return TaskEntity(
+      tid: tid,
+      lid: lid,
+      taskName: taskName,
+      description: description,
+      priority: priority,
+      completed: completed,
+      dueDate: dueDate,
+      reminders: reminders,
+      creator: creator,
+      assignedMembers: assignedMembers,
+      refLinks: refLinks,
+      created: created,
+      updated: updated,
+    );
+  }
+
   TaskEntity copyWith({
     String? tid,
     String? lid,
