@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.1.5] - 04-09-2024
+
+- fixed null link
+
+## [1.1.4] - 04-09-2024
+
+### Added
+
+- add ref link
+- update UI member
+
 ## [1.1.3-beta] - 20-01-2024
 
 ### Fixed

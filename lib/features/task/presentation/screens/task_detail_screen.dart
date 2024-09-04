@@ -90,7 +90,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
   Reminder? _reminder;
   DateTime? _dueDate;
   late List<String> _assignedMembers;
-  late List<String>? _refLinks;
+  late List<String> _refLinks;
   String? _description;
 
   late Stream stream;
@@ -108,7 +108,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
     _dueDate = widget.oldTask.dueDate;
     _assignedMembers = widget.oldTask.assignedMembers!;
     _description = widget.oldTask.description;
-    _refLinks = widget.oldTask.refLinks?.toList();
+    _refLinks = widget.oldTask.refLinks?.toList() ?? [];
 
     stream = di<TaskRepository>().getOneMyDayStream(widget.currentUserUID, widget.oldTask.tid!);
   }
@@ -203,24 +203,34 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
   Widget _buildTaskReferenceLinks() {
     return Column(
       children: [
-        if (_refLinks?.isNotEmpty ?? false)
-          for (final link in _refLinks!)
+        if (_refLinks.isNotEmpty)
+          for (final link in _refLinks)
             Padding(
               padding: const EdgeInsets.only(bottom: 4.0),
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.link),
+                    icon: const Icon(Icons.open_in_new),
                     onPressed: () async {
                       await tryLaunchUrl(link);
                     },
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.copy),
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: link));
+                      Fluttertoast.showToast(msg: 'Copied to clipboard');
+                    },
+                  ),
                   const SizedBox(width: 8.0),
                   Expanded(
-                    child: Text(
-                      link,
-                      style: const TextStyle(color: Colors.blue),
-                      overflow: TextOverflow.ellipsis,
+                    child: Tooltip(
+                      message: link,
+                      child: Text(
+                        link,
+                        style: const TextStyle(color: Colors.blue),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
 
@@ -228,7 +238,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
                   IconButton(
                     onPressed: () {
                       setState(() {
-                        _refLinks!.remove(link);
+                        _refLinks.remove(link);
                         if (listEquals(_refLinks, widget.oldTask.refLinks ?? [])) {
                           unSavedRef = false;
                         } else {
@@ -306,7 +316,7 @@ class _TaskDetailBodyState extends State<TaskDetailBody> {
 
             if (newLink?.isNotBlank ?? false) {
               setState(() {
-                _refLinks!.add(newLink!);
+                _refLinks.add(newLink!);
                 if (listEquals(_refLinks, widget.oldTask.refLinks ?? [])) {
                   unSavedRef = false;
                 } else {
